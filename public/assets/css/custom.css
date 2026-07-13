@@ -1,0 +1,38 @@
+:root {
+    --vz-primary: #7c7c7b !important;
+    --vz-primary-rgb: 124, 124, 123 !important;
+}
+
+.btn-primary {
+    --vz-btn-bg: #d1cba4 !important;
+    --vz-btn-border-color: #d1cba4 !important;
+}
+
+.btn-primary:hover {
+    --vz-btn-hover-bg: #c6bf92 !important;
+    --vz-btn-hover-border-color: #c6bf92 !important;
+}
+
+.nav-pills .nav-link.active, 
+.nav-pills .show > .nav-link {
+    background-color: #d1cba4 !important;
+}
+
+.page-item.active .page-link {
+    background-color: #d1cba4 !important;
+    border-color: #d1cba4 !important;
+}
+
+.form-check-input:checked {
+    background-color: #d1cba4 !important;
+    border-color: #d1cba4 !important;
+}
+
+blockquote {
+  margin: 0 0 20px;
+  padding: 10px 20px;
+  font-size: 17.5px;
+  border-right: 5px solid #299cdb !important;
+  font-weight: 500;
+  border: 1px solid rgba(120, 130, 140, 0.13);
+}

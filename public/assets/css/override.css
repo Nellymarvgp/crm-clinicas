@@ -1,0 +1,179 @@
+/* Theme Color Override */
+:root {
+    --bs-primary: #7c7c7b;
+    --bs-primary-rgb: 124, 124, 123;
+}
+
+/* Sidebar Background */
+.vertical-menu {
+    background: #000000 !important;
+}
+
+/* Buttons and Interactive Elements */
+.btn-primary,
+.btn-primary:hover,
+.btn-primary:focus,
+.btn-primary:active,
+.btn-primary:not(:disabled):not(.disabled):active {
+    background-color: var(--bs-primary) !important;
+    border-color: var(--bs-primary) !important;
+    color: #fff !important;
+}
+
+.btn-outline-primary {
+    color: var(--bs-primary) !important;
+    border-color: var(--bs-primary) !important;
+}
+
+.btn-outline-primary:hover,
+.btn-outline-primary:focus,
+.btn-outline-primary:active {
+    background-color: var(--bs-primary) !important;
+    color: #fff !important;
+}
+
+/* Navigation and Menu */
+.mm-active > a,
+#sidebar-menu ul li a:hover,
+#sidebar-menu ul li .active,
+#sidebar-menu ul li.mm-active .active {
+    color: var(--bs-primary) !important;
+}
+
+#sidebar-menu ul li.mm-active .active i {
+    color: var(--bs-primary) !important;
+}
+
+/* Sidebar Menu Items */
+#sidebar-menu ul li a {
+    color: #ffffff !important;
+}
+
+#sidebar-menu ul li a:hover {
+    color: var(--bs-primary) !important;
+}
+
+#sidebar-menu ul li a i {
+    color: #ffffff !important;
+}
+
+#sidebar-menu ul li a:hover i {
+    color: var(--bs-primary) !important;
+}
+
+/* Hamburger Menu Button */
+.hamburger-toggle {
+    color: var(--bs-primary) !important;
+    margin-right: 10px;
+}
+
+.hamburger-toggle i {
+    transition: transform 0.3s ease;
+}
+
+body.sidebar-enable .hamburger-toggle i {
+    transform: rotate(90deg);
+}
+
+/* Mobile Sidebar */
+@media (max-width: 991.98px) {
+    .vertical-menu {
+        display: none;
+    }
+
+    body.sidebar-enable .vertical-menu {
+        display: block;
+        position: fixed;
+        top: 70px;
+        left: 0;
+        bottom: 0;
+        width: 250px;
+        z-index: 1001;
+        overflow-y: auto;
+        background: #000000 !important;
+    }
+
+    .main-content {
+        margin-left: 0 !important;
+    }
+}
+
+/* Links */
+a {
+    color: var(--bs-primary);
+}
+
+a:hover {
+    color: rgba(var(--bs-primary-rgb), 0.8);
+}
+
+/* Form Elements */
+.form-check-input:checked {
+    background-color: var(--bs-primary) !important;
+    border-color: var(--bs-primary) !important;
+}
+
+.form-control:focus,
+.form-select:focus {
+    border-color: var(--bs-primary) !important;
+    box-shadow: 0 0 0 0.2rem rgba(var(--bs-primary-rgb), 0.25) !important;
+}
+
+/* Tables */
+.table .thead-light th {
+    background-color: rgba(var(--bs-primary-rgb), 0.1) !important;
+}
+
+/* Badges and Labels */
+.badge-primary {
+    background-color: var(--bs-primary) !important;
+}
+
+/* Progress Bars */
+.progress-bar {
+    background-color: var(--bs-primary) !important;
+}
+
+/* Pagination */
+.page-item.active .page-link {
+    background-color: var(--bs-primary) !important;
+    border-color: var(--bs-primary) !important;
+}
+
+.page-link {
+    color: var(--bs-primary);
+}
+
+/* Custom Classes */
+.text-primary {
+    color: var(--bs-primary) !important;
+}
+
+.bg-primary {
+    background-color: var(--bs-primary) !important;
+}
+
+/* Header and Navigation */
+.header-item:hover,
+.header-item:focus {
+    color: var(--bs-primary) !important;
+}
+
+/* Dropdown menus */
+.dropdown-item.active,
+.dropdown-item:active {
+    background-color: var(--bs-primary) !important;
+    color: #fff !important;
+}
+
+/* Cards */
+.card-header {
+    border-bottom: 1px solid rgba(var(--bs-primary-rgb), 0.125) !important;
+}
+
+/* Alerts */
+.alert-primary {
+    background-color: rgba(var(--bs-primary-rgb), 0.1) !important;
+    border-color: rgba(var(--bs-primary-rgb), 0.2) !important;
+    color: var(--bs-primary) !important;
+}

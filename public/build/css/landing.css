@@ -1,0 +1,206 @@
+/* Landing Page Styles */
+body {
+    overflow-x: hidden;
+}
+.PrimerBloque{margin-top:82px}
+.PrimerBloque .col-md-6.col-xs-12{padding:0}
+.PrimerBloque .col-md-6.col-xs-12 .blockLeft{background:#99d9d9;height:100vh;padding:50px;display:flex;align-items:center;flex-direction:row}
+.PrimerBloque .col-md-6.col-xs-12 .blockRight{height:100vh}
+.PrimerBloque .col-md-6.col-xs-12 .blockLeft .content h1{font-size:55px;color:#132740;font-weight:400!important}
+.PrimerBloque .col-md-6.col-xs-12 .blockLeft .content p{font-size:18px;color:#132740;margin-top:30px}
+.PrimerBloque .col-md-6.col-xs-12 .blockLeft .content .hero-btn a.btn.btn-primary{padding:10px 25px;background:#4fb1b1!important;border:1px solid #4fb1b1!important;border-radius:5px}
+.PrimerBloque .col-md-6.col-xs-12 .blockRight .content img{width:100%;height:100vh;object-fit:cover}
+
+/* Segundo Bloque */
+.SegundoBloque .content-one .col-md-12{padding:50px;background:#99d9d9}
+.SegundoBloque .content-one .about-header{text-align:left!important;color:#132740}
+.SegundoBloque .content-one .about-header h2{font-size:18px;text-transform:uppercase;font-weight:500;letter-spacing:1px;margin-bottom:20px}
+.SegundoBloque .content-one .about-header p{font-weight:600;font-size:18px;margin:0}
+.SegundoBloque .content-one .content-two{margin:40px auto}
+.SegundoBloque .content-one .content-two .box{background:#fff;padding:40px;border-radius:10px;text-align:center;min-height:200px;display:flex;flex-direction:column;align-items:center;flex-wrap:nowrap;justify-content:center}
+.SegundoBloque .content-one .content-two .box img{width:70px;height:70px;object-fit:contain;padding:10px;margin-bottom:10px}
+.SegundoBloque .content-one .content-two .box h4{margin:0;width:80%;color:#132740}
+.SegundoBloque .content-one .content-two .box a.showMore{margin-top:10px;font-size:25px;font-weight:500;color:#99d9d9}
+
+/* Tercer Bloque - Doctores */
+.landing-page .swiper-slide{background:transparent!important}
+.landing-page .btn{padding:10px 20px!important;background:#fff!important;border-color:#99d9d9!important}
+.TercerBloque .content{background:#99d9d9;padding:50px;text-align:center}
+.TercerBloque .content h2{font-size:55px;color:#132740;font-weight:400!important;margin:0}
+
+/* Doctor Carousel */
+.doctor-carousel {
+    padding: 30px 0;
+    position: relative;
+    width: 100%;
+    overflow: hidden;
+    background: transparent;
+}
+.doctor-carousel .swiper {
+    width: 100%;
+    padding: 20px 0;
+}
+.doctor-carousel .swiper-slide {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: auto;
+}
+.doctor-carousel .box-team {
+    background: #fff;
+    border-radius: 15px;
+    padding: 20px;
+    text-align: center;
+    width: 220px;
+    height: 280px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    margin: 0 10px;
+    box-shadow: 0 3px 6px rgba(0,0,0,0.1);
+    transition: all 0.3s ease;
+    border: 1px solid #eee;
+}
+.doctor-carousel .box-team:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 15px rgba(153,217,217,0.2);
+    border-color: #99d9d9;
+}
+.doctor-carousel .box-team img {
+    width: 120px;
+    height: 120px;
+    object-fit: cover;
+    border-radius: 50%;
+    border: 3px solid #99d9d9;
+    margin-bottom: 20px;
+    transition: all 0.3s ease;
+}
+.doctor-carousel .box-team:hover img {
+    transform: scale(1.05);
+    border-width: 4px;
+}
+.doctor-carousel .box-team h4 {
+    font-size: 18px;
+    font-weight: 600;
+    color: #132740;
+    margin: 0 0 10px;
+    line-height: 1.2;
+}
+.doctor-carousel .box-team span {
+    display: block;
+    text-transform: uppercase;
+    font-size: 13px;
+    color: #99d9d9;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+}
+.doctor-carousel .swiper-button-next,
+.doctor-carousel .swiper-button-prev {
+    color: #99d9d9;
+    background: #fff;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+    transition: all 0.3s ease;
+}
+.doctor-carousel .swiper-button-next:hover,
+.doctor-carousel .swiper-button-prev:hover {
+    background: #99d9d9;
+    color: #fff;
+}
+.doctor-carousel .swiper-button-next:after,
+.doctor-carousel .swiper-button-prev:after {
+    font-size: 18px;
+    font-weight: bold;
+}
+.doctor-carousel .swiper-pagination {
+    bottom: -5px;
+}
+.doctor-carousel .swiper-pagination-bullet {
+    width: 8px;
+    height: 8px;
+    margin: 0 4px;
+}
+.doctor-carousel .swiper-pagination-bullet-active {
+    background: #99d9d9;
+    transform: scale(1.2);
+}
+
+/* Cuarto Bloque */
+.CuartoBloque .content{background:#ffffff87;min-height:100vh;padding:50px;display:flex;justify-content:center;flex-direction:column}
+.CuartoBloque .content h2{font-size:55px;color:#132740;font-weight:400!important;text-align:center;margin-bottom:40px}
+.CuartoBloque .content p{font-size:18px;margin:0;color:#132740;width:80%;margin:0 auto;text-align:center}
+.CuartoBloque .content img{display:block;margin:0 auto 30px auto}
+.CuartoBloque .content a.btn.btn-primary{margin:0 auto;display:block;width:max-content;color:#132740!important;font-weight:bold;background:#4fb1b1!important;border-color:#4fb1b1!important}
+
+/* Contact Section */
+section#contact .content img{margin:0}
+section#contact .content h2{margin-top:50px;text-align:left}
+section#contact .content a{margin:0}
+section#contact .content p{text-align:left;width:100%;margin-bottom:20px}
+section#contact .content div b{font-size:20px;color:#132740}
+
+/* Servicios Section */
+.servicios-section{padding:150px 0 100px;background-color:#fff;position:relative;margin-top:100px}
+.servicios-section::before{content:'';position:absolute;top:-100px;left:0;right:0;height:100px;background:linear-gradient(to bottom right,transparent 49%,#fff 50%)}
+.servicios-section h2{font-family:'Poppins',sans-serif;font-size:2.5rem;font-weight:600;color:#132740;text-align:center;margin-bottom:80px;position:relative}
+.servicio-card{background:white;border-radius:15px;padding:50px 35px;margin-bottom:40px;transition:all .3s ease;box-shadow:0 10px 30px rgba(0,0,0,.08);border:1px solid rgba(40,167,69,.1);height:95%;display:flex;flex-direction:column}
+.servicio-card h3{color:#99d9d9;font-family:'Poppins',sans-serif;font-weight:600;font-size:1.5rem;margin:25px 0 20px}
+.servicio-card p{color:#666;font-family:'Inter',sans-serif;line-height:1.8;margin-bottom:0;flex-grow:1}
+.servicio-icon{font-size:3rem;color:#99d9d9;height:90px;width:90px;display:flex;align-items:center;justify-content:center;background:rgba(40,167,69,.1);border-radius:50%;margin:0 auto 30px;transition:all .3s ease}
+.servicio-card:hover{transform:translateY(-10px);box-shadow:0 15px 35px rgba(40,167,69,.15);border-color:#99d9d9}
+.servicio-card:hover .servicio-icon{background:#99d9d9;color:white;transform:scale(1.1)}
+
+/* Responsive Styles */
+@media (max-width: 768px) {
+    .PrimerBloque .col-md-6.col-xs-12 .blockLeft{height:auto;padding:30px}
+    .PrimerBloque .col-md-6.col-xs-12 .blockRight{height:50vh}
+    .PrimerBloque .col-md-6.col-xs-12 .blockLeft .content h1{font-size:40px}
+    .servicios-section{padding:100px 0 50px}
+    .servicio-card{margin-bottom:30px}
+}
+
+@media (max-width: 480px) {
+    .PrimerBloque .col-md-6.col-xs-12 .blockLeft .content h1{font-size:32px}
+    .TercerBloque .content h2{font-size:32px}
+    .CuartoBloque .content h2{font-size:32px}
+    .doctor-carousel .box-team{height:200px}
+    .doctor-carousel .box-team img{width:80px;height:80px}
+}
+
+/* CORE Brand Theme Overrides */
+.landing-page{--core-sand:#d1cba4;--core-stone:#7c7c7b;--core-soft:#f8f6ef;--core-deep:#5f5f5e}
+.landing-page .text-brand{color:var(--core-sand)!important}
+.landing-page .core-logo{height:54px;width:auto;object-fit:contain}
+.landing-page .core-logo-footer{height:62px}
+.landing-page .navbar .navbar-nav .nav-link{color:var(--core-stone);font-weight:500}
+.landing-page .navbar .navbar-nav .nav-link:hover,.landing-page .navbar .navbar-nav .nav-link:focus,.landing-page .navbar .navbar-nav .nav-link.active{color:var(--core-deep)}
+.landing-page .btn,.landing-page .btn.btn-primary{background:var(--core-sand)!important;border-color:var(--core-sand)!important;color:var(--core-stone)!important;font-weight:600}
+.PrimerBloque .col-md-6.col-xs-12 .blockLeft,.TercerBloque .content{background:var(--core-soft)}
+.PrimerBloque .col-md-6.col-xs-12 .blockLeft .content h1,.PrimerBloque .col-md-6.col-xs-12 .blockLeft .content p,.TercerBloque .content h2,.CuartoBloque .content h2,.CuartoBloque .content p,section#contact .content div b{color:var(--core-stone)}
+.doctor-carousel .box-team{border-color:rgba(209,203,164,.45)}
+.doctor-carousel .box-team h4{color:var(--core-stone)}
+.doctor-carousel .box-team span,.servicio-card h3,.servicio-icon{color:var(--core-deep)}
+.doctor-carousel .box-team img{border-color:var(--core-sand)}
+.doctor-carousel .box-team:hover{box-shadow:0 8px 15px rgba(209,203,164,.35);border-color:var(--core-sand)}
+.doctor-carousel .swiper-button-next,.doctor-carousel .swiper-button-prev,.doctor-carousel .swiper-pagination-bullet-active,.servicio-card:hover .servicio-icon{background:var(--core-sand);color:var(--core-stone)}
+.servicio-card{border-color:rgba(209,203,164,.35)}
+.servicio-card:hover{border-color:var(--core-sand);box-shadow:0 15px 35px rgba(124,124,123,.18)}
+.PrimerBloque .col-md-6.col-xs-12 .blockLeft .content .hero-btn a.btn.btn-primary,.CuartoBloque .content a.btn.btn-primary,section#contact .content a.btn.btn-primary{background:var(--core-sand)!important;border-color:var(--core-sand)!important;color:var(--core-stone)!important}
+.brand-section{background:linear-gradient(180deg,#fff 0%,var(--core-soft) 100%);padding:90px 0}
+.brand-header{max-width:920px;margin:0 auto 40px;text-align:center}
+.brand-header h2{color:var(--core-stone);font-size:2.4rem;margin-bottom:16px}
+.brand-header p{font-size:1.05rem;color:var(--core-deep);line-height:1.8;margin:0}
+.brand-grid,.values-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:22px}
+.values-grid{grid-template-columns:repeat(5,minmax(0,1fr));margin-top:28px}
+.brand-card,.value-card{background:#fff;border:1px solid rgba(209,203,164,.45);border-radius:16px;padding:24px;box-shadow:0 10px 26px rgba(124,124,123,.1)}
+.brand-card h3,.value-card h4{color:var(--core-stone);margin-bottom:12px}
+.brand-card p,.value-card p{color:var(--core-deep);margin:0;line-height:1.7}
+.brand-objectives,.brand-footer-copy{margin-top:36px;background:#fff;border:1px solid rgba(209,203,164,.45);border-radius:16px;padding:30px}
+.brand-objectives h3,.brand-footer-copy h3{color:var(--core-stone);margin-bottom:12px}
+.brand-objectives p,.brand-objectives li,.brand-footer-copy p{color:var(--core-deep);line-height:1.8}
+.brand-objectives ul{margin:0;padding-left:1.2rem}
+@media (max-width: 991px){.brand-grid,.values-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width: 767px){.brand-grid,.values-grid{grid-template-columns:1fr}.brand-header h2{font-size:1.9rem}}

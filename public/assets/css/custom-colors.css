@@ -1,0 +1,139 @@
+:root {
+    --core-sand: #d1cba4;
+    --core-stone: #7c7c7b;
+    --core-deep: #666665;
+    --core-soft: #f6f3e8;
+
+    /* Bootstrap-like aliases used by the app styles */
+    --blue: #7c7c7b !important;
+    --primary: #7c7c7b !important;
+    --success: #d1cba4 !important;
+    --info: #d1cba4 !important;
+    --bs-primary: #7c7c7b !important;
+    --bs-primary-rgb: 124, 124, 123 !important;
+    --bs-success: #d1cba4 !important;
+    --bs-success-rgb: 209, 203, 164 !important;
+    --bs-link-color: #7c7c7b !important;
+    --bs-link-hover-color: #666665 !important;
+}
+
+.btn-primary,
+.btn-success,
+.btn-info {
+    background-color: var(--core-sand) !important;
+    border-color: var(--core-sand) !important;
+    color: var(--core-stone) !important;
+}
+
+.btn-primary:hover,
+.btn-primary:focus,
+.btn-primary:active,
+.btn-success:hover,
+.btn-success:focus,
+.btn-success:active,
+.btn-info:hover,
+.btn-info:focus,
+.btn-info:active {
+    background-color: #c6bf92 !important;
+    border-color: #c6bf92 !important;
+    color: #646463 !important;
+}
+
+.text-primary,
+.text-success,
+.text-info,
+.link-primary,
+.link-success,
+.link-info {
+    color: var(--core-stone) !important;
+}
+
+.bg-primary,
+.bg-success,
+.bg-info {
+    background-color: var(--core-sand) !important;
+}
+
+.border-primary,
+.border-success,
+.border-info {
+    border-color: var(--core-sand) !important;
+}
+
+/* Navigation and states */
+.nav-pills .nav-link.active,
+.nav-pills .show > .nav-link,
+.page-item.active .page-link,
+.custom-control-input:checked ~ .custom-control-label::before,
+.custom-checkbox .custom-control-input:checked ~ .custom-control-label::before,
+.custom-radio .custom-control-input:checked ~ .custom-control-label::before,
+.form-check-input:checked,
+.form-switch .form-check-input:checked {
+    background-color: var(--core-sand) !important;
+    border-color: var(--core-sand) !important;
+}
+
+.page-link {
+    color: var(--core-stone) !important;
+}
+
+.page-link:hover,
+.page-link:focus {
+    color: var(--core-deep) !important;
+    background-color: var(--core-soft) !important;
+}
+
+/* Sidebar/menu accents from app theme */
+.mm-active,
+.mm-active > a,
+.mm-active > a i,
+#sidebar-menu ul li a:hover,
+#sidebar-menu ul li a:hover i,
+#sidebar-menu ul li ul.sub-menu li a:hover,
+.vertical-menu .active,
+.vertical-menu .active i {
+    color: var(--core-stone) !important;
+}
+
+.metismenu .mm-active > a,
+.metismenu .mm-active > a i {
+    color: var(--core-stone) !important;
+}
+
+/* Progress and form controls */
+.progress-bar {
+    background-color: var(--core-sand) !important;
+}
+
+.custom-range::-webkit-slider-thumb,
+.custom-range::-moz-range-thumb,
+.custom-range::-ms-thumb {
+    background-color: var(--core-sand) !important;
+}
+
+/* Badges and alerts */
+.badge.bg-primary,
+.badge.bg-success,
+.alert-primary,
+.alert-success {
+    background-color: rgba(209, 203, 164, 0.22) !important;
+    border-color: rgba(209, 203, 164, 0.6) !important;
+    color: var(--core-stone) !important;
+}
+
+/* Topbar brand strip */
+#page-topbar {
+    background-color: #2a3042 !important;
+}
+
+#page-topbar .navbar-header {
+    background-color: #2a3042 !important;
+}
+
+#page-topbar .navbar-brand-box {
+    background-color: #2a3042 !important;
+}
+
+#page-topbar .navbar-brand-box .logo img {
+    display: block;
+}
