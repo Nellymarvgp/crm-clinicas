@@ -9,7 +9,7 @@ use App\DoctorAvailableSlot;
 use App\DoctorAvailableTimes;
 use App\Patient;
 use App\User;
-use App\Services\CalendlyService;
+use App\Services\GoogleCalendarService;
 use Cartalyst\Sentinel\Laravel\Facades\Sentinel;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -305,21 +305,10 @@ class PublicAppointmentController extends Controller
             'gender' => 'required|string|in:Male,Female,Other',
             'address' => 'required|string|max:500',
             'doctor_id' => 'required|exists:doctors,id',
+            'date' => 'required|date|date_format:Y-m-d|after_or_equal:today',
+            'time' => 'required',
+            'slot_id' => 'required|exists:doctor_available_slots,id',
         ]);
-
-        // Validación adicional dependiendo del modo de calendario
-        if ($request->calendar_mode === 'standard') {
-            $validator->addRules([
-                'date' => 'required|date|date_format:Y-m-d|after_or_equal:today',
-                'time' => 'required',
-                'slot_id' => 'required|exists:doctor_available_slots,id',
-            ]);
-        } elseif ($request->calendar_mode === 'calendly') {
-            $validator->addRules([
-                'calendly_event_uri' => 'required|string',
-                'calendly_invitee_uri' => 'required|string',
-            ]);
-        }
         
         if ($validator->fails()) {
             return response()->json([
@@ -386,55 +375,45 @@ class PublicAppointmentController extends Controller
             $appointment->appointment_with = $request->doctor_id; // ID del doctor
             $appointment->booked_by = $user->id; // La cita es reservada por el mismo paciente
             
-            if ($request->calendar_mode === 'standard') {
-                // Modo de calendario estándar
-                $appointment->appointment_date = $request->date;
-                
-                // available_time debe ser el ID del tiempo disponible, no la hora en formato texto
-                // Obtener el ID del tiempo disponible según el slot seleccionado
-                try {
-                    // Obtener el tiempo disponible relacionado con el slot seleccionado
-                    $slotInfo = DB::table('doctor_available_slots')
-                        ->where('id', $request->slot_id)
-                        ->first();
-                        
-                    if ($slotInfo) {
-                        // El available_time debe ser el doctor_available_time_id asociado con el slot
-                        $appointment->available_time = $slotInfo->doctor_available_time_id;
-                    } else {
-                        // Si no hay información, usar un valor por defecto para evitar errores
-                        $appointment->available_time = $request->slot_id; // Como fallback
-                        Log::warning("No se encontró información del slot {$request->slot_id}, usando ID como fallback");
-                    }
-                } catch (\Exception $e) {
-                    Log::error("Error al obtener información del slot: " . $e->getMessage());
-                    // Usar slot_id como fallback para evitar errores
+            // Modo de calendario estándar
+            $appointment->appointment_date = $request->date;
+
+            // available_time debe ser el ID del tiempo disponible, no la hora en formato texto
+            try {
+                $slotInfo = DB::table('doctor_available_slots')
+                    ->where('id', $request->slot_id)
+                    ->first();
+
+                if ($slotInfo) {
+                    $appointment->available_time = $slotInfo->doctor_available_time_id;
+                } else {
                     $appointment->available_time = $request->slot_id;
+                    Log::warning("No se encontró información del slot {$request->slot_id}, usando ID como fallback");
                 }
-                
-                $appointment->available_slot = $request->slot_id;
-            } else {
-                // Modo Calendly - Extraer fecha y hora del evento de Calendly
-                // Aquí utilizamos la información del evento de Calendly
-                $appointment->appointment_date = date('Y-m-d'); // Fecha actual como fallback
-                $appointment->available_time = date('H:i:s'); // Hora actual como fallback
-                $appointment->available_slot = 0; // No hay slot específico
-                $appointment->calendly_event_uri = $request->calendly_event_uri;
-                $appointment->calendly_invitee_uri = $request->calendly_invitee_uri;
+            } catch (\Exception $e) {
+                Log::error("Error al obtener información del slot: " . $e->getMessage());
+                $appointment->available_time = $request->slot_id;
             }
+
+            $appointment->available_slot = $request->slot_id;
             
             $appointment->status = 0; // Pendiente
             $appointment->save();
             
-            // Sincronizar con Calendly si está configurado
-            if (env('USE_CALENDLY', false) && $request->calendar_mode === 'standard') {
-                try {
-                    $calendlyService = new CalendlyService();
-                    $calendlyService->syncAppointmentToCalendly($appointment, $patient);
-                } catch (\Exception $e) {
-                    // Registrar error pero continuar con la creación de la cita
-                    Log::error('Error al sincronizar con Calendly: ' . $e->getMessage());
-                }
+            $googleCalendarSync = false;
+            $googleCalendarEventLink = null;
+
+            try {
+                $doctor = Doctor::with('user')->findOrFail($request->doctor_id);
+                $googleCalendarService = new GoogleCalendarService();
+                $eventData = $googleCalendarService->createAppointmentEvent($appointment, $patient, $doctor, $request->time);
+                $googleCalendarSync = true;
+                $googleCalendarEventLink = $eventData['htmlLink'] ?? null;
+            } catch (\Throwable $googleError) {
+                Log::error('No se pudo sincronizar la cita con Google Calendar', [
+                    'appointment_id' => $appointment->id,
+                    'error' => $googleError->getMessage(),
+                ]);
             }
             
             // Confirmar transacción
@@ -445,7 +424,11 @@ class PublicAppointmentController extends Controller
             
             return response()->json([
                 'success' => true,
-                'message' => '¡Cita agendada correctamente!',
+                'message' => $googleCalendarSync
+                    ? '¡Cita agendada y sincronizada con Google Calendar!'
+                    : '¡Cita agendada correctamente! No se pudo sincronizar con Google Calendar.',
+                'google_calendar_synced' => $googleCalendarSync,
+                'google_calendar_event_link' => $googleCalendarEventLink,
                 'redirect' => route('public.appointment.success')
             ]);
             

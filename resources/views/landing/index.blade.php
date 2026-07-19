@@ -93,26 +93,56 @@
 
         <!-- home-section start -->
         @if ($data['Home'] == 0)
-            <section class="PrimerBloque" id="home">
-                <div class="containers">
-                    <div class="row">
-                        <div class="col-md-6 col-xs-12">
-                            <div class="blockLeft">
-                                <div class="content">
-                                    <h1>CORE</h1>
-                                    <p>Centro Odontológico y Rehabilitación Estética. Transformamos la experiencia dental con atención integral, tecnología moderna y un trato humano que devuelve confianza a cada sonrisa.</p>
-                                    <div class="hero-btn mt-4">
-                                        <a href="{{ url('login') }}" class="btn btn-primary">Agendar cita</a>
-                                    </div>
-                                </div>
-                            </div>
+            <section class="core-hero-compromiso" id="home">
+                <div class="core-hero-overlay"></div>
+                <div class="container core-hero-grid">
+                    <div class="core-hero-left">
+                        <h2>Tu sonrisa es<br><span>nuestra prioridad</span></h2>
+                        <p>Transformamos la experiencia dental con atención integral, tecnología moderna y un trato humano que devuelve confianza a cada sonrisa.</p>
+
+                        <div class="core-hero-services">
+                            <a href="#services" class="core-hero-service-link" aria-label="Ir a especialidad Rehabilitación Oral">
+                                <article class="core-hero-service">
+                                    <img src="{{ URL::asset('build/images/nuevas/icono_Rehabilitacion oral.png') }}" alt="Rehabilitación Oral">
+                                    <h3>Rehabilitación<br>Oral</h3>
+                                </article>
+                            </a>
+                            <a href="#services" class="core-hero-service-link" aria-label="Ir a especialidad Diseño de Sonrisa">
+                                <article class="core-hero-service">
+                                    <img src="{{ URL::asset('build/images/nuevas/icono_estetica.png') }}" alt="Diseño de Sonrisa">
+                                    <h3>Diseño de<br>Sonrisa</h3>
+                                </article>
+                            </a>
+                            <a href="#services" class="core-hero-service-link" aria-label="Ir a especialidad Ortodoncia">
+                                <article class="core-hero-service">
+                                    <img src="{{ URL::asset('build/images/nuevas/icono_ortodoncia.png') }}" alt="Ortodoncia">
+                                    <h3>Ortodoncia</h3>
+                                </article>
+                            </a>
+                            <a href="#services" class="core-hero-service-link" aria-label="Ir a especialidad Cirugía">
+                                <article class="core-hero-service">
+                                    <img src="{{ URL::asset('build/images/nuevas/icono_cirugia dental.png') }}" alt="Cirugía">
+                                    <h3>Cirugía</h3>
+                                </article>
+                            </a>
                         </div>
-                        <div class="col-md-6 col-xs-12">
-                            <div class="blockRight">
-                                <div class="content">
-                                    <img src="{{ URL::asset('build/images/fondo-bg.jpg') }}" alt="" class="image-bg">
-                                </div>
-                            </div>
+                    </div>
+
+                    <div class="core-hero-right">
+                        <div class="core-hero-instagram">
+                            <a href="https://www.instagram.com/core.ven" target="_blank" rel="noopener noreferrer">
+                                <span>core.ven</span>
+                                <img src="{{ URL::asset('build/images/nuevas/icono_instagram.png') }}" alt="Instagram CORE">
+                            </a>
+                        </div>
+
+                        <div class="core-hero-doctor">
+                            <h4>Dr. Jesus Rodriguez</h4>
+                            <p>Especialista en Rehabilitación oral y estética</p>
+                        </div>
+
+                        <div class="core-hero-cta">
+                            <a href="{{ url('login') }}" class="btn btn-primary">Agenda tu cita Aquí</a>
                         </div>
                     </div>
                 </div>
@@ -125,15 +155,38 @@
             <section class="servicios-section" id="services">
                 <div class="container">
                     <h2>Nuestras especialidades</h2>
+                    @php
+                        $specialtyIcons = [
+                            'rehabilitacion' => 'icono_Rehabilitacion oral.png',
+                            'diseno' => 'icono_estetica.png',
+                            'estetica' => 'icono_estetica.png',
+                            'ortodoncia' => 'icono_ortodoncia.png',
+                            'cirugia' => 'icono_cirugia dental.png',
+                            'endodoncia' => 'icono_endodoncia.png',
+                            'implanto' => 'icono_implantologia.png',
+                            'periodoncia' => 'icono_periodoncia.png',
+                        ];
+                    @endphp
                     <div class="row">
                         @foreach($departments as $department)
+                            @php
+                                $departmentText = mb_strtolower($department->name . ' ' . ($department->description ?? ''), 'UTF-8');
+                                $selectedIcon = 'icono_estetica.png';
+                                foreach ($specialtyIcons as $keyword => $iconFile) {
+                                    if (str_contains($departmentText, $keyword)) {
+                                        $selectedIcon = $iconFile;
+                                        break;
+                                    }
+                                }
+                            @endphp
                             <div class="col-lg-4 col-md-6">
                                 <div class="servicio-card">
                                     <div class="servicio-icon">
-                                        <i class="fas fa-tooth"></i>
+                                        <img src="{{ URL::asset('build/images/nuevas/' . $selectedIcon) }}" alt="{{ $department->name }}">
                                     </div>
                                     <h3>{{ $department->name }}</h3>
-                                    <p>{{ $department->description }}</p>
+                                    <p class="servicio-description">{{ $department->description ?: 'Atención especializada con enfoque clínico integral y resultados estéticos funcionales.' }}</p>
+                                    <a href="{{ route('doctors.find', ['department' => $department->id]) }}" class="btn servicio-action">Ver especialistas</a>
                                 </div>
                             </div>
                         @endforeach
@@ -144,7 +197,7 @@
         @endif
 
         <!-- commitment-section start  -->
-            <section class="CuartoBloque" id="commitment" style="background: url({{ URL::asset('build/images/fondo-od.jpg') }}) no-repeat center center/cover;">
+            <section class="CuartoBloque" id="commitment" style="background: url({{ URL::asset('build/images/nuevas/compromiso.jpeg') }}) no-repeat center center/cover;">
                 <div class="containers">
                     <div class="content">
                         <div class="row">
@@ -185,31 +238,6 @@
                         <article class="brand-card">
                             <h3>Esencia de marca</h3>
                             <p><strong>Confianza.</strong> Es el vínculo que construimos con cada paciente a través de la honestidad, la excelencia clínica, la innovación y un trato genuinamente humano.</p>
-                        </article>
-                    </div>
-
-
-
-                    <div class="values-grid">
-                        <article class="value-card">
-                            <h4>Excelencia</h4>
-                            <p>Máxima calidad en cada diagnóstico, tratamiento y detalle de atención.</p>
-                        </article>
-                        <article class="value-card">
-                            <h4>Innovación</h4>
-                            <p>Tecnología y técnicas de vanguardia para tratamientos modernos, seguros y eficientes.</p>
-                        </article>
-                        <article class="value-card">
-                            <h4>Compromiso</h4>
-                            <p>Dedicación para lograr resultados funcionales, estéticos y duraderos.</p>
-                        </article>
-                        <article class="value-card">
-                            <h4>Confianza</h4>
-                            <p>Relaciones sólidas con comunicación clara y cumplimiento de lo que prometemos.</p>
-                        </article>
-                        <article class="value-card">
-                            <h4>Calidez humana</h4>
-                            <p>Una experiencia donde cada paciente se siente escuchado, cómodo y valorado.</p>
                         </article>
                     </div>
 
@@ -261,30 +289,56 @@
 
         @if ($data['Contact'] == 0)
             <!-- cta-section start  -->
-            <section class="CuartoBloque" id="contact" style="background: url({{ URL::asset('build/images/fondo-consulta.jpg') }}) no-repeat center center/cover;">
+            <section class="CuartoBloque" id="contact" style="background: url({{ URL::asset('build/images/nuevas/consultas.jpeg') }}) no-repeat center center/cover;">
                 <div class="containers">
                     <div class="content">
                         <div class="row">
                             <div class="col-md-6 col-xs-12">
                                 <i class="fas fa-tooth fa-3x text-brand mb-3"></i>
                                 <h2>CORE <br>Centro Odontológico</h2>
+                                <p class="contact-intro-text">En CORE Centro Odontológico combinamos la precisión de la odontología moderna con una atención diseñada a tu medida. Nos dedicamos a cuidar tu salud y estética dental a través de un equipo de especialistas de primer nivel, tecnología avanzada y un espacio pensado para tu total tranquilidad.</p>
                                 <div class="hero-btn mt-4">
                                     <a href="{{ url('login') }}" class="btn btn-primary">Agenda una consulta</a>
                                 </div>
                             </div>
                             <div class="col-md-6 col-xs-12">
-                                <p>COMUNÍCATE CON NOSOTROS</p>
-                                <div>
-                                    <b>Dirección</b>
-                                    <p>Venezuela</p>
-                                </div>
-                                <div>
-                                    <b>Correo corporativo</b>
-                                    <p><a href="mailto:info@corecentrove.com">info@corecentrove.com</a></p>
-                                </div>
-                                <div>
-                                    <b>Correo público</b>
-                                    <p><a href="mailto:centrocore.ve@gmail.com">centrocore.ve@gmail.com</a></p>
+                                <p class="contact-values-title">Valores CORE</p>
+                                <div class="contact-values-grid">
+                                    <article class="contact-value-card">
+                                        <div class="contact-value-head">
+                                            <div class="contact-value-icon"><i class="fas fa-award"></i></div>
+                                            <h4>Excelencia</h4>
+                                        </div>
+                                        <p><strong>Buscamos la máxima calidad</strong> en cada diagnóstico, tratamiento y detalle de atención, asegurando resultados clínicos impecables.</p>
+                                    </article>
+                                    <article class="contact-value-card">
+                                        <div class="contact-value-head">
+                                            <div class="contact-value-icon"><i class="fas fa-lightbulb"></i></div>
+                                            <h4>Innovación</h4>
+                                        </div>
+                                        <p><strong>Implementamos tecnología y técnicas de vanguardia</strong> para ofrecerte tratamientos modernos, completamente seguros y altamente eficientes.</p>
+                                    </article>
+                                    <article class="contact-value-card">
+                                        <div class="contact-value-head">
+                                            <div class="contact-value-icon"><i class="fas fa-handshake"></i></div>
+                                            <h4>Compromiso</h4>
+                                        </div>
+                                        <p><strong>Trabajamos con dedicación absoluta</strong> para lograr resultados funcionales, estéticos y duraderos que transformen tu sonrisa.</p>
+                                    </article>
+                                    <article class="contact-value-card">
+                                        <div class="contact-value-head">
+                                            <div class="contact-value-icon"><i class="fas fa-shield-alt"></i></div>
+                                            <h4>Confianza</h4>
+                                        </div>
+                                        <p><strong>Construimos relaciones sólidas</strong> basadas en una comunicación clara, la transparencia médica y el fiel cumplimiento de lo que prometemos.</p>
+                                    </article>
+                                    <article class="contact-value-card is-highlight">
+                                        <div class="contact-value-head">
+                                            <div class="contact-value-icon"><i class="fas fa-heart"></i></div>
+                                            <h4>Calidez humana</h4>
+                                        </div>
+                                        <p><strong>Creamos una experiencia cercana</strong> donde cada paciente se siente verdaderamente escuchado, cómodo, valorado y en familia.</p>
+                                    </article>
                                 </div>
                             </div>
                         </div>
@@ -347,7 +401,10 @@
                         <h5>Contáctanos :</h5>
                         <ul>
                             <li>
-                                <span class="text-white"><span class="mdi mdi-map-marker font-size-18"></span> </span> <a href="#!">Venezuela</a>
+                                <span class="text-white"><span class="mdi mdi-map-marker font-size-18"></span> </span> <a href="#!">C.C Gold Country, Av Country Club, Calle Urdaneta, Local PB-14</a>
+                            </li>
+                            <li>
+                                <span class="text-white"><span class="mdi mdi-instagram font-size-18"></span> </span> <a href="https://www.instagram.com/core.ven" target="_blank" rel="noopener noreferrer">@core.ven</a>
                             </li>
                             <li>
                                 <span class="text-white"><span class="mdi mdi-email-outline font-size-18"></span> </span> <a href="mailto:info@corecentrove.com">info@corecentrove.com</a>

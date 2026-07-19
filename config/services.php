@@ -34,4 +34,10 @@ return [
         'secret' => env('STRIPE_SECRET'),
    ],
 
+    'google_calendar' => [
+        'calendar_id' => env('GOOGLE_CALENDAR_ID'),
+        'credentials_json' => env('GOOGLE_CALENDAR_CREDENTIALS_JSON'),
+        'impersonate_user' => env('GOOGLE_CALENDAR_IMPERSONATE_USER'),
+    ],
+
 ];

@@ -145,7 +145,6 @@
                                 </div>
                             </div>
                             
-                            <!-- Selector de modo calendario (oculto, solo para control) -->
                             <input type="hidden" id="calendar-mode" name="calendar_mode" value="standard">
                             
                             <!-- Sistema de calendario estándar -->
@@ -170,26 +169,6 @@
                                 </div>
                             </div>
                             
-                            <!-- Widget de Calendly integrado -->
-                            <div id="calendly-inline-container" style="display: none;" class="mt-3">
-                                <div class="form-group">
-                                    <label>Selecciona fecha y hora con Calendly</label>
-                                    <div class="calendly-inline-widget" data-url="https://calendly.com/nellymar-v-g-p/new-meeting" style="min-width:100%;height:650px;"></div>
-                                    <input type="hidden" id="calendly_event_uri" name="calendly_event_uri">
-                                    <input type="hidden" id="calendly_invitee_uri" name="calendly_invitee_uri">
-                                </div>
-                            </div>
-                            
-                            <!-- Toggle para cambiar entre calendarios -->
-                            <div class="row mt-3">
-                                <div class="col-md-12">
-                                    <div class="custom-control custom-switch">
-                                        <input type="checkbox" class="custom-control-input" id="use-calendly-toggle">
-                                        <label class="custom-control-label" for="use-calendly-toggle">Usar Calendly para seleccionar fecha y hora</label>
-                                    </div>
-                                </div>
-                            </div>
-                            
                             <div class="text-center mt-4">
                                 <button type="submit" class="btn btn-success btn-lg">Agendar Cita</button>
                             </div>
@@ -210,9 +189,6 @@
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/es.js"></script>
 
-<!-- Calendly widget script -->
-<script type="text/javascript" src="https://assets.calendly.com/assets/external/widget.js" async></script>
-
 <script type="text/javascript">
     document.addEventListener('DOMContentLoaded', function() {
         // Variables
@@ -224,16 +200,7 @@
         const errorContainer = document.getElementById('error-container');
         const successContainer = document.getElementById('success-container');
         
-        // Nuevas variables para Calendly
-        const useCalendlyToggle = document.getElementById('use-calendly-toggle');
-        const standardCalendarContainer = document.getElementById('standard-calendar-container');
-        const calendlyContainer = document.getElementById('calendly-inline-container');
         const calendarModeInput = document.getElementById('calendar-mode');
-        const calendlyEventUriInput = document.getElementById('calendly_event_uri');
-        const calendlyInviteeUriInput = document.getElementById('calendly_invitee_uri');
-        
-        // Variable para controlar la inicialización de Calendly
-        let calendlyInitialized = false;
         
         // Variables para el calendario
         let doctorId = '';
@@ -256,6 +223,8 @@
             const datePicker = flatpickr("#date", {
                 locale: "es",
                 dateFormat: "Y-m-d",
+                altInput: true,
+                altFormat: "l, d F Y",
                 minDate: "today",
                 disableMobile: "true",
                 disable: [
@@ -452,65 +421,10 @@
             }, 5000);
         }
         
-        // Toggle para cambiar entre calendarios
-        if (useCalendlyToggle) {
-            useCalendlyToggle.addEventListener('change', function() {
-                if (this.checked) {
-                    standardCalendarContainer.style.display = 'none';
-                    calendlyContainer.style.display = 'block';
-                    calendarModeInput.value = 'calendly';
-                    
-                    // Cargar Calendly
-                    try {
-                        if (window.Calendly && !calendlyInitialized) {
-                            window.Calendly.initInlineWidget({
-                                url: 'https://calendly.com/nellymar-v-g-p/new-meeting',
-                                parentElement: document.querySelector('.calendly-inline-widget'),
-                                prefill: {
-                                    name: document.getElementById('name').value,
-                                    email: document.getElementById('email').value,
-                                    customAnswers: {
-                                        a1: document.getElementById('phone').value,
-                                        a2: document.getElementById('age').value,
-                                        a3: document.getElementById('gender').value,
-                                        a4: "Doctor ID: " + doctorSelect.value
-                                    }
-                                }
-                            });
-                            
-                            // Listener para eventos de Calendly
-                            window.addEventListener('message', function(e) {
-                                if (e.data.event && e.data.event.indexOf('calendly') === 0) {
-                                    if (e.data.event === 'calendly.event_scheduled') {
-                                        // Guardar la información del evento programado
-                                        calendlyEventUriInput.value = e.data.payload.event.uri;
-                                        calendlyInviteeUriInput.value = e.data.payload.invitee.uri;
-                                        
-                                        // Mostrar mensaje de éxito
-                                        showSuccess('¡Fecha y hora seleccionadas correctamente!');
-                                    }
-                                }
-                            });
-                            
-                            calendlyInitialized = true;
-                            console.log('Calendly inicializado correctamente');
-                        } else if (!window.Calendly) {
-                            console.error('Calendly no está disponible. Asegúrate de que el script se ha cargado correctamente.');
-                        }
-                    } catch (error) {
-                        console.error('Error al inicializar Calendly:', error);
-                    }
-                } else {
-                    standardCalendarContainer.style.display = 'flex';
-                    calendlyContainer.style.display = 'none';
-                    calendarModeInput.value = 'standard';
-                }
-            });
-        } else {
-            console.error('El elemento use-calendly-toggle no se encontró');
-        }
+        // Se mantiene modo estandar de calendario.
+        calendarModeInput.value = 'standard';
         
-        // Modificar el envío del formulario para manejar el modo Calendly
+        // Envio del formulario de cita publica.
         if (appointmentForm) {
             appointmentForm.addEventListener('submit', function(e) {
                 e.preventDefault();
@@ -639,19 +553,12 @@
                 }
             });
             
-            // Validar calendario
-            if (calendarModeInput.value === 'calendly' && !calendlyEventUriInput.value) {
-                showError('Por favor selecciona una fecha y hora en el calendario de Calendly');
+            if (!dateInput.value) {
+                showError('Por favor selecciona una fecha para la cita');
                 hasError = true;
-            } else if (calendarModeInput.value === 'standard') {
-                // Validar que se haya seleccionado fecha y hora
-                if (!dateInput.value) {
-                    showError('Por favor selecciona una fecha para la cita');
-                    hasError = true;
-                } else if (!timeSelect.value) {
-                    showError('Por favor selecciona una hora para la cita');
-                    hasError = true;
-                }
+            } else if (!timeSelect.value) {
+                showError('Por favor selecciona una hora para la cita');
+                hasError = true;
             }
             
             return !hasError;

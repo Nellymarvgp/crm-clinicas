@@ -373,6 +373,14 @@
                 });
             }
 
+            // Apply initial department filter from query string (?department=ID)
+            const queryParams = new URLSearchParams(window.location.search);
+            const preselectedDepartment = queryParams.get('department');
+            if (preselectedDepartment) {
+                $('#departmentFilter').val(preselectedDepartment);
+                filterDoctors();
+            }
+
             // Handle schedule modal
             $('.view-schedule-btn').on('click', function() {
                 const doctorId = $(this).data('doctor-id');
