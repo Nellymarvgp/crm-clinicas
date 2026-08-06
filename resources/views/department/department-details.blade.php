@@ -108,6 +108,22 @@
                                             </span>
                                         @enderror
                                     </div>
+                                    <div class="col-md-12 mb-3">
+                                        <label for="department-image" class="form-label">{{ __('Imagen de la especialidad') }}</label>
+                                        <input type="file"
+                                            class="form-control @error('image') is-invalid @enderror"
+                                            name="image" id="department-image" accept="image/*">
+                                        @error('image')
+                                            <span class="invalid-feedback" role="alert">
+                                                <strong>{{ $message }}</strong>
+                                            </span>
+                                        @enderror
+                                        @if ($department && $department->image)
+                                            <div class="mt-2">
+                                                <img src="{{ URL::asset('build/images/nuevas/' . $department->image) }}" alt="{{ $department->name }}" style="max-height: 90px;">
+                                            </div>
+                                        @endif
+                                    </div>
                                 </div>
                             </div>
                         </div>

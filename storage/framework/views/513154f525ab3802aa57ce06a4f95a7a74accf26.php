@@ -34,7 +34,7 @@
                 id="navbar">
                 <div class="container">
                     <a class="navbar-brand logo d-flex align-items-center" href="#home" aria-label="CORE">
-                        <img src="<?php echo e(URL::asset('build/images/logo.jpg')); ?>" alt="Logo CORE" class="core-logo">
+                        <img src="<?php echo e(URL::asset('build/images/logo.png')); ?>" alt="Logo CORE" class="core-logo">
                     </a>
                     <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
                         data-bs-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false"
@@ -171,7 +171,7 @@
                         <?php $__currentLoopData = $departments; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $department): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                             <?php
                                 $departmentText = mb_strtolower($department->name . ' ' . ($department->description ?? ''), 'UTF-8');
-                                $selectedIcon = 'icono_estetica.png';
+                                $selectedIcon = 'icono_endodoncia.png';
                                 foreach ($specialtyIcons as $keyword => $iconFile) {
                                     if (str_contains($departmentText, $keyword)) {
                                         $selectedIcon = $iconFile;
@@ -182,7 +182,10 @@
                             <div class="col-lg-4 col-md-6">
                                 <div class="servicio-card">
                                     <div class="servicio-icon">
-                                        <img src="<?php echo e(URL::asset('build/images/nuevas/' . $selectedIcon)); ?>" alt="<?php echo e($department->name); ?>">
+                                        <?php
+                                            $departmentImage = $department->image ? 'build/images/nuevas/' . $department->image : 'build/images/nuevas/' . $selectedIcon;
+                                        ?>
+                                        <img src="<?php echo e(URL::asset($departmentImage)); ?>" alt="<?php echo e($department->name); ?>">
                                     </div>
                                     <h3><?php echo e($department->name); ?></h3>
                                     <p class="servicio-description"><?php echo e($department->description ?: 'Atención especializada con enfoque clínico integral y resultados estéticos funcionales.'); ?></p>
@@ -202,9 +205,9 @@
                     <div class="content">
                         <div class="row">
                             <div class="col-md-12">
-                                <img src="<?php echo e(URL::asset('build/images/servicio1.png')); ?>" alt="">
-                                <h2>Tu sonrisa, nuestra prioridad</h2>
-                                <p>En Centro Odontológico CORE cada paciente recibe atención personalizada, respaldada por especialistas altamente capacitados y tecnología de vanguardia, en un entorno seguro, cálido y profesional.</p>
+                                <img src="<?php echo e(URL::asset('build/images/servicio1.png')); ?>" alt="" style="filter: brightness(0); max-width: 100px;">
+                                <h2 style="color: #000;">Tu sonrisa, nuestra prioridad</h2>
+                                <p style="color: #000;">En Centro Odontológico CORE cada paciente recibe atención personalizada, respaldada por especialistas altamente capacitados y tecnología de vanguardia, en un entorno seguro, cálido y profesional.</p>
                                 <div class="hero-btn mt-4">
                                     <a href="<?php echo e(url('login')); ?>" class="btn btn-primary">Conocer más</a>
                                 </div>
@@ -219,7 +222,7 @@
                 <div class="container">
                     <div class="brand-header">
                         <h2>Identidad CORE</h2>
-                        <p>Somos una marca moderna, profesional, cercana, elegante, confiable y humana, con un enfoque detallista e innovador en cada etapa del tratamiento odontológico.</p>
+                        <p>Somos una marca de profesionales confiables, cercana, elegante y moderna con un enfoque detallista que innova conocimiento y tecnología de alta gama en tecnología odontologica en cada procedimiento odontologico.</p>
                     </div>
 
                     <div class="brand-grid">
@@ -355,12 +358,12 @@
                 <div class="row justify-content-between g-2">
                     <div class="col-lg-4">
                         <a class="brand-logo d-flex align-items-center" href="#home" aria-label="CORE">
-                            <img src="<?php echo e(URL::asset('build/images/logo.jpg')); ?>" alt="Logo CORE" class="core-logo core-logo-footer">
+                            <img src="<?php echo e(URL::asset('build/images/logo.png')); ?>" alt="Logo CORE" class="core-logo core-logo-footer">
                         </a>
                         <p class="mt-4 text-white-50">Atención odontológica integral con tecnología de vanguardia, especialistas y calidez humana para cuidar cada sonrisa.</p>
                         <div class="footer-btn mt-4">
-                            <h5>Contacto :</h5>
-                            <a href="mailto:info@corecentrove.com" class="btn btn-light">info@corecentrove.com</a>
+                            <h5>Contacto:</h5>
+                            <a href="mailto:centrocore.ve@gmail.com" class="btn btn-light">centrocore.ve@gmail.com</a>
                         </div>
                     </div>
 
@@ -407,10 +410,10 @@
                                 <span class="text-white"><span class="mdi mdi-instagram font-size-18"></span> </span> <a href="https://www.instagram.com/core.ven" target="_blank" rel="noopener noreferrer">@core.ven</a>
                             </li>
                             <li>
-                                <span class="text-white"><span class="mdi mdi-email-outline font-size-18"></span> </span> <a href="mailto:info@corecentrove.com">info@corecentrove.com</a>
+                                <span class="text-white"><span class="mdi mdi-email-outline font-size-18"></span> </span> <a href="mailto:centrocore.ve@gmail.com">centrocore.ve@gmail.com</a>
                             </li>
                             <li>
-                                <span class="text-white"><span class="mdi mdi-email-outline font-size-18"></span> </span> <a href="mailto:centrocore.ve@gmail.com">centrocore.ve@gmail.com</a>
+                                <span class="text-white"><span class="mdi mdi-whatsapp font-size-18"></span> </span> <a href="https://wa.me/584248326325" target="_blank" rel="noopener noreferrer">0424-8326325</a>
                             </li>
                         </ul>
                     </div>

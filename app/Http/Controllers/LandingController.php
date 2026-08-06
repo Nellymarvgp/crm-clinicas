@@ -21,7 +21,14 @@ class LandingController extends Controller
         }
 
         // Get departments (services)
+        $hiddenKeywords = ['protesis', 'odontopediatria', 'prevencion', 'diagnostico', 'diagnóstico'];
         $departments = Departments::where('is_deleted', 0)
+            ->where(function ($query) use ($hiddenKeywords) {
+                $query->whereRaw('LOWER(CONCAT(COALESCE(name, ""), " ", COALESCE(description, ""))) NOT LIKE ?', ['%' . $hiddenKeywords[0] . '%']);
+                foreach (array_slice($hiddenKeywords, 1) as $keyword) {
+                    $query->whereRaw('LOWER(CONCAT(COALESCE(name, ""), " ", COALESCE(description, ""))) NOT LIKE ?', ['%' . $keyword . '%']);
+                }
+            })
             ->orderBy('name')
             ->get();
 

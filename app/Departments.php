@@ -15,6 +15,7 @@ class Departments extends Model
         'id',
         "name",
         "description",
+        "image",
         "is_deleted"
     ];
 

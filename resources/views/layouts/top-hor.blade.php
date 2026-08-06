@@ -4,7 +4,7 @@
             <!-- LOGO -->
             <div class="navbar-brand-box">
                 <a href="{{ url('/dashboard') }}" class="logo logo-light">
-                    <img src="{{ URL::asset('build/images/logo-light.jpg') }}" alt="CORE" height="34">
+                    <img src="{{ URL::asset('build/images/logo.png') }}" alt="CORE" height="34">
                 </a>
             </div>
             <button type="button" class="btn btn-sm px-3 font-size-16 d-lg-none header-item waves-effect waves-light"

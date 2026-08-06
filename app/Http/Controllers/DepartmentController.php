@@ -7,6 +7,7 @@ use Cartalyst\Sentinel\Laravel\Facades\Sentinel;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Yajra\DataTables\Facades\DataTables;
+use Illuminate\Support\Str;
 
 class DepartmentController extends Controller
 {
@@ -82,16 +83,27 @@ class DepartmentController extends Controller
         $user = Sentinel::getUser();
         if ($user->hasAccess('department.create')) {
             $validatedData = $request->validate([
-                'name' => 'required|alpha|max:250',
-                'description' => 'required|regex:/^[a-zA-Z\s]+$/|max:250',
+                'name' => 'required|string|max:250',
+                'description' => 'required|string|max:250',
+                'image' => 'nullable|image|mimes:jpg,jpeg,png,svg|max:2048',
             ]);
             try {
-                //Create a new department
-                Departments::create($validatedData);
+                $departmentData = [
+                    'name' => $validatedData['name'],
+                    'description' => $validatedData['description'],
+                ];
 
-                //Attach the user to the role
+                if ($request->hasFile('image')) {
+                    $image = $request->file('image');
+                    $imageName = Str::slug($validatedData['name']) . '-' . time() . '.' . $image->getClientOriginalExtension();
+                    $image->move(public_path('build/images/nuevas'), $imageName);
+                    $departmentData['image'] = $imageName;
+                }
+
+                Departments::create($departmentData);
+
                 return redirect('department')->with('success', 'Department created successfully!');
-            } catch (Exception $e) {
+            } catch (\Exception $e) {
                 return redirect('department')->with('error', 'Something went wrong!!! ' . $e->getMessage());
             }
         } else {
@@ -143,16 +155,25 @@ class DepartmentController extends Controller
         $user = Sentinel::getUser();
         if ($user->hasAccess('department.update')) {
             $validatedData = $request->validate([
-                'name' => 'required|alpha|max:250',
-                'description' => 'required|regex:/^[a-zA-Z\s]+$/|max:250',
+                'name' => 'required|string|max:250',
+                'description' => 'required|string|max:250',
+                'image' => 'nullable|image|mimes:jpg,jpeg,png,svg|max:2048',
             ]);
             try {
                 $department->name = $validatedData['name'];
                 $department->description = $validatedData['description'];
+
+                if ($request->hasFile('image')) {
+                    $image = $request->file('image');
+                    $imageName = Str::slug($validatedData['name']) . '-' . time() . '.' . $image->getClientOriginalExtension();
+                    $image->move(public_path('build/images/nuevas'), $imageName);
+                    $department->image = $imageName;
+                }
+
                 $department->save();
 
                 return redirect('department')->with('success', 'Department updated successfully!');
-            } catch (Exception $e) {
+            } catch (\Exception $e) {
                 return redirect('accountant')->with('error', 'Something went wrong!!! ' . $e->getMessage());
             }
         } else {
