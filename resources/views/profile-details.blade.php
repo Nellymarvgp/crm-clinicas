@@ -191,8 +191,8 @@
                                         </div>
                                     </div>
 
-                                    <blockquote>{{ __('Información Médica') }}</blockquote>
-                                    <div class="row">
+                                    <blockquote class="d-none">{{ __('Información Médica') }}</blockquote>
+                                    <div class="row d-none">
                                         <div class="col-md-6">
                                             <div class="mb-3">
                                                 <label class="form-label">{{ __('Altura (cm)') }}<span class="text-danger">*</span></label>
@@ -319,8 +319,8 @@
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="d-none">
                                     <blockquote>{{ __('Antecedentes Médicos') }}</blockquote>
+                                    <p class="text-muted mb-2">{{ __('Todos los campos de antecedentes médicos son opcionales.') }}</p>
                                     <div class="row">
                                         <div class="col-md-6">
                                             <div class="mb-3">
@@ -344,7 +344,6 @@
                                                 @error('diabetes_controlled')<span class="invalid-feedback" role="alert"><strong>{{ $message }}</strong></span>@enderror
                                             </div>
                                         </div>
-                                    </div>
                                     </div>
                                     <div class="row">
                                         <div class="col-md-6">

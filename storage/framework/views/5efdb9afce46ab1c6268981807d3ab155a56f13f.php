@@ -331,8 +331,8 @@ unset($__errorArgs, $__bag); ?>
                                     </div>
                                 </div>
                             </div>
-                            <blockquote><?php echo e(__('Información Médica')); ?></blockquote>
-                            <div class="row">
+                            <blockquote class="d-none"><?php echo e(__('Información Médica')); ?></blockquote>
+                            <div class="row d-none">
                                 <div class="col-md-6">
                                     <div class="row">
                                         <div class="col-md-12 mb-3">
@@ -583,6 +583,7 @@ unset($__errorArgs, $__bag); ?>
                                         </div>
                                     </div>
                                     <blockquote><?php echo e(__('Antecedentes Médicos')); ?></blockquote>
+                                    <p class="text-muted mb-2"><?php echo e(__('Todos los campos de antecedentes médicos son opcionales.')); ?></p>
                                     <div class="row">
                                         <div class="col-md-12 mb-3">
                                             <label class="form-label"><?php echo e(__('Diabetes')); ?> <span class="text-danger">*</span></label>

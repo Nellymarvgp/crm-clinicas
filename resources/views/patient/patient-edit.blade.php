@@ -165,8 +165,8 @@
                                     </div>
                                 </div>
                             </div>
-                            <blockquote>{{ __('Medical Information') }}</blockquote>
-                            <div class="row">
+                            <blockquote class="d-none">{{ __('Medical Information') }}</blockquote>
+                            <div class="row d-none">
                                 <div class="col-md-6">
                                     <div class="row">
                                         <div class="col-md-12 mb-3">
@@ -303,8 +303,8 @@
                                             @enderror
                                         </div>
                                     </div>
-                                    <div class="d-none">
                                     <blockquote>{{ __('Medical History') }}</blockquote>
+                                    <p class="text-muted mb-2">{{ __('All medical history fields are optional.') }}</p>
                                     <div class="row">
                                         <div class="col-md-12 mb-3">
                                             <label class="form-label">{{ __('Diabetes') }} <span class="text-danger">*</span></label>
@@ -410,8 +410,7 @@
                                         </div>
                                     </div>
                                 </div>
-                                    </div>
-                                    </div>
+                            </div>
                             <div class="row">
                                 <div class="col-md-12">
                                     <button type="submit" class="btn btn-primary">
