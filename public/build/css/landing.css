@@ -238,7 +238,11 @@ section#contact .contact-value-card p strong{color:var(--core-stone)}
 .core-hero-right{display:grid;grid-template-columns:minmax(220px,1fr) 240px;grid-template-areas:"doctor instagram" "doctor cta";column-gap:26px;row-gap:8px;align-items:end;align-self:end;padding-bottom:10px}
 .core-hero-instagram{grid-area:instagram;width:240px;display:flex;justify-content:flex-end}
 .core-hero-cta{grid-area:cta;width:240px;display:flex;justify-content:flex-end}
-.core-hero-instagram a{display:flex;align-items:center;gap:10px;color:#fff;text-decoration:none;font-size:2rem;font-weight:500;margin:0}
+.core-hero-instagram a{display:flex;flex-direction:column;align-items:flex-end;gap:6px;color:#fff;text-decoration:none;font-size:2rem;font-weight:500;margin:0}
+.core-hero-doctor-text{display:flex;flex-direction:column;align-items:flex-end;line-height:1.2}
+.core-hero-doctor-text h4{margin:0;font-size:1.25rem;color:#fff;font-weight:700}
+.core-hero-doctor-text p{margin:2px 0 0;font-size:1.05rem;color:#fff;max-width:260px;text-align:right}
+.core-hero-handle{display:flex;align-items:center;gap:10px}
 .core-hero-instagram img{width:44px;height:44px;object-fit:contain;filter:brightness(0) invert(1)}
 .core-hero-doctor{grid-area:doctor;max-width:360px;text-align:left;margin:0;align-self:end}
 .core-hero-doctor h4{margin:0 0 6px;font-size:2rem;color:var(--core-sand);font-weight:600}
@@ -431,7 +435,17 @@ section#contact .contact-value-card p strong{color:var(--core-stone)}
     .core-hero-instagram a{
         margin:0;
         font-size:1.7rem;
-        gap:8px;
+        gap:6px;
+        align-items:flex-end;
+    }
+
+    .core-hero-doctor-text h4{
+        font-size:1rem;
+    }
+
+    .core-hero-doctor-text p{
+        font-size:.9rem;
+        max-width:180px;
     }
 
     .core-hero-instagram img{
@@ -486,6 +500,15 @@ section#contact .contact-value-card p strong{color:var(--core-stone)}
 
     .core-hero-instagram a{
         font-size:1.45rem;
+    }
+
+    .core-hero-doctor-text h4{
+        font-size:.95rem;
+    }
+
+    .core-hero-doctor-text p{
+        font-size:.82rem;
+        max-width:160px;
     }
 
     .core-hero-instagram img{

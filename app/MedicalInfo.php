@@ -18,6 +18,18 @@ class MedicalInfo extends Model
         'respiration',
         'allergy',
         'diet',
+        'diabetes_status',
+        'diabetes_controlled',
+        'hypertension_status',
+        'hypertension_controlled',
+        'currently_pregnant',
+        'heart_attack_history',
+        'last_heart_attack',
+        'takes_medications',
+        'medications_list',
+        'aspirin_last_72h',
+        'has_disease',
+        'disease_details',
         'is_deleted',
     ];
 }

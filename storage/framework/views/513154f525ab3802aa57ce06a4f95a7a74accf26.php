@@ -131,14 +131,15 @@
                     <div class="core-hero-right">
                         <div class="core-hero-instagram">
                             <a href="https://www.instagram.com/core.ven" target="_blank" rel="noopener noreferrer">
-                                <span>core.ven</span>
-                                <img src="<?php echo e(URL::asset('build/images/nuevas/icono_instagram.png')); ?>" alt="Instagram CORE">
+                                <div class="core-hero-doctor-text">
+                                    <h4>Dr. Jesus Rodriguez</h4>
+                                    <p>Especialista en Rehabilitación oral y estética</p>
+                                </div>
+                                <div class="core-hero-handle">
+                                    <span>core.ve</span>
+                                    <img src="<?php echo e(URL::asset('build/images/nuevas/icono_instagram.png')); ?>" alt="Instagram CORE">
+                                </div>
                             </a>
-                        </div>
-
-                        <div class="core-hero-doctor">
-                            <h4>Dr. Jesus Rodriguez</h4>
-                            <p>Especialista en Rehabilitación oral y estética</p>
                         </div>
 
                         <div class="core-hero-cta">

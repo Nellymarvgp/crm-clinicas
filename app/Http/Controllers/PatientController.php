@@ -128,14 +128,26 @@ class PatientController extends Controller
                 'age' => 'required|numeric',
                 'address' => 'required|max:100',
                 'gender' => 'required',
-                'height' => 'required',
-                'b_group' => 'required',
-                'pulse' => 'required',
-                'allergy' => 'required',
-                'weight' => 'required|numeric',
-                'b_pressure' => 'required',
-                'respiration' => 'required',
-                'diet' => 'required',
+                'height' => 'nullable',
+                'b_group' => 'nullable',
+                'pulse' => 'nullable',
+                'allergy' => 'nullable',
+                'weight' => 'nullable|numeric',
+                'b_pressure' => 'nullable',
+                'respiration' => 'nullable',
+                'diet' => 'nullable',
+                'diabetes_status' => 'nullable|in:si,no',
+                'diabetes_controlled' => 'nullable|in:si,no',
+                'hypertension_status' => 'nullable|in:si,no',
+                'hypertension_controlled' => 'nullable|in:si,no',
+                'currently_pregnant' => 'nullable|in:si,no',
+                'heart_attack_history' => 'nullable|in:si,no',
+                'last_heart_attack' => 'nullable|string|max:120',
+                'takes_medications' => 'nullable|in:si,no',
+                'medications_list' => 'nullable|string|max:255',
+                'aspirin_last_72h' => 'nullable|in:si,no',
+                'has_disease' => 'nullable|in:si,no',
+                'disease_details' => 'nullable|string|max:255',
                 'profile_photo' => 'image|mimes:jpg,png,jpeg,gif,svg|max:500'
             ]);
             if ($request->profile_photo != null) {
@@ -272,14 +284,26 @@ class PatientController extends Controller
                 'age' => 'required|numeric',
                 'address' => 'required|max:100',
                 'gender' => 'required',
-                'height' => 'required|numeric',
-                'b_group' => 'required',
-                'pulse' => 'required',
-                'allergy' => 'required',
-                'weight' => 'required|numeric',
-                'b_pressure' => 'required',
-                'respiration' => 'required',
-                'diet' => 'required',
+                'height' => 'nullable|numeric',
+                'b_group' => 'nullable',
+                'pulse' => 'nullable',
+                'allergy' => 'nullable',
+                'weight' => 'nullable|numeric',
+                'b_pressure' => 'nullable',
+                'respiration' => 'nullable',
+                'diet' => 'nullable',
+                'diabetes_status' => 'nullable|in:si,no',
+                'diabetes_controlled' => 'nullable|in:si,no',
+                'hypertension_status' => 'nullable|in:si,no',
+                'hypertension_controlled' => 'nullable|in:si,no',
+                'currently_pregnant' => 'nullable|in:si,no',
+                'heart_attack_history' => 'nullable|in:si,no',
+                'last_heart_attack' => 'nullable|string|max:120',
+                'takes_medications' => 'nullable|in:si,no',
+                'medications_list' => 'nullable|string|max:255',
+                'aspirin_last_72h' => 'nullable|in:si,no',
+                'has_disease' => 'nullable|in:si,no',
+                'disease_details' => 'nullable|string|max:255',
                 'profile_photo'=>'image|mimes:jpg,png,jpeg,gif,svg|max:500'
             ]);
             try {
@@ -329,6 +353,18 @@ class PatientController extends Controller
                         $medical_info->b_pressure = $request->b_pressure;
                         $medical_info->respiration = $request->respiration;
                         $medical_info->diet = $request->diet;
+                        $medical_info->diabetes_status = $request->diabetes_status;
+                        $medical_info->diabetes_controlled = $request->diabetes_controlled;
+                        $medical_info->hypertension_status = $request->hypertension_status;
+                        $medical_info->hypertension_controlled = $request->hypertension_controlled;
+                        $medical_info->currently_pregnant = $request->currently_pregnant;
+                        $medical_info->heart_attack_history = $request->heart_attack_history;
+                        $medical_info->last_heart_attack = $request->last_heart_attack;
+                        $medical_info->takes_medications = $request->takes_medications;
+                        $medical_info->medications_list = $request->medications_list;
+                        $medical_info->aspirin_last_72h = $request->aspirin_last_72h;
+                        $medical_info->has_disease = $request->has_disease;
+                        $medical_info->disease_details = $request->disease_details;
                         $medical_info->user_id = $patient->id;
                         $medical_info->save();
                     }
@@ -341,6 +377,18 @@ class PatientController extends Controller
                         $medical_info->b_pressure = $request->b_pressure;
                         $medical_info->respiration = $request->respiration;
                         $medical_info->diet = $request->diet;
+                        $medical_info->diabetes_status = $request->diabetes_status;
+                        $medical_info->diabetes_controlled = $request->diabetes_controlled;
+                        $medical_info->hypertension_status = $request->hypertension_status;
+                        $medical_info->hypertension_controlled = $request->hypertension_controlled;
+                        $medical_info->currently_pregnant = $request->currently_pregnant;
+                        $medical_info->heart_attack_history = $request->heart_attack_history;
+                        $medical_info->last_heart_attack = $request->last_heart_attack;
+                        $medical_info->takes_medications = $request->takes_medications;
+                        $medical_info->medications_list = $request->medications_list;
+                        $medical_info->aspirin_last_72h = $request->aspirin_last_72h;
+                        $medical_info->has_disease = $request->has_disease;
+                        $medical_info->disease_details = $request->disease_details;
                         $medical_info->user_id = $patient->id;
                         $medical_info->save();
                     }
