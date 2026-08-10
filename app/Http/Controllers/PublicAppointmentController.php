@@ -428,15 +428,24 @@ class PublicAppointmentController extends Controller
                 $user->mobile = $request->phone;
                 $user->save();
             } else {
-                // Crear nuevo usuario con rol de paciente (ID 4)
-                $user = new User();
-                $user->first_name = $firstName;
-                $user->last_name = $lastName;
-                $user->email = $request->email;
-                $user->mobile = $request->phone;
-                $user->password = Hash::make(Str::random(10)); // Contraseña aleatoria
-                $user->role_id = 4; // Rol de paciente
-                $user->save();
+                // Crear nuevo usuario usando Sentinel (sin role_id en tabla users)
+                $userData = [
+                    'first_name' => $firstName,
+                    'last_name' => $lastName,
+                    'email' => $request->email,
+                    'mobile' => $request->phone,
+                    'password' => Str::random(10),
+                ];
+                $user = Sentinel::registerAndActivate($userData);
+            }
+
+            // Asegurar que el usuario tenga rol de paciente
+            $patientRole = Sentinel::findRoleBySlug('patient');
+            if ($patientRole) {
+                $alreadyPatient = $patientRole->users()->where('users.id', $user->id)->exists();
+                if (!$alreadyPatient) {
+                    $patientRole->users()->attach($user);
+                }
             }
             
             // Verificar si el paciente ya existe
