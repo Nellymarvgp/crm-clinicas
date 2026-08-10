@@ -22,6 +22,69 @@ use Illuminate\Support\Str;
 class PublicAppointmentController extends Controller
 {
     /**
+     * Resolve the identifiers used by availability tables.
+     *
+     * Availability records point to users.id, while the public form sends doctors.id.
+     * This helper allows both forms so legacy data keeps working.
+     *
+     * @param  int|string  $doctorId
+     * @return array<int>
+     */
+    private function resolveAvailabilityDoctorIds($doctorId): array
+    {
+        $doctorId = (int) $doctorId;
+
+        $doctorUserId = Doctor::where('id', $doctorId)->value('user_id');
+        $doctorRowId = Doctor::where('user_id', $doctorId)->value('id');
+
+        return collect([$doctorId, $doctorUserId, $doctorRowId])
+            ->filter()
+            ->map(function ($value) {
+                return (int) $value;
+            })
+            ->unique()
+            ->values()
+            ->all();
+    }
+
+    /**
+     * Resolve the column used for Wednesday availability.
+     *
+     * Some legacy records use `wen` while the schema created by migrations uses `wed`.
+     *
+     * @return string
+     */
+    private function resolveWednesdayColumn(): string
+    {
+        if (Schema::hasColumn('doctor_available_days', 'wed')) {
+            return 'wed';
+        }
+
+        if (Schema::hasColumn('doctor_available_days', 'wen')) {
+            return 'wen';
+        }
+
+        return 'wed';
+    }
+
+    /**
+     * Get a human-friendly time label for public slots.
+     *
+     * @param  string  $timeValue
+     * @return string
+     */
+    private function formatPublicTimeLabel($timeValue): string
+    {
+        try {
+            $formatted = date('h:i A', strtotime($timeValue));
+
+            return str_replace(['AM', 'PM'], ['a. m.', 'p. m.'], $formatted);
+        } catch (\Throwable $e) {
+            return (string) $timeValue;
+        }
+    }
+
+    /**
      * Display the public appointment form.
      *
      * @return \Illuminate\View\View
@@ -62,25 +125,34 @@ class PublicAppointmentController extends Controller
             if (!$doctorId) {
                 return response()->json(['error' => 'ID del doctor no proporcionado.', 'days' => []], 400);
             }
+
+            $doctorLookupIds = $this->resolveAvailabilityDoctorIds($doctorId);
             
-            // Obtener días disponibles directamente de la base de datos
-            $availableDays = DB::table('doctor_available_days')
-                ->where('doctor_id', $doctorId)
-                ->first();
-                
-            if (!$availableDays) {
+            $wednesdayColumn = $this->resolveWednesdayColumn();
+
+            // Obtener días disponibles directamente de la base de datos y combinarlos si existen varias filas
+            $availableDaysRows = DB::table('doctor_available_days')
+                ->whereIn('doctor_id', $doctorLookupIds)
+                ->get();
+
+            if ($availableDaysRows->isEmpty()) {
                 return response()->json(['error' => 'No hay días disponibles para este doctor.', 'days' => []], 200);
             }
 
             // Convertir a array de números de días (0=domingo, 1=lunes, etc.)
             $days = [];
-            if ($availableDays->sun) $days[] = 0; // Sunday
-            if ($availableDays->mon) $days[] = 1; // Monday
-            if ($availableDays->tue) $days[] = 2; // Tuesday
-            if ($availableDays->wen) $days[] = 3; // Wednesday (corregido de "wed" a "wen")
-            if ($availableDays->thu) $days[] = 4; // Thursday
-            if ($availableDays->fri) $days[] = 5; // Friday
-            if ($availableDays->sat) $days[] = 6; // Saturday
+
+            foreach ($availableDaysRows as $availableDays) {
+                if (!empty($availableDays->sun)) $days[] = 0; // Sunday
+                if (!empty($availableDays->mon)) $days[] = 1; // Monday
+                if (!empty($availableDays->tue)) $days[] = 2; // Tuesday
+                if (!empty($availableDays->{$wednesdayColumn})) $days[] = 3; // Wednesday
+                if (!empty($availableDays->thu)) $days[] = 4; // Thursday
+                if (!empty($availableDays->fri)) $days[] = 5; // Friday
+                if (!empty($availableDays->sat)) $days[] = 6; // Saturday
+            }
+
+            $days = array_values(array_unique($days));
 
             return response()->json(['days' => $days]);
             
@@ -111,6 +183,7 @@ class PublicAppointmentController extends Controller
             
             $doctorId = $request->input('doctor_id');
             $date = $request->input('date');
+            $doctorLookupIds = $this->resolveAvailabilityDoctorIds($doctorId);
             
             Log::info("Parámetros extraídos", ['doctor_id' => $doctorId, 'date' => $date]);
             
@@ -130,11 +203,12 @@ class PublicAppointmentController extends Controller
             Log::info("Día de la semana calculado", ['date' => $date, 'dayOfWeek' => $dayOfWeek]);
             
             // Mapeo de día de la semana a nombre de columna en tabla doctor_available_days
+            $wednesdayColumn = $this->resolveWednesdayColumn();
             $dayMapping = [
                 0 => 'sun',
                 1 => 'mon',
                 2 => 'tue',
-                3 => 'wen', // Está como "wen" en la BD, no "wed"
+                3 => $wednesdayColumn,
                 4 => 'thu',
                 5 => 'fri',
                 6 => 'sat',
@@ -147,7 +221,7 @@ class PublicAppointmentController extends Controller
             Log::info("Verificando disponibilidad del doctor en ese día");
             try {
                 $isAvailable = DB::table('doctor_available_days')
-                    ->where('doctor_id', $doctorId)
+                    ->whereIn('doctor_id', $doctorLookupIds)
                     ->where($day, 1)
                     ->exists();
                     
@@ -173,10 +247,26 @@ class PublicAppointmentController extends Controller
             Log::info("Consultando horarios disponibles");
             try {
                 $availableTimes = DB::table('doctor_available_times')
-                    ->where('doctor_id', $doctorId)
+                    ->whereIn('doctor_id', $doctorLookupIds)
                     ->where('day_of_week', $dayOfWeekString)
                     ->where('is_deleted', 0)
                     ->get();
+
+                // Fallback for legacy data: if there are no day-specific rows,
+                // use generic rows configured for the same doctor.
+                if ($availableTimes->isEmpty()) {
+                    $availableTimes = DB::table('doctor_available_times')
+                        ->whereIn('doctor_id', $doctorLookupIds)
+                        ->where('is_deleted', 0)
+                        ->get();
+
+                    if ($availableTimes->isNotEmpty()) {
+                        Log::warning('Usando horario general por falta de horario específico del día', [
+                            'doctor_lookup_ids' => $doctorLookupIds,
+                            'day_of_week' => $dayOfWeekString,
+                        ]);
+                    }
+                }
                 
                 Log::info("Resultado de la consulta de horarios", ['count' => $availableTimes->count()]);
                 
@@ -197,17 +287,17 @@ class PublicAppointmentController extends Controller
             try {
                 // Revisar si la clase Appointment existe, de lo contrario usar consulta directa
                 if (class_exists('App\Appointment')) {
-                    $bookedAppointments = \App\Appointment::where('appointment_with', $doctorId)
+                    $bookedAppointments = \App\Appointment::whereIn('appointment_with', $doctorLookupIds)
                         ->where('appointment_date', $date)
                         ->get(['appointment_time']);
                 } else if (class_exists('App\Models\Appointment')) {
-                    $bookedAppointments = \App\Models\Appointment::where('appointment_with', $doctorId)
+                    $bookedAppointments = \App\Models\Appointment::whereIn('appointment_with', $doctorLookupIds)
                         ->where('appointment_date', $date)
                         ->get(['appointment_time']);
                 } else {
                     // Usar consulta directa si no se encuentra el modelo
                     $bookedAppointments = DB::table('appointments')
-                        ->where('appointment_with', $doctorId)
+                        ->whereIn('appointment_with', $doctorLookupIds)
                         ->where('appointment_date', $date)
                         ->get(['appointment_time']);
                 }
@@ -247,7 +337,7 @@ class PublicAppointmentController extends Controller
                             $availableSlots[] = [
                                 'id' => $time->id,
                                 'time' => $formattedTime,
-                                'display_time' => date('h:i A', $timeSlot)
+                                'display_time' => $this->formatPublicTimeLabel(date('H:i:s', $timeSlot))
                             ];
                         }
                         

@@ -23432,3 +23432,102 @@ Did you mean one of these?
 #62 C:\\wamp64\\www\\appyweb\\crm_clinicas\\crm-clinicas\\server.php(21): require_once('C:\\\\wamp64\\\\www\\\\a...')
 #63 {main}
 "} 
+[2026-08-10 17:50:37] local.INFO: -------- BEGIN getDoctorAvailableSlots --------  
+[2026-08-10 17:50:37] local.INFO: Parámetros recibidos {"doctor_id":"1","date":"2026-08-17","_token":"M0W3HybCZBJ6HY0pNJy2HUQXwXwN2KQQecNjsNod"} 
+[2026-08-10 17:50:37] local.INFO: Parámetros extraídos {"doctor_id":"1","date":"2026-08-17"} 
+[2026-08-10 17:50:37] local.INFO: Día de la semana calculado {"date":"2026-08-17","dayOfWeek":"1"} 
+[2026-08-10 17:50:37] local.INFO: Nombre de la columna para el día {"day":"mon"} 
+[2026-08-10 17:50:37] local.INFO: Verificando disponibilidad del doctor en ese día  
+[2026-08-10 17:50:37] local.INFO: Resultado de la consulta de disponibilidad {"isAvailable":true} 
+[2026-08-10 17:50:37] local.INFO: Formato de día para consulta {"dayOfWeekString":"1"} 
+[2026-08-10 17:50:37] local.INFO: Consultando horarios disponibles  
+[2026-08-10 17:50:37] local.INFO: Resultado de la consulta de horarios {"count":1} 
+[2026-08-10 17:50:37] local.INFO: Consultando citas ya reservadas  
+[2026-08-10 17:50:37] local.ERROR: Error al consultar citas reservadas: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'appointment_time' in 'field list' (SQL: select `appointment_time` from `appointments` where `appointment_with` in (1, 51) and `appointment_date` = 2026-08-17)  
+[2026-08-10 17:50:37] local.INFO: Generando slots disponibles  
+[2026-08-10 17:50:37] local.INFO: Procesando horario {"id":1,"from":"08:00:00","to":"17:00:00","startTime":1786363200,"endTime":1786395600} 
+[2026-08-10 17:50:37] local.INFO: Total de slots generados: 18  
+[2026-08-10 17:50:37] local.INFO: -------- END getDoctorAvailableSlots (SUCCESS) --------  
+[2026-08-10 18:39:26] local.INFO: -------- BEGIN getDoctorAvailableSlots --------  
+[2026-08-10 18:39:26] local.INFO: Parámetros recibidos {"doctor_id":"1","date":"2026-08-12","_token":"M0W3HybCZBJ6HY0pNJy2HUQXwXwN2KQQecNjsNod"} 
+[2026-08-10 18:39:26] local.INFO: Parámetros extraídos {"doctor_id":"1","date":"2026-08-12"} 
+[2026-08-10 18:39:26] local.INFO: Día de la semana calculado {"date":"2026-08-12","dayOfWeek":"3"} 
+[2026-08-10 18:39:26] local.INFO: Nombre de la columna para el día {"day":"wen"} 
+[2026-08-10 18:39:26] local.INFO: Verificando disponibilidad del doctor en ese día  
+[2026-08-10 18:39:26] local.INFO: Resultado de la consulta de disponibilidad {"isAvailable":true} 
+[2026-08-10 18:39:26] local.INFO: Formato de día para consulta {"dayOfWeekString":"3"} 
+[2026-08-10 18:39:26] local.INFO: Consultando horarios disponibles  
+[2026-08-10 18:39:26] local.INFO: Resultado de la consulta de horarios {"count":0} 
+[2026-08-10 18:39:26] local.INFO: No hay horarios configurados para este día  
+[2026-08-10 18:39:30] local.INFO: -------- BEGIN getDoctorAvailableSlots --------  
+[2026-08-10 18:39:30] local.INFO: Parámetros recibidos {"doctor_id":"1","date":"2026-08-19","_token":"M0W3HybCZBJ6HY0pNJy2HUQXwXwN2KQQecNjsNod"} 
+[2026-08-10 18:39:30] local.INFO: Parámetros extraídos {"doctor_id":"1","date":"2026-08-19"} 
+[2026-08-10 18:39:30] local.INFO: Día de la semana calculado {"date":"2026-08-19","dayOfWeek":"3"} 
+[2026-08-10 18:39:30] local.INFO: Nombre de la columna para el día {"day":"wen"} 
+[2026-08-10 18:39:30] local.INFO: Verificando disponibilidad del doctor en ese día  
+[2026-08-10 18:39:30] local.INFO: Resultado de la consulta de disponibilidad {"isAvailable":true} 
+[2026-08-10 18:39:30] local.INFO: Formato de día para consulta {"dayOfWeekString":"3"} 
+[2026-08-10 18:39:30] local.INFO: Consultando horarios disponibles  
+[2026-08-10 18:39:30] local.INFO: Resultado de la consulta de horarios {"count":0} 
+[2026-08-10 18:39:30] local.INFO: No hay horarios configurados para este día  
+[2026-08-10 18:39:38] local.INFO: -------- BEGIN getDoctorAvailableSlots --------  
+[2026-08-10 18:39:38] local.INFO: Parámetros recibidos {"doctor_id":"1","date":"2026-08-17","_token":"M0W3HybCZBJ6HY0pNJy2HUQXwXwN2KQQecNjsNod"} 
+[2026-08-10 18:39:38] local.INFO: Parámetros extraídos {"doctor_id":"1","date":"2026-08-17"} 
+[2026-08-10 18:39:38] local.INFO: Día de la semana calculado {"date":"2026-08-17","dayOfWeek":"1"} 
+[2026-08-10 18:39:38] local.INFO: Nombre de la columna para el día {"day":"mon"} 
+[2026-08-10 18:39:38] local.INFO: Verificando disponibilidad del doctor en ese día  
+[2026-08-10 18:39:39] local.INFO: Resultado de la consulta de disponibilidad {"isAvailable":true} 
+[2026-08-10 18:39:39] local.INFO: Formato de día para consulta {"dayOfWeekString":"1"} 
+[2026-08-10 18:39:39] local.INFO: Consultando horarios disponibles  
+[2026-08-10 18:39:39] local.INFO: Resultado de la consulta de horarios {"count":1} 
+[2026-08-10 18:39:39] local.INFO: Consultando citas ya reservadas  
+[2026-08-10 18:39:39] local.ERROR: Error al consultar citas reservadas: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'appointment_time' in 'field list' (SQL: select `appointment_time` from `appointments` where `appointment_with` in (1, 51) and `appointment_date` = 2026-08-17)  
+[2026-08-10 18:39:39] local.INFO: Generando slots disponibles  
+[2026-08-10 18:39:39] local.INFO: Procesando horario {"id":1,"from":"08:00:00","to":"17:00:00","startTime":1786363200,"endTime":1786395600} 
+[2026-08-10 18:39:39] local.INFO: Total de slots generados: 18  
+[2026-08-10 18:39:39] local.INFO: -------- END getDoctorAvailableSlots (SUCCESS) --------  
+[2026-08-10 18:39:43] local.INFO: -------- BEGIN getDoctorAvailableSlots --------  
+[2026-08-10 18:39:43] local.INFO: Parámetros recibidos {"doctor_id":"1","date":"2026-08-26","_token":"M0W3HybCZBJ6HY0pNJy2HUQXwXwN2KQQecNjsNod"} 
+[2026-08-10 18:39:43] local.INFO: Parámetros extraídos {"doctor_id":"1","date":"2026-08-26"} 
+[2026-08-10 18:39:43] local.INFO: Día de la semana calculado {"date":"2026-08-26","dayOfWeek":"3"} 
+[2026-08-10 18:39:43] local.INFO: Nombre de la columna para el día {"day":"wen"} 
+[2026-08-10 18:39:43] local.INFO: Verificando disponibilidad del doctor en ese día  
+[2026-08-10 18:39:43] local.INFO: Resultado de la consulta de disponibilidad {"isAvailable":true} 
+[2026-08-10 18:39:43] local.INFO: Formato de día para consulta {"dayOfWeekString":"3"} 
+[2026-08-10 18:39:43] local.INFO: Consultando horarios disponibles  
+[2026-08-10 18:39:43] local.INFO: Resultado de la consulta de horarios {"count":0} 
+[2026-08-10 18:39:43] local.INFO: No hay horarios configurados para este día  
+[2026-08-10 18:42:56] local.INFO: -------- BEGIN getDoctorAvailableSlots --------  
+[2026-08-10 18:42:56] local.INFO: Parámetros recibidos {"doctor_id":"1","date":"2026-08-19","_token":"M0W3HybCZBJ6HY0pNJy2HUQXwXwN2KQQecNjsNod"} 
+[2026-08-10 18:42:56] local.INFO: Parámetros extraídos {"doctor_id":"1","date":"2026-08-19"} 
+[2026-08-10 18:42:56] local.INFO: Día de la semana calculado {"date":"2026-08-19","dayOfWeek":"3"} 
+[2026-08-10 18:42:56] local.INFO: Nombre de la columna para el día {"day":"wen"} 
+[2026-08-10 18:42:56] local.INFO: Verificando disponibilidad del doctor en ese día  
+[2026-08-10 18:42:56] local.INFO: Resultado de la consulta de disponibilidad {"isAvailable":true} 
+[2026-08-10 18:42:56] local.INFO: Formato de día para consulta {"dayOfWeekString":"3"} 
+[2026-08-10 18:42:56] local.INFO: Consultando horarios disponibles  
+[2026-08-10 18:42:56] local.INFO: Resultado de la consulta de horarios {"count":2} 
+[2026-08-10 18:42:56] local.INFO: Consultando citas ya reservadas  
+[2026-08-10 18:42:56] local.ERROR: Error al consultar citas reservadas: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'appointment_time' in 'field list' (SQL: select `appointment_time` from `appointments` where `appointment_with` in (1, 51) and `appointment_date` = 2026-08-19)  
+[2026-08-10 18:42:56] local.INFO: Generando slots disponibles  
+[2026-08-10 18:42:56] local.INFO: Procesando horario {"id":3,"from":"08:00:00","to":"12:00:00","startTime":1786363200,"endTime":1786377600} 
+[2026-08-10 18:42:56] local.INFO: Procesando horario {"id":5,"from":"13:00:00","to":"17:00:00","startTime":1786381200,"endTime":1786395600} 
+[2026-08-10 18:42:56] local.INFO: Total de slots generados: 16  
+[2026-08-10 18:42:56] local.INFO: -------- END getDoctorAvailableSlots (SUCCESS) --------  
+[2026-08-10 18:43:01] local.INFO: -------- BEGIN getDoctorAvailableSlots --------  
+[2026-08-10 18:43:01] local.INFO: Parámetros recibidos {"doctor_id":"1","date":"2026-08-24","_token":"M0W3HybCZBJ6HY0pNJy2HUQXwXwN2KQQecNjsNod"} 
+[2026-08-10 18:43:01] local.INFO: Parámetros extraídos {"doctor_id":"1","date":"2026-08-24"} 
+[2026-08-10 18:43:01] local.INFO: Día de la semana calculado {"date":"2026-08-24","dayOfWeek":"1"} 
+[2026-08-10 18:43:01] local.INFO: Nombre de la columna para el día {"day":"mon"} 
+[2026-08-10 18:43:01] local.INFO: Verificando disponibilidad del doctor en ese día  
+[2026-08-10 18:43:01] local.INFO: Resultado de la consulta de disponibilidad {"isAvailable":true} 
+[2026-08-10 18:43:01] local.INFO: Formato de día para consulta {"dayOfWeekString":"1"} 
+[2026-08-10 18:43:01] local.INFO: Consultando horarios disponibles  
+[2026-08-10 18:43:01] local.INFO: Resultado de la consulta de horarios {"count":2} 
+[2026-08-10 18:43:01] local.INFO: Consultando citas ya reservadas  
+[2026-08-10 18:43:01] local.ERROR: Error al consultar citas reservadas: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'appointment_time' in 'field list' (SQL: select `appointment_time` from `appointments` where `appointment_with` in (1, 51) and `appointment_date` = 2026-08-24)  
+[2026-08-10 18:43:01] local.INFO: Generando slots disponibles  
+[2026-08-10 18:43:01] local.INFO: Procesando horario {"id":2,"from":"08:00:00","to":"12:00:00","startTime":1786363200,"endTime":1786377600} 
+[2026-08-10 18:43:01] local.INFO: Procesando horario {"id":4,"from":"13:00:00","to":"17:00:00","startTime":1786381200,"endTime":1786395600} 
+[2026-08-10 18:43:01] local.INFO: Total de slots generados: 16  
+[2026-08-10 18:43:01] local.INFO: -------- END getDoctorAvailableSlots (SUCCESS) --------  
