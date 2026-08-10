@@ -5,6 +5,10 @@
  */
 $(document).ready(function() {
 
+    function getCsrfToken() {
+        return $("input[name='_token']").val() || $('#csrf_token_value').val() || $('meta[name="csrf-token"]').attr('content');
+    }
+
     $('.dt').on('change', function() {
         //alert();
         $("#btn_create").removeAttr('disabled');
@@ -72,61 +76,86 @@ $(document).ready(function() {
 
     });
 
-    $('.complete').on('click', function(e) {
+    $(document).on('click', '.complete', function(e) {
         var id = $(this).data('id');
-        var token = $("input[name='_token']").val();
+        var token = getCsrfToken();
         var status = 1;
-        console.log(id);
-        $(".complete").attr('disabled', true);
-        if (confirm('Are you sure you want to confirm appointment?')) {
+        var finalAmountInput = prompt('Ingrese el monto final de la cita:', '0');
+
+        if (finalAmountInput === null) {
+            return;
+        }
+
+        var finalAmount = parseFloat(String(finalAmountInput).replace(',', '.'));
+        if (isNaN(finalAmount) || finalAmount < 0) {
+            toastr.error('Debe ingresar un monto válido mayor o igual a 0.');
+            return;
+        }
+
+        $(this).attr('disabled', true);
+
+        if (confirm('¿Seguro que deseas completar la cita?')) {
 
             $.ajax({
                 type: "post",
-                url: "appointment-status/" + id,
+                url: "/appointment-status/" + id,
                 data: { 'appointment_id': id, '_token': token, 'status': status },
                 beforeSend: function() {
                     $('#preloader').show()
                 },
                 success: function(response) {
-                    console.log(response);
-                    toastr.success(response.Message);
-                    $(".complete").attr('disabled', false);
-                    location.reload();
+                    $.ajax({
+                        type: "post",
+                        url: "/appointment-final-price/" + id,
+                        data: {
+                            _token: token,
+                            final_consultation_price: finalAmount
+                        },
+                        success: function(priceResponse) {
+                            toastr.success('Cita completada y monto final guardado.');
+                            location.reload();
+                        },
+                        error: function(priceError) {
+                            toastr.warning('La cita se completó, pero no se pudo guardar el monto final.');
+                            location.reload();
+                        }
+                    });
                 },
                 error: function(response) {
-                    console.error(response);
-                    $(".complete").attr('disabled', false);
-                    toastr.error(response.responseJSON.Message);
+                    $('.complete[data-id="' + id + '"]').attr('disabled', false);
+                    toastr.error(response.responseJSON && response.responseJSON.Message ? response.responseJSON.Message : 'No se pudo completar la cita.');
                 },
                 complete: function() {
                     $('#preloader').hide();
                 }
             });
+        } else {
+            $('.complete[data-id="' + id + '"]').attr('disabled', false);
         }
     });
-    $('.cancel').on('click', function(e) {
+    $(document).on('click', '.cancel', function(e) {
         var id = $(this).data('id');
-        var token = $("input[name='_token']").val();
+        var token = getCsrfToken();
         var status = 2;
-        $(".cancel").attr('disabled', true);
+        $(this).attr('disabled', true);
         if (confirm('Are you sure you want to cancel appointment?')) {
 
             $.ajax({
                 type: "post",
-                url: "appointment-status/" + id,
+                url: "/appointment-status/" + id,
                 data: { 'appointment_id': id, '_token': token, 'status': status },
                 beforeSend: function() {
                     $('#pageloader').show();
                 },
                 success: function(response) {
                     toastr.success(response.Message);
-                    $(".cancel").attr('disabled', false);
+                    $('.cancel[data-id="' + id + '"]').attr('disabled', false);
                     setTimeout(() => {
                         location.reload();
                     }, 1500);
                 },
                 error: function(response) {
-                    $(".cancel").attr('disabled', false);
+                    $('.cancel[data-id="' + id + '"]').attr('disabled', false);
                     toastr.error(response.responseJSON.Message);
                 },
                 complete: function() {
@@ -134,7 +163,7 @@ $(document).ready(function() {
                 }
             });
         } else {
-            $(".cancel").attr('disabled', false);
+            $('.cancel[data-id="' + id + '"]').attr('disabled', false);
         }
     });
 

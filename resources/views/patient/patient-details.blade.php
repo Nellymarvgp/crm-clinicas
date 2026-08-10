@@ -203,8 +203,8 @@
                                     </div>
                                 </div>
                             </div>
-                            <blockquote class="d-none">{{ __('Información Médica') }}</blockquote>
-                            <div class="row d-none">
+                            <blockquote>{{ __('Información Médica') }}</blockquote>
+                            <div class="row">
                                 <div class="col-md-6">
                                     <div class="row">
                                         <div class="col-md-12 mb-3">
@@ -341,10 +341,12 @@
                                             @enderror
                                         </div>
                                     </div>
+                                </div>
+                                <div class="col-md-12">
                                     <blockquote>{{ __('Antecedentes Médicos') }}</blockquote>
                                     <p class="text-muted mb-2">{{ __('Todos los campos de antecedentes médicos son opcionales.') }}</p>
                                     <div class="row">
-                                        <div class="col-md-12 mb-3">
+                                        <div class="col-md-6 mb-3">
                                             <label class="form-label">{{ __('Diabetes') }} <span class="text-danger">*</span></label>
                                             <select class="form-control @error('diabetes_status') is-invalid @enderror" name="diabetes_status">
                                                 <option disabled selected>{{ __('-- Seleccione --') }}</option>
@@ -355,7 +357,7 @@
                                                 <span class="invalid-feedback" role="alert"><strong>{{ $message }}</strong></span>
                                             @enderror
                                         </div>
-                                        <div class="col-md-12 mb-3">
+                                        <div class="col-md-6 mb-3">
                                             <label class="form-label">{{ __('Diabetes controlado (si o no)') }}</label>
                                             <select class="form-control @error('diabetes_controlled') is-invalid @enderror" name="diabetes_controlled">
                                                 <option value="">{{ __('-- Seleccione --') }}</option>
@@ -366,7 +368,7 @@
                                                 <span class="invalid-feedback" role="alert"><strong>{{ $message }}</strong></span>
                                             @enderror
                                         </div>
-                                        <div class="col-md-12 mb-3">
+                                        <div class="col-md-6 mb-3">
                                             <label class="form-label">{{ __('Hipertensión') }} <span class="text-danger">*</span></label>
                                             <select class="form-control @error('hypertension_status') is-invalid @enderror" name="hypertension_status">
                                                 <option disabled selected>{{ __('-- Seleccione --') }}</option>
@@ -377,7 +379,7 @@
                                                 <span class="invalid-feedback" role="alert"><strong>{{ $message }}</strong></span>
                                             @enderror
                                         </div>
-                                        <div class="col-md-12 mb-3">
+                                        <div class="col-md-6 mb-3">
                                             <label class="form-label">{{ __('Hipertensión controlado (si o no)') }}</label>
                                             <select class="form-control @error('hypertension_controlled') is-invalid @enderror" name="hypertension_controlled">
                                                 <option value="">{{ __('-- Seleccione --') }}</option>
@@ -388,7 +390,7 @@
                                                 <span class="invalid-feedback" role="alert"><strong>{{ $message }}</strong></span>
                                             @enderror
                                         </div>
-                                        <div class="col-md-12 mb-3">
+                                        <div class="col-md-6 mb-3">
                                             <label class="form-label">{{ __('Actualmente embarazada') }} <span class="text-danger">*</span></label>
                                             <select class="form-control @error('currently_pregnant') is-invalid @enderror" name="currently_pregnant">
                                                 <option disabled selected>{{ __('-- Seleccione --') }}</option>
@@ -399,7 +401,7 @@
                                                 <span class="invalid-feedback" role="alert"><strong>{{ $message }}</strong></span>
                                             @enderror
                                         </div>
-                                        <div class="col-md-12 mb-3">
+                                        <div class="col-md-6 mb-3">
                                             <label class="form-label">{{ __('Infarto') }} <span class="text-danger">*</span></label>
                                             <select class="form-control @error('heart_attack_history') is-invalid @enderror" name="heart_attack_history">
                                                 <option disabled selected>{{ __('-- Seleccione --') }}</option>
@@ -410,7 +412,7 @@
                                                 <span class="invalid-feedback" role="alert"><strong>{{ $message }}</strong></span>
                                             @enderror
                                         </div>
-                                        <div class="col-md-12 mb-3">
+                                        <div class="col-md-6 mb-3">
                                             <label class="form-label">{{ __('¿Cuándo fue el último infarto?') }}</label>
                                             <input type="text" class="form-control @error('last_heart_attack') is-invalid @enderror"
                                                 name="last_heart_attack" value="@if ($medical_info){{ old('last_heart_attack', $medical_info->last_heart_attack) }}@else{{ old('last_heart_attack') }}@endif"
@@ -419,7 +421,7 @@
                                                 <span class="invalid-feedback" role="alert"><strong>{{ $message }}</strong></span>
                                             @enderror
                                         </div>
-                                        <div class="col-md-12 mb-3">
+                                        <div class="col-md-6 mb-3">
                                             <label class="form-label">{{ __('Actualmente consume medicamentos') }} <span class="text-danger">*</span></label>
                                             <select class="form-control @error('takes_medications') is-invalid @enderror" name="takes_medications">
                                                 <option disabled selected>{{ __('-- Seleccione --') }}</option>
@@ -430,7 +432,7 @@
                                                 <span class="invalid-feedback" role="alert"><strong>{{ $message }}</strong></span>
                                             @enderror
                                         </div>
-                                        <div class="col-md-12 mb-3">
+                                        <div class="col-md-6 mb-3">
                                             <label class="form-label">{{ __('¿Cuál medicamentos?') }}</label>
                                             <input type="text" class="form-control @error('medications_list') is-invalid @enderror"
                                                 name="medications_list" value="@if ($medical_info){{ old('medications_list', $medical_info->medications_list) }}@else{{ old('medications_list') }}@endif"
@@ -439,7 +441,7 @@
                                                 <span class="invalid-feedback" role="alert"><strong>{{ $message }}</strong></span>
                                             @enderror
                                         </div>
-                                        <div class="col-md-12 mb-3">
+                                        <div class="col-md-6 mb-3">
                                             <label class="form-label">{{ __('Ha consumido aspirina las últimas 72 horas') }} <span class="text-danger">*</span></label>
                                             <select class="form-control @error('aspirin_last_72h') is-invalid @enderror" name="aspirin_last_72h">
                                                 <option disabled selected>{{ __('-- Seleccione --') }}</option>
@@ -450,7 +452,7 @@
                                                 <span class="invalid-feedback" role="alert"><strong>{{ $message }}</strong></span>
                                             @enderror
                                         </div>
-                                        <div class="col-md-12 mb-3">
+                                        <div class="col-md-6 mb-3">
                                             <label class="form-label">{{ __('Padece alguna enfermedad') }} <span class="text-danger">*</span></label>
                                             <select class="form-control @error('has_disease') is-invalid @enderror" name="has_disease">
                                                 <option disabled selected>{{ __('-- Seleccione --') }}</option>
@@ -461,7 +463,7 @@
                                                 <span class="invalid-feedback" role="alert"><strong>{{ $message }}</strong></span>
                                             @enderror
                                         </div>
-                                        <div class="col-md-12 mb-3">
+                                        <div class="col-md-6 mb-3">
                                             <label class="form-label">{{ __('¿Cuál enfermedad?') }}</label>
                                             <input type="text" class="form-control @error('disease_details') is-invalid @enderror"
                                                 name="disease_details" value="@if ($medical_info){{ old('disease_details', $medical_info->disease_details) }}@else{{ old('disease_details') }}@endif"
@@ -493,6 +495,28 @@
     @endsection
     @section('script')
         <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                var fieldsToHide = ['height', 'b_group', 'pulse', 'allergy', 'weight', 'b_pressure', 'respiration', 'diet'];
+
+                fieldsToHide.forEach(function(fieldName) {
+                    var field = document.querySelector('[name="' + fieldName + '"]');
+                    if (field) {
+                        field.disabled = true;
+                        var wrapper = field.closest('.mb-3');
+                        if (wrapper) {
+                            wrapper.style.display = 'none';
+                        }
+                    }
+                });
+
+                var blockquotes = document.querySelectorAll('blockquote');
+                blockquotes.forEach(function(bq) {
+                    if (bq.textContent.trim() === 'Información Médica') {
+                        bq.style.display = 'none';
+                    }
+                });
+            });
+
             // Profile Photo
             function triggerClick() {
                 document.querySelector('#profile_photo').click();

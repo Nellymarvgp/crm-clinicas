@@ -191,8 +191,8 @@
                                         </div>
                                     </div>
 
-                                    <blockquote class="d-none">{{ __('Información Médica') }}</blockquote>
-                                    <div class="row d-none">
+                                    <blockquote>{{ __('Información Médica') }}</blockquote>
+                                    <div class="row">
                                         <div class="col-md-6">
                                             <div class="mb-3">
                                                 <label class="form-label">{{ __('Altura (cm)') }}<span class="text-danger">*</span></label>
@@ -477,6 +477,28 @@
 
 @section('script')
     <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var fieldsToHide = ['height', 'b_group', 'pulse', 'allergy', 'weight', 'b_pressure', 'respiration', 'diet'];
+
+            fieldsToHide.forEach(function(fieldName) {
+                var field = document.querySelector('[name="' + fieldName + '"]');
+                if (field) {
+                    field.disabled = true;
+                    var wrapper = field.closest('.mb-3');
+                    if (wrapper) {
+                        wrapper.style.display = 'none';
+                    }
+                }
+            });
+
+            var blockquotes = document.querySelectorAll('blockquote');
+            blockquotes.forEach(function(bq) {
+                if (bq.textContent.trim() === 'Información Médica') {
+                    bq.style.display = 'none';
+                }
+            });
+        });
+
         // Profile Photo Preview
         function triggerClick() {
             document.querySelector('#profile_photo').click();

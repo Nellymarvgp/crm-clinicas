@@ -191,8 +191,23 @@ class UserController extends Controller
                 $doctor_info = Doctor::where('user_id', '=', $doctor->id)->first();
                 if ($doctor_info) {
                     $availableDay = DoctorAvailableDay::where('doctor_id', $doctor->id)->first();
+                    if (!$availableDay) {
+                        $availableDay = new DoctorAvailableDay();
+                        $availableDay->doctor_id = $doctor->id;
+                        $availableDay->sun = 0;
+                        $availableDay->mon = 0;
+                        $availableDay->tue = 0;
+                        $availableDay->wen = 0;
+                        $availableDay->thu = 0;
+                        $availableDay->fri = 0;
+                        $availableDay->sat = 0;
+                    }
                     $availableTime = DoctorAvailableTime::where('doctor_id', $doctor->id)->get();
-                    return view('doctor.doctor-profile-edit', compact('user', 'role', 'doctor', 'doctor_info', 'availableDay', 'availableTime', 'departments'));
+                    $selectedDepartmentIds = $doctor_info->departments()->pluck('departments.id')->toArray();
+                    if (empty($selectedDepartmentIds) && $doctor_info->department_id) {
+                        $selectedDepartmentIds = [(int) $doctor_info->department_id];
+                    }
+                    return view('doctor.doctor-profile-edit', compact('user', 'role', 'doctor', 'doctor_info', 'availableDay', 'availableTime', 'departments', 'selectedDepartmentIds'));
                 } else {
                     return redirect('/dashboard')->with('error', 'Doctor details not found');
                 }
@@ -236,7 +251,7 @@ class UserController extends Controller
                 $validatedData = $request->validate([
                     'first_name' => 'required|alpha',
                     'last_name' => 'required|alpha',
-                    'mobile' => 'required|numeric|digits:10',
+                    'mobile' => 'required|regex:/^04[0-9]{9}$/',
                     'email' => 'required|email|regex:/(.+)@(.+)\.(.+)/i|max:50',
                     'profile_photo' => 'image|mimes:jpg,png,jpeg,gif,svg|max:500',
                 ]);
@@ -267,14 +282,20 @@ class UserController extends Controller
             } elseif ($role == 'doctor') {
                 $doctor = Sentinel::getUser();
                 $user = Sentinel::getUser();
+                $request->merge([
+                    'fees' => is_string($request->fees) ? str_replace(',', '.', $request->fees) : $request->fees,
+                    'doctor_payment_percentage' => is_string($request->doctor_payment_percentage) ? str_replace(',', '.', $request->doctor_payment_percentage) : $request->doctor_payment_percentage,
+                ]);
                 $validatedData = $request->validate([
                     'first_name' => 'required|alpha',
                     'last_name' => 'required|alpha',
-                    'mobile' => 'required|numeric|digits:10',
+                    'mobile' => 'required|regex:/^04[0-9]{9}$/',
                     'email' => 'required|email|regex:/(.+)@(.+)\.(.+)/i|max:50',
                     'title' => 'required|regex:/^[a-zA-Z ]+$/',
-                    'department' => "required|numeric",
-                    'fees' => 'required|numeric',
+                    'departments' => 'required|array|min:1',
+                    'departments.*' => 'required|numeric|exists:departments,id',
+                    'fees' => 'nullable|numeric',
+                    'doctor_payment_percentage' => 'required|numeric|min:0|max:100',
                     'degree' => 'required',
                     'experience' => 'required|numeric',
                     'profile_photo' => 'image|mimes:jpg,png,jpeg,gif,svg|max:500',
@@ -306,37 +327,36 @@ class UserController extends Controller
                     $doctor->email = $validatedData['email'];
                     $doctor->updated_by = $user->id;
                     $doctor->save();
-                    Doctor::where('user_id', $doctor->id)
-                        ->update([
+                    $primaryDepartmentId = (int) $validatedData['departments'][0];
+                    $doctorDetail = Doctor::updateOrCreate(
+                        ['user_id' => $doctor->id],
+                        [
                             'title' => $validatedData['title'],
                             'degree' => $validatedData['degree'],
-                            'department_id' => $validatedData['department'],
+                            'department_id' => $primaryDepartmentId,
                             'experience' => $validatedData['experience'],
-                            'fees' => $validatedData['fees'],
-                        ]);
-                    $availableDay = DoctorAvailableDay::where('doctor_id', $doctor->id)->first();
+                            'fees' => $validatedData['fees'] ?? 0,
+                            'doctor_payment_percentage' => $validatedData['doctor_payment_percentage'],
+                        ]
+                    );
+                    $doctorDetail->departments()->sync($validatedData['departments']);
+                    $availableDay = DoctorAvailableDay::firstOrNew(['doctor_id' => $doctor->id]);
                     $availableDay->doctor_id = $doctor->id;
-                    if ($availableDay->mon = $request->mon !== Null) {
-                        $availableDay->mon = $request->mon;
-                    }
-                    if ($availableDay->tue = $request->tue !== Null) {
-                        $availableDay->tue = $request->tue;
-                    }
-                    if ($availableDay->wen = $request->wen !== Null) {
-                        $availableDay->wen = $request->wen;
-                    }
-                    if ($availableDay->thu = $request->thu !== Null) {
-                        $availableDay->thu = $request->thu;
-                    }
-                    if ($availableDay->fri = $request->fri !== Null) {
-                        $availableDay->fri = $request->fri;
-                    }
-                    if ($availableDay->sat = $request->sat !== Null) {
-                        $availableDay->sat = $request->sat;
-                    }
-                    if ($availableDay->sun = $request->sun !== Null) {
-                        $availableDay->sun = $request->sun;
-                    }
+                    $availableDay->mon = 0;
+                    $availableDay->tue = 0;
+                    $availableDay->wen = 0;
+                    $availableDay->thu = 0;
+                    $availableDay->fri = 0;
+                    $availableDay->sat = 0;
+                    $availableDay->sun = 0;
+
+                    if ($request->has('mon')) $availableDay->mon = 1;
+                    if ($request->has('tue')) $availableDay->tue = 1;
+                    if ($request->has('wen')) $availableDay->wen = 1;
+                    if ($request->has('thu')) $availableDay->thu = 1;
+                    if ($request->has('fri')) $availableDay->fri = 1;
+                    if ($request->has('sat')) $availableDay->sat = 1;
+                    if ($request->has('sun')) $availableDay->sun = 1;
                     $availableDay->save();
                     if ($role == 'doctor') {
                         return redirect('/dashboard')->with('success', 'Profile updated successfully!');
@@ -351,7 +371,7 @@ class UserController extends Controller
                 $validatedData = $request->validate([
                     'first_name' => 'required|alpha',
                     'last_name' => 'required|alpha',
-                    'mobile' => 'required|numeric|digits:10',
+                    'mobile' => 'required|regex:/^04[0-9]{9}$/',
                     'email' => 'required|email|regex:/(.+)@(.+)\.(.+)/i|max:50',
                     'doctor' => 'required',
                     'profile_photo' => 'image|mimes:jpg,png,jpeg,gif,svg|max:500'
@@ -423,7 +443,7 @@ class UserController extends Controller
                 $data = $request->validate([
                     'first_name' => 'required|alpha',
                     'last_name' => 'required|alpha',
-                    'mobile' => 'required|numeric|digits:10',
+                    'mobile' => 'required|regex:/^04[0-9]{9}$/',
                     'email' => 'required|email|regex:/(.+)@(.+)\.(.+)/i|max:50',
                     'profile_photo' => 'image|mimes:jpg,png,jpeg,gif,svg|max:500'
                 ]);
@@ -461,7 +481,7 @@ class UserController extends Controller
                 $validatedData = $request->validate([
                     'first_name' => 'required|alpha',
                     'last_name' => 'required|alpha',
-                    'mobile' => 'required|numeric|digits:10',
+                    'mobile' => 'required|regex:/^04[0-9]{9}$/',
                     'email' => 'required|email|regex:/(.+)@(.+)\.(.+)/i|max:50',
                     'age' => 'required|numeric',
                     'address' => 'required',
@@ -729,3 +749,4 @@ class UserController extends Controller
         }
     }
 }
+

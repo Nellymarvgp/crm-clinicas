@@ -60,6 +60,8 @@
                                                 <th>{{ __('Correo del Paciente') }}</th>
                                                 <th>{{ __('Fecha') }}</th>
                                                 <th>{{ __('Hora') }}</th>
+                                                <th>{{ __('Estado') }}</th>
+                                                <th>{{ __('Acción') }}</th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -78,17 +80,34 @@
                                             @foreach ($Cancel_appointment as $item)
                                                 <tr>
                                                     <td>{{ $loop->index + 1 + $per_page * ($currentpage - 1) }}</td>
-                                                    <td>{{ @$item->doctor->user->first_name . ' ' . @$item->doctor->user->last_name }}</td>
-                                                    <td>{{ $item->patient->first_name . ' ' . $item->patient->last_name }}
+                                                    <td>{{ trim((optional(optional($item->doctor)->user)->first_name ?? '') . ' ' . (optional(optional($item->doctor)->user)->last_name ?? '')) ?: 'Sin doctor asignado' }}</td>
+                                                    <td>{{ trim((optional($item->patient)->first_name ?? '') . ' ' . (optional($item->patient)->last_name ?? '')) ?: 'Sin paciente asignado' }}
                                                     </td>
-                                                    <td>{{ $item->patient->mobile }}</td>
-                                                    <td>{{ $item->patient->email }}</td>
+                                                    <td>{{ optional($item->patient)->mobile ?? '-' }}</td>
+                                                    <td>{{ optional($item->patient)->email ?? '-' }}</td>
                                                     <td>{{ $item->appointment_date }}</td>
                                                     <td>{{ optional($item->timeSlot)->from ? optional($item->timeSlot)->from . ' a ' . optional($item->timeSlot)->to : 'Sin horario' }}</td>
+                                                    <td>
+                                                        @if ($item->status == 1)
+                                                            <span class="badge badge-pill text-white" style="background-color:#198754;">Completado</span>
+                                                        @elseif($item->status == 2)
+                                                            <span class="badge badge-pill text-white" style="background-color:#dc3545;">Cancelado</span>
+                                                        @else
+                                                            <span class="badge badge-pill text-white" style="background-color:#0dcaf0;">Pendiente</span>
+                                                        @endif
+                                                    </td>
+                                                    <td>
+                                                        <a href="{{ url('appointment-view/' . $item->id) }}" class="btn btn-primary mb-2 mb-md-0">Ver</a>
+                                                        @if (($role == 'doctor' || $role == 'receptionist' || $role == 'admin') && (int) $item->status !== 1)
+                                                            <button type="button" class="btn btn-success complete mb-2 mb-md-0" data-id="{{ $item->id }}">Completar</button>
+                                                            <button type="button" class="btn btn-danger cancel mb-2 mb-md-0" data-id="{{ $item->id }}">Cancelar</button>
+                                                        @endif
+                                                    </td>
                                                 </tr>
                                             @endforeach
                                         </tbody>
                                     </table>
+                                    <input type="hidden" id="csrf_token_value" value="{{ csrf_token() }}">
                                 </div>
                                 <div class="col-md-12 text-center mt-3">
                                     <div class="d-flex justify-content-start">

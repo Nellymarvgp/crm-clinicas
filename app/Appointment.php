@@ -15,6 +15,7 @@ class Appointment extends Model
         'appointment_time',
         'booked_by',
         'status',
+        'final_consultation_price',
         'is_deleted',
     ];
 

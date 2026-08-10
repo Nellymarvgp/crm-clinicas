@@ -73,7 +73,8 @@
                             <span><?php echo e(__('translation.appointments')); ?></span>
                         </a>
                         <ul class="sub-menu" aria-expanded="true">
-                            <li><a href="<?php echo e(url('appointment-create')); ?>"><?php echo e(__('Agendar Cita')); ?></a></li>
+                            <li><a href="<?php echo e(route('appointment.create')); ?>"><?php echo e(__('Calendario de Citas')); ?></a></li>
+                            <li><a href="<?php echo e(url('appointment-create')); ?>"><?php echo e(__('Nueva Cita')); ?></a></li>
                             <li><a href="<?php echo e(url('pending-appointment')); ?>"><?php echo e(__('translation.pending-appointment')); ?></a></li>
                             <li><a href="<?php echo e(url('today-appointment')); ?>"><?php echo e(__('translation.today-appointments')); ?></a></li>
                             <li><a href="<?php echo e(url('upcoming-appointment')); ?>"><?php echo e(__('translation.upcoming-appointments')); ?></a></li>
@@ -86,6 +87,12 @@
                         <a href="<?php echo e(url('transaction')); ?>" class="waves-effect">
                             <i class='bx bx-bookmark-minus'></i>
                             <span><?php echo e(__('translation.transaction')); ?></span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="<?php echo e(url('doctor-monthly-payout-report')); ?>" class="waves-effect">
+                            <i class='bx bx-line-chart'></i>
+                            <span><?php echo e(__('Pago mensual doctores')); ?></span>
                         </a>
                     </li>
 
@@ -256,6 +263,12 @@
                             <li><a href="<?php echo e(route('invoice.create')); ?>"><?php echo e(__('translation.create-invoice')); ?></a>
                             </li>
                         </ul>
+                    </li>
+                    <li>
+                        <a href="<?php echo e(url('doctor-monthly-payout-report')); ?>" class="waves-effect">
+                            <i class='bx bx-line-chart'></i>
+                            <span><?php echo e(__('Pago mensual doctores')); ?></span>
+                        </a>
                     </li>
                 <?php endif; ?>
             </ul>

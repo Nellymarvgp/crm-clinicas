@@ -177,8 +177,9 @@ class DoctorController extends Controller
             $role = $user->roles[0]->slug;
             $doctor = null;
             $doctor_info = null;
+            $selectedDepartmentIds = [];
             $departments = Departments::get();
-            return view('doctor.doctor-details', compact('user', 'role', 'doctor', 'doctor_info', 'departments'));
+            return view('doctor.doctor-details', compact('user', 'role', 'doctor', 'doctor_info', 'departments', 'selectedDepartmentIds'));
         } else {
             return view('error.403');
         }
@@ -194,16 +195,22 @@ class DoctorController extends Controller
     {
         $user = Sentinel::getUser();
         if ($user->hasAccess('doctor.create')) {
+            $request->merge([
+                'fees' => is_string($request->fees) ? str_replace(',', '.', $request->fees) : $request->fees,
+                'doctor_payment_percentage' => is_string($request->doctor_payment_percentage) ? str_replace(',', '.', $request->doctor_payment_percentage) : $request->doctor_payment_percentage,
+            ]);
             $slot_time = $request->slot_time;
             $validatedData = $request->validate(
                 [
                     'first_name' => 'required|alpha',
                     'last_name' => 'required|alpha',
-                    'mobile' => 'required|numeric|digits:10',
+                    'mobile' => 'required|regex:/^04[0-9]{9}$/',
                     'email' => 'required|email|unique:users|regex:/(.+)@(.+)\.(.+)/i|max:50',
                     'title' => 'required|regex:/^[a-zA-Z ]+$/',
-                    'department' => "required|numeric",
-                    'fees' => 'required|numeric',
+                    'departments' => 'required|array|min:1',
+                    'departments.*' => 'required|numeric|exists:departments,id',
+                    'fees' => 'nullable|numeric',
+                    'doctor_payment_percentage' => 'required|numeric|min:0|max:100',
                     'degree' => 'required',
                     'experience' => 'required|numeric',
                     'slot_time' => 'required',
@@ -262,15 +269,18 @@ class DoctorController extends Controller
                 //Attach the user to the role
                 $role = Sentinel::findRoleBySlug('doctor');
                 $role->users()->attach($doctor);
+                $primaryDepartmentId = (int) $validatedData['departments'][0];
                 $doctor_details = new Doctor();
                 $doctor_details->user_id = $doctor->id;
-                $doctor_details->department_id = $request->department;
+                $doctor_details->department_id = $primaryDepartmentId;
                 $doctor_details->title = $request->title;
                 $doctor_details->degree = $request->degree;
                 $doctor_details->experience = $request->experience;
-                $doctor_details->fees = $request->fees;
+                $doctor_details->fees = $validatedData['fees'] ?? 0;
+                $doctor_details->doctor_payment_percentage = $validatedData['doctor_payment_percentage'];
                 $doctor_details->slot_time = $request->slot_time;
                 $doctor_details->save();
+                $doctor_details->departments()->sync($validatedData['departments']);
                 // Doctor Available day record add
                 $availableDay = new DoctorAvailableDay();
                 $availableDay->doctor_id = $doctor->id;
@@ -293,36 +303,67 @@ class DoctorController extends Controller
                 if ($request->has('sat')) $availableDay->sat = 1;
                 if ($request->has('sun')) $availableDay->sun = 1;
                 $availableDay->save();
+
+                $activeDays = [];
+                if ($request->has('sun')) {
+                    $activeDays[] = '0';
+                }
+                if ($request->has('mon')) {
+                    $activeDays[] = '1';
+                }
+                if ($request->has('tue')) {
+                    $activeDays[] = '2';
+                }
+                if ($request->has('wen')) {
+                    $activeDays[] = '3';
+                }
+                if ($request->has('thu')) {
+                    $activeDays[] = '4';
+                }
+                if ($request->has('fri')) {
+                    $activeDays[] = '5';
+                }
+                if ($request->has('sat')) {
+                    $activeDays[] = '6';
+                }
+                if (empty($activeDays)) {
+                    $activeDays = ['1'];
+                }
+
                 // Save TimeSlots only if they were provided and valid
                 if ($request->has('TimeSlot') && is_array($request->TimeSlot)) {
                     foreach ($request->TimeSlot as $key => $item) {
                         // Save only if both 'from' and 'to' are filled for this specific slot
                         if (!empty($item['from']) && !empty($item['to'])) {
-                            $availableTime = new DoctorAvailableTime();
-                            $availableTime->doctor_id = $doctor->id;
-                            $availableTime->from = $item['from'];
-                            $availableTime->to = $item['to'];
-                            $availableTime->save();
-                            $start_datetime = Carbon::parse($item['from'])->format('H:i:s');
-                            $end_datetime = Carbon::parse($item['to'])->format('H:i:s');
-                            $start_datetime_carbon = Carbon::parse($item['from']);
-                            $end_datetime_carbon = Carbon::parse($item['to']);
-                            $totalDuration = $end_datetime_carbon->diffInMinutes($start_datetime_carbon);
-                            $totalSlots = $totalDuration / $slot_time;
-                            for ($a = 0; $a <= $totalSlots; $a++) {
-                                $slot_time_start_min = $a * $slot_time;
-                                $slot_time_end_min = $slot_time_start_min + $slot_time;
-                                $slot_time_start = Carbon::parse($start_datetime)->addMinute($slot_time_start_min)->format('H:i:s');
-                                $slot_time_end = Carbon::parse($start_datetime)->addMinute($slot_time_end_min)->format('H:i:s');
-                                if ($slot_time_end <= $end_datetime) {
-                                    // add time slot here
-                                    $time = $slot_time_start . '<=' . $slot_time_end . '<br>';
-                                    $availableSlot = new DoctorAvailableSlot();
-                                    $availableSlot->doctor_id = $doctor->id;
-                                    $availableSlot->doctor_available_time_id = $availableTime->id;
-                                    $availableSlot->from = $slot_time_start;
-                                    $availableSlot->to = $slot_time_end;
-                                    $availableSlot->save();
+                            foreach ($activeDays as $dayOfWeek) {
+                                $availableTime = new DoctorAvailableTime();
+                                $availableTime->doctor_id = $doctor->id;
+                                $availableTime->day_of_week = (string) $dayOfWeek;
+                                $availableTime->from = $item['from'];
+                                $availableTime->to = $item['to'];
+                                $availableTime->save();
+
+                                $start_datetime = Carbon::parse($item['from'])->format('H:i:s');
+                                $end_datetime = Carbon::parse($item['to'])->format('H:i:s');
+                                $start_datetime_carbon = Carbon::parse($item['from']);
+                                $end_datetime_carbon = Carbon::parse($item['to']);
+                                $totalDuration = $end_datetime_carbon->diffInMinutes($start_datetime_carbon);
+                                $totalSlots = $totalDuration / $slot_time;
+                                for ($a = 0; $a <= $totalSlots; $a++) {
+                                    $slot_time_start_min = $a * $slot_time;
+                                    $slot_time_end_min = $slot_time_start_min + $slot_time;
+                                    $slot_time_start = Carbon::parse($start_datetime)->addMinute($slot_time_start_min)->format('H:i:s');
+                                    $slot_time_end = Carbon::parse($start_datetime)->addMinute($slot_time_end_min)->format('H:i:s');
+                                    if ($slot_time_end <= $end_datetime) {
+                                        // add time slot here
+                                        $time = $slot_time_start . '<=' . $slot_time_end . '<br>';
+                                        $availableSlot = new DoctorAvailableSlot();
+                                        $availableSlot->doctor_id = $doctor->id;
+                                        $availableSlot->doctor_available_time_id = $availableTime->id;
+                                        $availableSlot->from = $slot_time_start;
+                                        $availableSlot->to = $slot_time_end;
+                                        $availableSlot->save();
+                                    }
                                 }
                             }
                         }
@@ -409,9 +450,24 @@ class DoctorController extends Controller
                 $doctor_info = Doctor::where('user_id', '=', $doctor->id)->first();
                 if ($doctor_info) {
                     $availableDay = DoctorAvailableDay::where('doctor_id', $doctor->id)->first();
+                    if (!$availableDay) {
+                        $availableDay = new DoctorAvailableDay();
+                        $availableDay->doctor_id = $doctor->id;
+                        $availableDay->sun = 0;
+                        $availableDay->mon = 0;
+                        $availableDay->tue = 0;
+                        $availableDay->wen = 0;
+                        $availableDay->thu = 0;
+                        $availableDay->fri = 0;
+                        $availableDay->sat = 0;
+                    }
                     $availableTime = DoctorAvailableTime::where('doctor_id', $doctor->id)->get();
                     $departments = Departments::get();
-                    return view('doctor.doctor-edit', compact('user', 'role', 'doctor', 'doctor_info', 'availableDay', 'availableTime', 'departments'));
+                    $selectedDepartmentIds = $doctor_info->departments()->pluck('departments.id')->toArray();
+                    if (empty($selectedDepartmentIds) && $doctor_info->department_id) {
+                        $selectedDepartmentIds = [(int) $doctor_info->department_id];
+                    }
+                    return view('doctor.doctor-edit', compact('user', 'role', 'doctor', 'doctor_info', 'availableDay', 'availableTime', 'departments', 'selectedDepartmentIds'));
                 } else {
                     return redirect('/dashboard')->with('error', 'Doctor details not found');
                 }
@@ -433,15 +489,21 @@ class DoctorController extends Controller
     {
         $user = Sentinel::getUser();
         if ($user->hasAccess('doctor.update')) {
+            $request->merge([
+                'fees' => is_string($request->fees) ? str_replace(',', '.', $request->fees) : $request->fees,
+                'doctor_payment_percentage' => is_string($request->doctor_payment_percentage) ? str_replace(',', '.', $request->doctor_payment_percentage) : $request->doctor_payment_percentage,
+            ]);
             $role = $user->roles[0]->slug;
             $validatedData = $request->validate([
                 'first_name' => 'required|alpha',
                 'last_name' => 'required|alpha',
-                'mobile' => 'required|numeric|digits:10',
+                'mobile' => 'required|regex:/^04[0-9]{9}$/',
                 'email' => 'required|email|regex:/(.+)@(.+)\.(.+)/i|max:50',
                 'title' => 'required|regex:/^[a-zA-Z ]+$/',
-                'department' => "required|numeric",
-                'fees' => 'required|numeric',
+                'departments' => 'required|array|min:1',
+                'departments.*' => 'required|numeric|exists:departments,id',
+                'fees' => 'nullable|numeric',
+                'doctor_payment_percentage' => 'required|numeric|min:0|max:100',
                 'degree' => 'required',
                 'experience' => 'required|numeric',
                 'mon' => 'required_without_all:tue,wen,thu,fri,sat,sun',
@@ -474,15 +536,20 @@ class DoctorController extends Controller
                 $doctor->email = $validatedData['email'];
                 $doctor->updated_by = $user->id;
                 $doctor->save();
-                Doctor::where('user_id', $doctor->id)
-                    ->update([
+                $primaryDepartmentId = (int) $validatedData['departments'][0];
+                $doctorDetail = Doctor::updateOrCreate(
+                    ['user_id' => $doctor->id],
+                    [
                         'title' => $validatedData['title'],
-                        'department_id' => $validatedData['department'],
+                        'department_id' => $primaryDepartmentId,
                         'degree' => $validatedData['degree'],
                         'experience' => $validatedData['experience'],
-                        'fees' => $validatedData['fees'],
-                    ]);
-                $availableDay = DoctorAvailableDay::where('doctor_id', $doctor->id)->first();
+                        'fees' => $validatedData['fees'] ?? 0,
+                        'doctor_payment_percentage' => $validatedData['doctor_payment_percentage'],
+                    ]
+                );
+                $doctorDetail->departments()->sync($validatedData['departments']);
+                $availableDay = DoctorAvailableDay::firstOrNew(['doctor_id' => $doctor->id]);
                 $availableDay->doctor_id = $doctor->id;
                 
                 // Initialize all days to 0 by default
@@ -590,37 +657,74 @@ class DoctorController extends Controller
             $doctor = Doctor::where('user_id', $id)->first();
             $doctor->slot_time = $slot_time;
             $doctor->save();
+
+            $availableDay = DoctorAvailableDay::where('doctor_id', $id)->first();
+            $activeDays = [];
+            if ($availableDay) {
+                if ((int) $availableDay->sun === 1) {
+                    $activeDays[] = '0';
+                }
+                if ((int) $availableDay->mon === 1) {
+                    $activeDays[] = '1';
+                }
+                if ((int) $availableDay->tue === 1) {
+                    $activeDays[] = '2';
+                }
+                if ((int) $availableDay->wen === 1) {
+                    $activeDays[] = '3';
+                }
+                if ((int) $availableDay->thu === 1) {
+                    $activeDays[] = '4';
+                }
+                if ((int) $availableDay->fri === 1) {
+                    $activeDays[] = '5';
+                }
+                if ((int) $availableDay->sat === 1) {
+                    $activeDays[] = '6';
+                }
+            }
+            if (empty($activeDays)) {
+                // Fallback to Monday if availability days are not configured.
+                $activeDays = ['1'];
+            }
+
             $availableTime = DoctorAvailableTime::where('doctor_id', $id)->update(['is_deleted' => 1]);
             $availableSlot = DoctorAvailableSlot::where('doctor_id', $id)->update(['is_deleted' => 1]);
             $validatedData = $request->validate([
                 'slot_time' => 'required',
             ]);
             foreach ($request->TimeSlot as $key => $item) {
-                $availableTime = new DoctorAvailableTime();
-                $availableTime->doctor_id = $id;
-                $availableTime->from = $item['from'];
-                $availableTime->to = $item['to'];
-                $availableTime->save();
-                $start_datetime = Carbon::parse($item['from'])->format('H:i:s');
-                $end_datetime = Carbon::parse($item['to'])->format('H:i:s');
-                $start_datetime_carbon = Carbon::parse($item['from']);
-                $end_datetime_carbon = Carbon::parse($item['to']);
-                $totalDuration = $end_datetime_carbon->diffInMinutes($start_datetime_carbon);
-                $totalSlots = $totalDuration / $slot_time;
-                for ($a = 0; $a <= $totalSlots; $a++) {
-                    $slot_time_start_min = $a * $slot_time;
-                    $slot_time_end_min = $slot_time_start_min + $slot_time;
-                    $slot_time_start = Carbon::parse($start_datetime)->addMinute($slot_time_start_min)->format('H:i:s');
-                    $slot_time_end = Carbon::parse($start_datetime)->addMinute($slot_time_end_min)->format('H:i:s');
-                    if ($slot_time_end <= $end_datetime) {
-                        // add time slot here
-                        $time = $slot_time_start . '<=' . $slot_time_end . '<br>';
-                        $availableSlot = new DoctorAvailableSlot();
-                        $availableSlot->doctor_id = $id;
-                        $availableSlot->doctor_available_time_id = $availableTime->id;
-                        $availableSlot->from = $slot_time_start;
-                        $availableSlot->to = $slot_time_end;
-                        $availableSlot->save();
+                if (!empty($item['from']) && !empty($item['to'])) {
+                    foreach ($activeDays as $dayOfWeek) {
+                        $availableTime = new DoctorAvailableTime();
+                        $availableTime->doctor_id = $id;
+                        $availableTime->day_of_week = (string) $dayOfWeek;
+                        $availableTime->from = $item['from'];
+                        $availableTime->to = $item['to'];
+                        $availableTime->save();
+
+                        $start_datetime = Carbon::parse($item['from'])->format('H:i:s');
+                        $end_datetime = Carbon::parse($item['to'])->format('H:i:s');
+                        $start_datetime_carbon = Carbon::parse($item['from']);
+                        $end_datetime_carbon = Carbon::parse($item['to']);
+                        $totalDuration = $end_datetime_carbon->diffInMinutes($start_datetime_carbon);
+                        $totalSlots = $totalDuration / $slot_time;
+                        for ($a = 0; $a <= $totalSlots; $a++) {
+                            $slot_time_start_min = $a * $slot_time;
+                            $slot_time_end_min = $slot_time_start_min + $slot_time;
+                            $slot_time_start = Carbon::parse($start_datetime)->addMinute($slot_time_start_min)->format('H:i:s');
+                            $slot_time_end = Carbon::parse($start_datetime)->addMinute($slot_time_end_min)->format('H:i:s');
+                            if ($slot_time_end <= $end_datetime) {
+                                // add time slot here
+                                $time = $slot_time_start . '<=' . $slot_time_end . '<br>';
+                                $availableSlot = new DoctorAvailableSlot();
+                                $availableSlot->doctor_id = $id;
+                                $availableSlot->doctor_available_time_id = $availableTime->id;
+                                $availableSlot->from = $slot_time_start;
+                                $availableSlot->to = $slot_time_end;
+                                $availableSlot->save();
+                            }
+                        }
                     }
                 }
             }
@@ -635,7 +739,11 @@ class DoctorController extends Controller
     }
     public function time_update_ajax($id)
     {
-        $availableTime = DoctorAvailableTime::where('doctor_id', $id)->where('is_deleted', 0)->get();
+        $availableTime = DoctorAvailableTime::where('doctor_id', $id)
+            ->where('is_deleted', 0)
+            ->select('from', 'to')
+            ->distinct()
+            ->get();
         if ($availableTime) {
             return response()->json([
                 'isSuccess' => true,
@@ -784,3 +892,4 @@ class DoctorController extends Controller
         }
     }
 }
+

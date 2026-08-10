@@ -44,7 +44,9 @@
                                 </div>
                                 <h5 class="font-size-15 text-truncate"> {{ $doctor->first_name }}
                                     {{ $doctor->last_name }} </h5>
-                                <p class="badge bg-success text-white mb-0 text-truncate"> {{ $doctor_info->department->name }} </p>
+                                <p class="badge bg-success text-white mb-0 text-truncate">
+                                    {{ $doctor_info->departments->pluck('name')->implode(' / ') ?: ($doctor_info->department->name ?? '') }}
+                                </p>
                                 <p class="text-muted mb-0 text-truncate"> {{ $doctor_info->title }} </p>
                             </div>
                             <div class="col-sm-8">
@@ -95,12 +97,16 @@
                                         <td> {{ $doctor_info->degree }} </td>
                                     </tr>
                                     <tr>
+                                        <th scope="row">{{ __('Specialties:') }}</th>
+                                        <td>{{ $doctor_info->departments->pluck('name')->implode(' / ') ?: ($doctor_info->department->name ?? '') }}</td>
+                                    </tr>
+                                    <tr>
                                         <th scope="row">{{ __('Experience:') }}</th>
                                         <td> {{ $doctor_info->experience }} </td>
                                     </tr>
                                     <tr>
-                                        <th scope="row">{{ __('Fees:') }}</th>
-                                        <td>{{ $doctor_info->fees }}</td>
+                                        <th scope="row">{{ __('Doctor Payment Percentage:') }}</th>
+                                        <td>{{ number_format((float) $doctor_info->doctor_payment_percentage, 2) }}%</td>
                                     </tr>
                                 </tbody>
                             </table>

@@ -114,18 +114,17 @@
                                     </div>
                                     <div class="row">
                                         <div class="col-md-12 mb-3">
-                                                <label class="form-label">{{ __('Departamento') }}<span
+                                                <label class="form-label">{{ __('Especialidades') }}<span
                                                     class="text-danger">*</span></label>
-                                            <select class="form-control select2 @error('department') is-invalid @enderror"
-                                                name="department" id="department">
-                                                <option value="" disabled selected>Seleccione departamento</option>
+                                            <select class="form-control select2 @error('departments') is-invalid @enderror"
+                                                name="departments[]" id="department" multiple>
                                                 @foreach ($departments as $department)
                                                 <option value="{{ $department->id }}"
-                                                    {{ $doctor_info->department_id == $department->id ? 'selected' : '' }}>
+                                                    {{ in_array($department->id, old('departments', $selectedDepartmentIds ?? [])) ? 'selected' : '' }}>
                                                     {{ $department->name }}</option>
                                                 @endforeach
                                             </select>
-                                            @error('department')
+                                            @error('departments')
                                                 <span class="invalid-feedback" role="alert">
                                                     <strong>{{ $message }}</strong>
                                                 </span>
@@ -261,15 +260,17 @@
                                             @enderror
                                         </div>
                                     </div>
+                                    <input type="hidden" name="fees" value="{{ old('fees', $doctor_info->fees ?? 0) }}">
                                     <div class="row">
                                         <div class="col-md-12 mb-3">
-                                                <label class="form-label">{{ __('Honorarios ') }}<span
+                                                <label class="form-label">{{ __('% Pago Doctor ') }}<span
                                                     class="text-danger">*</span></label>
-                                            <input type="text" class="form-control @error('fees') is-invalid @enderror"
-                                                name="fees" id="fees" tabindex="6"
-                                                value="{{ old('fees', $doctor_info->fees) }}"
-                                                placeholder="{{ __('Ingrese los honorarios') }}">
-                                            @error('fees')
+                                            <input type="number" step="0.01" min="0" max="100"
+                                                class="form-control @error('doctor_payment_percentage') is-invalid @enderror"
+                                                name="doctor_payment_percentage" id="doctor_payment_percentage"
+                                                value="{{ old('doctor_payment_percentage', $doctor_info->doctor_payment_percentage) }}"
+                                                placeholder="{{ __('Ingrese porcentaje de pago') }}">
+                                            @error('doctor_payment_percentage')
                                                 <span class="invalid-feedback" role="alert">
                                                     <strong>{{ $message }}</strong>
                                                 </span>

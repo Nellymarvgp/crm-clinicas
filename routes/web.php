@@ -104,6 +104,7 @@ Route::middleware('sentinel.auth')->group(function () {
     // appointment routes
     Route::get('appointmentList', 'AppointmentController@appointment_list');
     Route::post('appointment-status/{id}', 'AppointmentController@appointment_status');
+    Route::post('appointment-final-price/{id}', 'AppointmentController@update_final_consultation_price');
     Route::get('getMonthlyAppointments', 'ReportController@getMonthlyAppointments');
     Route::post('patient-by-appointment', 'InvoiceController@patient_by_appointment')->name('patient_by_appointment');
     Route::post('doctor-by-department', 'AppointmentController@doctor_by_department')->name('doctor_by_department');
@@ -112,6 +113,7 @@ Route::middleware('sentinel.auth')->group(function () {
     Route::post('/appointment-time-by-appointment-slot', 'AppointmentController@time_by_slot')->name('timeBySlot');
     Route::get('appointment-create', 'AppointmentController@appointment_create');
     Route::post('appointment-store', 'AppointmentController@appointment_store');
+    Route::get('appointment-view/{id}', 'AppointmentController@appointment_view')->name('appointment.view');
     Route::get('/cal-appointment-show', 'AppointmentController@cal_appointment_show');
     Route::get('pending-appointment', 'AppointmentController@pending_appointment');
     Route::get('upcoming-appointment', 'AppointmentController@upcoming_appointment');
@@ -124,6 +126,7 @@ Route::middleware('sentinel.auth')->group(function () {
     Route::get('getMonthlyUsersRevenue', 'ReportController@getMonthlyUsersRevenue');
     Route::get('getMonthlyInvoice', 'ReportController@getMonthlyInvoice');
     Route::get('getMonthlyEarning', 'ReportController@getMonthlyEarning');
+    Route::get('doctor-monthly-payout-report', 'ReportController@doctorMonthlyPayoutReport');
     Route::get('calender', 'HomeController@calender');
 
     // Notification routes

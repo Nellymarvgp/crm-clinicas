@@ -8,6 +8,7 @@ use App\Invoice;
 use App\InvoiceDetail;
 use App\User;
 use Cartalyst\Sentinel\Laravel\Facades\Sentinel;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Carbon;
 
@@ -137,5 +138,83 @@ class ReportController extends Controller
             'diff' => number_format($total_diff, 2)
         ];
         return $data;
+    }
+
+    /**
+     * Monthly payout report for all doctors.
+     *
+     * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
+     */
+    public function doctorMonthlyPayoutReport(Request $request)
+    {
+        $user = Sentinel::getUser();
+        $role = $user->roles[0]->slug;
+
+        if (!in_array($role, ['admin', 'accountant'])) {
+            return view('error.403');
+        }
+
+        $selectedMonth = (int) $request->get('month', Carbon::now()->month);
+        $selectedYear = (int) $request->get('year', Carbon::now()->year);
+
+        $reports = Doctor::query()
+            ->leftJoin('users', 'users.id', '=', 'doctors.user_id')
+            ->leftJoin('appointments', function ($join) use ($selectedMonth, $selectedYear) {
+                $join->on('appointments.appointment_with', '=', 'doctors.id')
+                    ->where('appointments.status', 1)
+                    ->where('appointments.is_deleted', 0)
+                    ->whereMonth('appointments.appointment_date', $selectedMonth)
+                    ->whereYear('appointments.appointment_date', $selectedYear);
+            })
+            ->leftJoinSub(
+                DB::table('invoices')
+                    ->join('invoice_details', 'invoice_details.invoice_id', '=', 'invoices.id')
+                    ->where('invoices.is_deleted', 0)
+                    ->where('invoice_details.is_deleted', 0)
+                    ->groupBy('invoices.appointment_id')
+                    ->selectRaw('invoices.appointment_id, SUM(invoice_details.amount) as total_services_amount'),
+                'appointment_services',
+                function ($join) {
+                    $join->on('appointment_services.appointment_id', '=', 'appointments.id');
+                }
+            )
+            ->where('doctors.is_deleted', 0)
+            ->where('users.is_deleted', 0)
+            ->groupBy('doctors.id', 'users.first_name', 'users.last_name', 'doctors.doctor_payment_percentage')
+            ->selectRaw('doctors.id as doctor_id')
+            ->selectRaw('users.first_name, users.last_name')
+            ->selectRaw('COALESCE(doctors.doctor_payment_percentage, 0) as doctor_payment_percentage')
+            ->selectRaw('COUNT(DISTINCT appointments.id) as completed_appointments')
+            ->selectRaw('COUNT(DISTINCT appointments.appointment_for) as attended_patients')
+            ->selectRaw('COALESCE(SUM(appointment_services.total_services_amount), 0) as total_services_amount')
+            ->selectRaw('COALESCE(SUM(COALESCE(appointments.final_consultation_price, 0)), 0) as total_final_consultation_price')
+            ->selectRaw('COALESCE(SUM((COALESCE(appointments.final_consultation_price, 0) * COALESCE(doctors.doctor_payment_percentage, 0)) / 100), 0) as doctor_payable_amount')
+            ->orderBy('users.first_name')
+            ->orderBy('users.last_name')
+            ->get()
+            ->map(function ($item) {
+                $item->doctor_name = trim(($item->first_name ?? '') . ' ' . ($item->last_name ?? ''));
+                // There is no payment ledger yet, so pending equals payable for now.
+                $item->pending_payment_amount = (float) $item->doctor_payable_amount;
+                return $item;
+            });
+
+        $totals = [
+            'completed_appointments' => $reports->sum('completed_appointments'),
+            'attended_patients' => $reports->sum('attended_patients'),
+            'total_services_amount' => $reports->sum('total_services_amount'),
+            'total_final_consultation_price' => $reports->sum('total_final_consultation_price'),
+            'doctor_payable_amount' => $reports->sum('doctor_payable_amount'),
+            'pending_payment_amount' => $reports->sum('pending_payment_amount'),
+        ];
+
+        return view('reports.doctor-monthly-payout', compact(
+            'user',
+            'role',
+            'reports',
+            'totals',
+            'selectedMonth',
+            'selectedYear'
+        ));
     }
 }

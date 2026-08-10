@@ -12,8 +12,11 @@ class Doctor extends Model
         'user_id',
         'department_id',
         'title',
+        'fees',
+        'doctor_payment_percentage',
         'degree',
         'experience',
+        'slot_time',
         'is_deleted',
     ];
 
@@ -24,6 +27,11 @@ class Doctor extends Model
     
     function department() {
         return $this->hasOne(Departments::class, 'id', 'department_id');
+    }
+
+    public function departments()
+    {
+        return $this->belongsToMany(Departments::class, 'doctor_departments', 'doctor_id', 'department_id')->withTimestamps();
     }
 
     public function availableDays()

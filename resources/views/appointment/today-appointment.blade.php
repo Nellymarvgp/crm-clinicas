@@ -98,19 +98,24 @@
                                                         @endif
                                                     </td>
                                                     <td>
+                                                        <a href="{{ url('appointment-view/' . $item->id) }}" class="btn btn-primary mb-2 mb-md-0">Ver</a>
                                                         @if ($item->status == 0)
-                                                            @if ($role == 'doctor' || $role == 'receptionist')
+                                                            @if ($role == 'doctor' || $role == 'receptionist' || $role == 'admin')
                                                                 <button type="button" class="btn btn-success complete"
                                                                     data-id="{{ $item->id }}">Completar</button>
                                                             @endif
                                                             <button type="button" class="btn btn-danger cancel"
                                                                 data-id="{{ $item->id }}">Cancelar</button>
+                                                        @elseif ($item->status == 2)
+                                                            <button type="button" class="btn btn-success complete" data-id="{{ $item->id }}">Completar</button>
+                                                            <button type="button" class="btn btn-danger cancel" data-id="{{ $item->id }}">Cancelar</button>
                                                         @endif
                                                     </td>
                                                 </tr>
                                             @endforeach
                                         </tbody>
                                     </table>
+                                    <input type="hidden" id="csrf_token_value" value="{{ csrf_token() }}">
                                 </div>
                                 <div class="col-md-12 text-center mt-3">
                                     <div class="d-flex justify-content-start">

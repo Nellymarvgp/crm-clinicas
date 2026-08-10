@@ -73,7 +73,8 @@
                             <span>{{ __('translation.appointments') }}</span>
                         </a>
                         <ul class="sub-menu" aria-expanded="true">
-                            <li><a href="{{ url('appointment-create') }}">{{ __('Agendar Cita') }}</a></li>
+                            <li><a href="{{ route('appointment.create') }}">{{ __('Calendario de Citas') }}</a></li>
+                            <li><a href="{{ url('appointment-create') }}">{{ __('Nueva Cita') }}</a></li>
                             <li><a href="{{ url('pending-appointment') }}">{{ __('translation.pending-appointment') }}</a></li>
                             <li><a href="{{ url('today-appointment') }}">{{ __('translation.today-appointments') }}</a></li>
                             <li><a href="{{ url('upcoming-appointment') }}">{{ __('translation.upcoming-appointments') }}</a></li>
@@ -86,6 +87,12 @@
                         <a href="{{ url('transaction') }}" class="waves-effect">
                             <i class='bx bx-bookmark-minus'></i>
                             <span>{{ __('translation.transaction') }}</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ url('doctor-monthly-payout-report') }}" class="waves-effect">
+                            <i class='bx bx-line-chart'></i>
+                            <span>{{ __('Pago mensual doctores') }}</span>
                         </a>
                     </li>
 
@@ -256,6 +263,12 @@
                             <li><a href="{{ route('invoice.create') }}">{{ __('translation.create-invoice') }}</a>
                             </li>
                         </ul>
+                    </li>
+                    <li>
+                        <a href="{{ url('doctor-monthly-payout-report') }}" class="waves-effect">
+                            <i class='bx bx-line-chart'></i>
+                            <span>{{ __('Pago mensual doctores') }}</span>
+                        </a>
                     </li>
                 @endif
             </ul>

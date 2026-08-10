@@ -128,7 +128,7 @@ class ReceptionistController extends Controller
             $validatedData = $request->validate([
                 'first_name' => 'required|alpha',
                 'last_name' => 'required|alpha',
-                'mobile' => 'required|numeric|digits:10',
+                'mobile' => 'required|regex:/^04[0-9]{9}$/',
                 'email' => 'required|email|unique:users|regex:/(.+)@(.+)\.(.+)/i|max:50',
                 'doctor' => 'required',
                 'profile_photo' => 'image|mimes:jpg,png,jpeg,gif,svg|max:500'
@@ -271,7 +271,7 @@ class ReceptionistController extends Controller
             $validatedData = $request->validate([
                 'first_name' => 'required|alpha',
                 'last_name' => 'required|alpha',
-                'mobile' => 'required|numeric|digits:10',
+                'mobile' => 'required|regex:/^04[0-9]{9}$/',
                 'email' => 'required|email|regex:/(.+)@(.+)\.(.+)/i|max:50',
                 'doctor' => 'required',
                 'profile_photo' => 'image|mimes:jpg,png,jpeg,gif,svg|max:500'
@@ -429,3 +429,4 @@ class ReceptionistController extends Controller
         }
     }
 }
+

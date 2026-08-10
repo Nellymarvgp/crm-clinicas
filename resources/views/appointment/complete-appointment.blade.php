@@ -60,6 +60,10 @@
                                                 <th>{{ __('Correo del Paciente') }}</th>
                                                 <th>{{ __('Fecha') }}</th>
                                                 <th>{{ __('Hora') }}</th>
+                                                <th>{{ __('Estado') }}</th>
+                                                <th>{{ __('Total del Servicio') }}</th>
+                                                <th>{{ __('Precio Final Consulta') }}</th>
+                                                <th>{{ __('Acción') }}</th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -78,18 +82,45 @@
                                             @foreach ($Complete_appointment as $item)
                                                 <tr>
                                                     <td>{{ $loop->index + 1 + $per_page * ($currentpage - 1) }}</td>
-                                                    <td> {{ @$item->doctor->user->first_name . ' ' . @$item->doctor->user->last_name }}
+                                                    <td> {{ trim((optional(optional($item->doctor)->user)->first_name ?? '') . ' ' . (optional(optional($item->doctor)->user)->last_name ?? '')) ?: 'Sin doctor asignado' }}
                                                     </td>
-                                                    <td> {{ $item->patient->first_name . ' ' . $item->patient->last_name }}
+                                                    <td> {{ trim((optional($item->patient)->first_name ?? '') . ' ' . (optional($item->patient)->last_name ?? '')) ?: 'Sin paciente asignado' }}
                                                     </td>
-                                                    <td> {{ $item->patient->mobile }} </td>
-                                                    <td>{{ $item->patient->email }}</td>
+                                                    <td> {{ optional($item->patient)->mobile ?? '-' }} </td>
+                                                    <td>{{ optional($item->patient)->email ?? '-' }}</td>
                                                     <td>{{ $item->appointment_date }}</td>
                                                     <td>{{ optional($item->timeSlot)->from ? optional($item->timeSlot)->from . ' a ' . optional($item->timeSlot)->to : 'Sin horario' }}</td>
+                                                    <td>
+                                                        @if ($item->status == 1)
+                                                            <span class="badge badge-pill text-white" style="background-color:#198754;">Completado</span>
+                                                        @elseif($item->status == 2)
+                                                            <span class="badge badge-pill text-white" style="background-color:#dc3545;">Cancelado</span>
+                                                        @else
+                                                            <span class="badge badge-pill text-white" style="background-color:#0dcaf0;">Pendiente</span>
+                                                        @endif
+                                                    </td>
+                                                    <td>{{ number_format((float) ($invoiceTotals[$item->id] ?? 0), 2, ',', '.') }}</td>
+                                                    <td>
+                                                        <input type="number" step="0.01" min="0" class="form-control form-control-sm final-consultation-price"
+                                                            data-id="{{ $item->id }}"
+                                                            value="{{ old('final_consultation_price', $item->final_consultation_price ?? ($invoiceTotals[$item->id] ?? '')) }}"
+                                                            placeholder="0.00">
+                                                    </td>
+                                                    <td>
+                                                        <a href="{{ url('appointment-view/' . $item->id) }}" class="btn btn-primary btn-sm mb-1">Ver</a>
+                                                        @if (($role == 'doctor' || $role == 'receptionist' || $role == 'admin') && (int) $item->status !== 1)
+                                                            <button type="button" class="btn btn-success btn-sm complete mb-1" data-id="{{ $item->id }}">Completar</button>
+                                                            <button type="button" class="btn btn-danger btn-sm cancel mb-1" data-id="{{ $item->id }}">Cancelar</button>
+                                                        @endif
+                                                        <button type="button" class="btn btn-sm btn-primary save-final-price" data-id="{{ $item->id }}">
+                                                            Guardar
+                                                        </button>
+                                                    </td>
                                                 </tr>
                                             @endforeach
                                         </tbody>
                                     </table>
+                                    <input type="hidden" id="csrf_token_value" value="{{ csrf_token() }}">
                                 </div>
                                 <div class="col-md-12 text-center mt-3">
                                     <div class="d-flex justify-content-start">
@@ -117,4 +148,36 @@
         <!-- Init js-->
         <script src="{{ URL::asset('build/js/pages/notification.init.js') }}"></script>
         <script src="{{ URL::asset('build/js/pages/appointment.js') }}"></script>
+        <script>
+            $(document).on('click', '.save-final-price', function() {
+                var appointmentId = $(this).data('id');
+                var input = $('.final-consultation-price[data-id="' + appointmentId + '"]');
+                var amount = input.val();
+                var token = "{{ csrf_token() }}";
+
+                if (amount === '' || Number(amount) < 0) {
+                    toastr.error('Ingrese un precio final válido.');
+                    return;
+                }
+
+                $.ajax({
+                    type: 'POST',
+                    url: 'appointment-final-price/' + appointmentId,
+                    data: {
+                        _token: token,
+                        final_consultation_price: amount
+                    },
+                    success: function(response) {
+                        toastr.success(response.message || 'Precio final guardado.');
+                    },
+                    error: function(xhr) {
+                        var msg = 'No se pudo guardar el precio final.';
+                        if (xhr.responseJSON && (xhr.responseJSON.message || xhr.responseJSON.Message)) {
+                            msg = xhr.responseJSON.message || xhr.responseJSON.Message;
+                        }
+                        toastr.error(msg);
+                    }
+                });
+            });
+        </script>
     @endsection

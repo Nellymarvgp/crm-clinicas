@@ -1,5 +1,5 @@
 @extends('layouts.master-layouts')
-@section('title') {{ __('Profile') }} @endsection
+@section('title') {{ __('Perfil del Paciente') }} @endsection
 @section('css')
     <!-- DataTables -->
     <link rel="stylesheet" type="text/css" href="{{ URL::asset('build/libs/datatables/datatables.min.css') }}">
@@ -7,9 +7,9 @@
     @section('content')
         <!-- start page title -->
         @component('components.breadcrumb')
-            @slot('title') Profile @endslot
-            @slot('li_1') Dashboard @endslot
-            @slot('li_2') Profile @endslot
+            @slot('title') Perfil del Paciente @endslot
+            @slot('li_1') Panel @endslot
+            @slot('li_2') Perfil del Paciente @endslot
         @endcomponent
         <!-- end page title -->
         <div class="row">
@@ -19,7 +19,7 @@
                         <div class="row">
                             <div class="col-7">
                                 <div class="text-primary p-3">
-                                    <h5 class="text-primary">{{ __('Patient Information') }}</h5>
+                                    <h5 class="text-primary">{{ __('Información del Paciente') }}</h5>
                                 </div>
                             </div>
                             <div class="col-5 align-self-end">
@@ -41,13 +41,13 @@
                                 <div class="pt-4">
                                     <div class="row">
                                         <div class="col-12">
-                                            <h5 class="font-size-12">{{ __('Last Login:') }}</h5>
+                                            <h5 class="font-size-12">{{ __('Último acceso:') }}</h5>
                                             <p class="text-muted mb-0"> {{ $patient->last_login }} </p>
                                         </div>
                                     </div>
                                     <div class="mt-4">
                                         <a href="{{ url('profile-edit') }}"
-                                            class="btn btn-primary waves-effect waves-light btn-sm">{{ __('Edit Profile ') }}<i
+                                            class="btn btn-primary waves-effect waves-light btn-sm">{{ __('Editar Perfil ') }}<i
                                                 class="mdi mdi-arrow-right ms-1"></i></a>
                                     </div>
                                 </div>
@@ -58,16 +58,16 @@
                 <!-- end card -->
                 <div class="card">
                     <div class="card-body">
-                        <h4 class="card-title mb-4">{{ __('Personal Information') }}</h4>
+                        <h4 class="card-title mb-4">{{ __('Información Personal') }}</h4>
                         <div class="table-responsive">
                             <table class="table mb-0">
                                 <tbody>
                                     <tr>
-                                        <th scope="row">{{ __('Full Name:') }}</th>
+                                        <th scope="row">{{ __('Nombre Completo:') }}</th>
                                         <td>{{ $patient->first_name }} {{ $patient->last_name }}</td>
                                     </tr>
                                     <tr>
-                                        <th scope="row">{{ __('Contact No:') }}</th>
+                                        <th scope="row">{{ __('Nro. de Contacto:') }}</th>
                                         <td> {{ @$patient->mobile }} </td>
                                     </tr>
                                     <tr>
@@ -75,15 +75,17 @@
                                         <td> {{ $patient->email }} </td>
                                     </tr>
                                     <tr>
-                                        <th scope="row">{{ __('Age:') }}</th>
+                                        <th scope="row">{{ __('Edad:') }}</th>
                                         <td> {{ @$patient_info->age }} </td>
                                     </tr>
                                     <tr>
-                                        <th scope="row">{{ __('Gender:') }}</th>
-                                        <td> {{ @$patient_info->gender }} </td>
+                                        <th scope="row">{{ __('Género:') }}</th>
+                                        <td>
+                                            {{ strtolower((string) @$patient_info->gender) === 'female' ? 'Femenino' : (strtolower((string) @$patient_info->gender) === 'male' ? 'Masculino' : @$patient_info->gender) }}
+                                        </td>
                                     </tr>
                                     <tr>
-                                        <th scope="row">{{ __('Address:') }}</th>
+                                        <th scope="row">{{ __('Dirección:') }}</th>
                                         <td> {{ @$patient_info->address }} </td>
                                     </tr>
                                 </tbody>
@@ -100,7 +102,7 @@
                             <div class="card-body">
                                 <div class="d-flex">
                                     <div class="flex-grow-1">
-                                        <p class="text-muted fw-medium">{{ __('Appointments') }}</p>
+                                        <p class="text-muted fw-medium">{{ __('Citas') }}</p>
                                         <h4 class="mb-0">{{ number_format($data['total_appointment']) }}</h4>
                                     </div>
                                     <div class="mini-stat-icon avatar-sm align-self-center rounded-circle bg-primary">
@@ -117,7 +119,7 @@
                             <div class="card-body">
                                 <div class="d-flex">
                                     <div class="flex-grow-1">
-                                        <p class="text-muted fw-medium">{{ __('Pending Bills') }}</p>
+                                        <p class="text-muted fw-medium">{{ __('Facturas Pendientes') }}</p>
                                         <h4 class="mb-0">{{ number_format($data['pending_bill']) }}</h4>
                                     </div>
                                     <div class="avatar-sm align-self-center mini-stat-icon rounded-circle bg-primary">
@@ -134,7 +136,7 @@
                             <div class="card-body">
                                 <div class="d-flex">
                                     <div class="flex-grow-1">
-                                        <p class="text-muted fw-medium">{{ __('Total Bill') }}</p>
+                                        <p class="text-muted fw-medium">{{ __('Total Facturado') }}</p>
                                         <h4 class="mb-0">${{ number_format($data['revenue'], 2) }}</h4>
                                     </div>
                                     <div class="avatar-sm align-self-center mini-stat-icon rounded-circle bg-primary">
@@ -154,25 +156,25 @@
                             <li class="nav-item">
                                 <a class="nav-link active" data-bs-toggle="tab" href="#Medical_info" role="tab">
                                     <span class="d-block d-sm-none"><i class="fas fa-home"></i></span>
-                                    <span class="d-none d-sm-block">{{ __('Medical Information') }}</span>
+                                    <span class="d-none d-sm-block">{{ __('Información Médica') }}</span>
                                 </a>
                             </li>
                             <li class="nav-item">
                                 <a class="nav-link" data-bs-toggle="tab" href="#AppointmentList" role="tab">
                                     <span class="d-block d-sm-none"><i class="far fa-user"></i></span>
-                                    <span class="d-none d-sm-block">{{ __('Appointment List') }}</span>
+                                    <span class="d-none d-sm-block">{{ __('Lista de Citas') }}</span>
                                 </a>
                             </li>
                             <li class="nav-item">
                                 <a class="nav-link" data-bs-toggle="tab" href="#PrescriptionList" role="tab">
                                     <span class="d-block d-sm-none"><i class="far fa-envelope"></i></span>
-                                    <span class="d-none d-sm-block">{{ __('Prescription List') }}</span>
+                                    <span class="d-none d-sm-block">{{ __('Lista de Recetas') }}</span>
                                 </a>
                             </li>
                             <li class="nav-item">
                                 <a class="nav-link" data-bs-toggle="tab" href="#Invoices" role="tab">
                                     <span class="d-block d-sm-none"><i class="fas fa-cog"></i></span>
-                                    <span class="d-none d-sm-block">{{ __('Invoices') }}</span>
+                                    <span class="d-none d-sm-block">{{ __('Facturas') }}</span>
                                 </a>
                             </li>
                         </ul>
@@ -183,35 +185,35 @@
                                     <table class="table table-striped mb-0">
                                         <tbody>
                                             <tr>
-                                                <th scope="row">{{ __('Height') }}</th>
+                                                <th scope="row">{{ __('Estatura') }}</th>
                                                 <td> {{ @$medical_Info->height }} </td>
                                             </tr>
                                             <tr>
-                                                <th scope="row">{{ __('Weight') }}</th>
+                                                <th scope="row">{{ __('Peso') }}</th>
                                                 <td> {{ @$medical_Info->weight }} </td>
                                             </tr>
                                             <tr>
-                                                <th scope="row">{{ __('Blood Group') }}</th>
+                                                <th scope="row">{{ __('Grupo Sanguíneo') }}</th>
                                                 <td> {{ @$medical_Info->b_group }} </td>
                                             </tr>
                                             <tr>
-                                                <th scope="row">{{ __('Blood Pressure') }}</th>
+                                                <th scope="row">{{ __('Presión Arterial') }}</th>
                                                 <td> {{ @$medical_Info->b_pressure }} </td>
                                             </tr>
                                             <tr>
-                                                <th scope="row">{{ __('Pulse') }}</th>
+                                                <th scope="row">{{ __('Pulso') }}</th>
                                                 <td> {{ @$medical_Info->pulse }} </td>
                                             </tr>
                                             <tr>
-                                                <th scope="row">{{ __('Respiration') }}</th>
+                                                <th scope="row">{{ __('Respiración') }}</th>
                                                 <td> {{ @$medical_Info->respiration }} </td>
                                             </tr>
                                             <tr>
-                                                <th scope="row">{{ __('Allergy') }}</th>
+                                                <th scope="row">{{ __('Alergia') }}</th>
                                                 <td> {{ @$medical_Info->allergy }} </td>
                                             </tr>
                                             <tr>
-                                                <th scope="row">{{ __('Diet') }}</th>
+                                                <th scope="row">{{ __('Dieta') }}</th>
                                                 <td> {{ @$medical_Info->diet }} </td>
                                             </tr>
                                         </tbody>
@@ -223,10 +225,10 @@
                                     style="border-collapse: collapse; border-spacing: 0; width: 100%;">
                                     <thead>
                                         <tr>
-                                            <th>{{ __('Sr. No') }}</th>
-                                            <th>{{ __('Doctor Name') }}</th>
-                                            <th>{{ __('Date') }}</th>
-                                            <th>{{ __('Time') }}</th>
+                                            <th>{{ __('Nro.') }}</th>
+                                            <th>Doctor</th>
+                                            <th>{{ __('Fecha') }}</th>
+                                            <th>{{ __('Hora') }}</th>
                                         </tr>
                                     </thead>
                                     @if (session()->has('page_limit'))
@@ -253,8 +255,8 @@
                                 </table>
                                 <div class="col-md-12 text-center mt-3">
                                     <div class="d-flex justify-content-start">
-                                        Showing {{ $appointments->firstItem() }} to {{ $appointments->lastItem() }} of
-                                        {{ $appointments->total() }} entries
+                                        Mostrando {{ $appointments->firstItem() }} a {{ $appointments->lastItem() }} de
+                                        {{ $appointments->total() }} registros
                                     </div>
                                     <div class="d-flex justify-content-end">
                                         {{ $appointments->links() }}
@@ -266,10 +268,10 @@
                                     style="border-collapse: collapse; border-spacing: 0; width: 100%;">
                                     <thead>
                                         <tr>
-                                            <th>{{ __('Sr. No') }}</th>
-                                            <th>{{ __('Doctor Name') }}</th>
-                                            <th>{{ __('Date') }}</th>
-                                            <th>{{ __('Option') }}</th>
+                                            <th>{{ __('Nro.') }}</th>
+                                            <th>Doctor</th>
+                                            <th>{{ __('Fecha') }}</th>
+                                            <th>{{ __('Opción') }}</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -295,7 +297,7 @@
                                                     <a href="{{ url('prescription-view/' . $item->id) }}">
                                                         <button type="button"
                                                             class="btn btn-primary btn-sm btn-rounded waves-effect waves-light">
-                                                            {{ __('View') }}
+                                                            {{ __('Ver') }}
                                                         </button>
                                                     </a>
                                                 </td>
@@ -305,8 +307,8 @@
                                 </table>
                                 <div class="col-md-12 text-center mt-3">
                                     <div class="d-flex justify-content-start">
-                                        Showing {{ $prescriptions->firstItem() }} to {{ $prescriptions->lastItem() }} of
-                                        {{ $prescriptions->total() }} entries
+                                        Mostrando {{ $prescriptions->firstItem() }} a {{ $prescriptions->lastItem() }} de
+                                        {{ $prescriptions->total() }} registros
                                     </div>
                                     <div class="d-flex justify-content-end">
                                         {{ $prescriptions->links() }}
@@ -318,10 +320,10 @@
                                     style="border-collapse: collapse; border-spacing: 0; width: 100%;">
                                     <thead>
                                         <tr>
-                                            <th>{{ __('Sr. No') }}</th>
-                                            <th>{{ __('Date') }}</th>
-                                            <th>{{ __('Status') }}</th>
-                                            <th>{{ __('Option') }}</th>
+                                            <th>{{ __('Nro.') }}</th>
+                                            <th>{{ __('Fecha') }}</th>
+                                            <th>{{ __('Estado') }}</th>
+                                            <th>{{ __('Opción') }}</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -346,7 +348,7 @@
                                                     <a href="{{ url('invoice-view/' . $item->id) }}">
                                                         <button type="button"
                                                             class="btn btn-primary btn-sm btn-rounded waves-effect waves-light">
-                                                            {{ __('View') }}
+                                                            {{ __('Ver') }}
                                                         </button>
                                                     </a>
                                                 </td>
@@ -356,8 +358,8 @@
                                 </table>
                                 <div class="col-md-12 text-center mt-3">
                                     <div class="d-flex justify-content-start">
-                                        Showing {{ $invoices->firstItem() }} to {{ $invoices->lastItem() }} of
-                                        {{ $invoices->total() }} entries
+                                        Mostrando {{ $invoices->firstItem() }} a {{ $invoices->lastItem() }} de
+                                        {{ $invoices->total() }} registros
                                     </div>
                                     <div class="d-flex justify-content-end">
                                         {{ $invoices->links() }}

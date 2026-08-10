@@ -14,6 +14,10 @@
         <!-- end page title -->
         <div class="row">
             <div class="col-12">
+                <a href="{{ url('/pending-appointment') }}"
+                    class="btn btn-outline-primary waves-effect waves-light mb-4 me-2">
+                    <i class="bx bx-list-ul font-size-16 align-middle me-2"></i> {{ __('Ver Citas') }}
+                </a>
                 <a href="{{ url('/appointment-create') }}"
                     class="btn btn-primary text-white waves-effect waves-light mb-4">
                     <i class="bx bx-plus font-size-16 align-middle me-2"></i> {{ __('Nueva Cita') }}
@@ -32,7 +36,7 @@
                 <div class="card">
                     <div class="card-body">
                         <h4 class="card-title mb-4">{{ __('Lista de Citas') }} | <label
-                                id="selected_date"><?php echo date('d M, Y'); ?></label>
+                            id="selected_date">{{ \Carbon\Carbon::now()->locale('es')->translatedFormat('d/m/Y') }}</label>
                         </h4>
                         <div id="appointment_list">
                             <table class="table table-bordered dt-responsive nowrap"
@@ -53,6 +57,10 @@
 
                                         @endif
                                         <th>{{ __('Hora') }}</th>
+                                        <th>{{ __('Estado') }}</th>
+                                        @if ($role == 'admin' || $role == 'doctor' || $role == 'receptionist')
+                                            <th>{{ __('Acción') }}</th>
+                                        @endif
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -69,7 +77,56 @@
                                                 </td>
                                                 <td>{{ $appointment->patient->mobile }}</td>
                                                 <td>
-                                                    {{ optional($appointment->timeSlot)->from ? optional($appointment->timeSlot)->from . ' a ' . optional($appointment->timeSlot)->to : 'Sin horario' }}
+                                                    {{ optional($appointment->timeSlot)->from ? \Carbon\Carbon::parse(optional($appointment->timeSlot)->from)->format('H:i') . ' a ' . \Carbon\Carbon::parse(optional($appointment->timeSlot)->to)->format('H:i') : 'Sin horario' }}
+                                                </td>
+                                                <td>
+                                                    @if ($appointment->status == 1)
+                                                        <span class="badge badge-pill text-white" style="background-color:#198754;">Completado</span>
+                                                    @elseif($appointment->status == 2)
+                                                        <span class="badge badge-pill text-white" style="background-color:#dc3545;">Cancelado</span>
+                                                    @else
+                                                        <span class="badge badge-pill text-white" style="background-color:#0dcaf0;">Pendiente</span>
+                                                    @endif
+                                                </td>
+                                                <td>
+                                                    <a href="{{ url('appointment-view/' . $appointment->id) }}" class="btn btn-primary mb-1">{{ __('Ver') }}</a>
+                                                    @if ((int) $appointment->status !== 1)
+                                                        <button type="button" class="btn btn-success complete mb-1" data-id="{{ $appointment->id }}">{{ __('Completar') }}</button>
+                                                        <button type="button" class="btn btn-danger cancel mb-1" data-id="{{ $appointment->id }}">{{ __('Cancelar') }}</button>
+                                                    @endif
+                                                </td>
+                                            </tr>
+                                            @php
+                                                $i++;
+                                            @endphp
+                                        @endforeach
+                                    @elseif ($role == 'admin')
+                                        @foreach ($appointments as $appointment)
+                                            <tr>
+                                                <td> {{ $i }} </td>
+                                                <td>{{ $appointment->patient->first_name . ' ' . $appointment->patient->last_name }}
+                                                </td>
+                                                <td>{{ @$appointment->doctor->user->first_name . ' ' . @$appointment->doctor->user->last_name }}
+                                                </td>
+                                                <td>{{ $appointment->patient->mobile }}</td>
+                                                <td>
+                                                    {{ optional($appointment->timeSlot)->from ? \Carbon\Carbon::parse(optional($appointment->timeSlot)->from)->format('H:i') . ' a ' . \Carbon\Carbon::parse(optional($appointment->timeSlot)->to)->format('H:i') : 'Sin horario' }}
+                                                </td>
+                                                <td>
+                                                    @if ($appointment->status == 1)
+                                                        <span class="badge badge-pill text-white" style="background-color:#198754;">Completado</span>
+                                                    @elseif($appointment->status == 2)
+                                                        <span class="badge badge-pill text-white" style="background-color:#dc3545;">Cancelado</span>
+                                                    @else
+                                                        <span class="badge badge-pill text-white" style="background-color:#0dcaf0;">Pendiente</span>
+                                                    @endif
+                                                </td>
+                                                <td>
+                                                    <a href="{{ url('appointment-view/' . $appointment->id) }}" class="btn btn-primary mb-1">{{ __('Ver') }}</a>
+                                                    @if ((int) $appointment->status !== 1)
+                                                        <button type="button" class="btn btn-success complete mb-1" data-id="{{ $appointment->id }}">{{ __('Completar') }}</button>
+                                                        <button type="button" class="btn btn-danger cancel mb-1" data-id="{{ $appointment->id }}">{{ __('Cancelar') }}</button>
+                                                    @endif
                                                 </td>
                                             </tr>
                                             @php
@@ -84,7 +141,23 @@
                                                 </td>
                                                 <td>{{ $appointment->patient->mobile }}</td>
                                                 <td>
-                                                    {{ optional($appointment->timeSlot)->from ? optional($appointment->timeSlot)->from . ' a ' . optional($appointment->timeSlot)->to : 'Sin horario' }}
+                                                    {{ optional($appointment->timeSlot)->from ? \Carbon\Carbon::parse(optional($appointment->timeSlot)->from)->format('H:i') . ' a ' . \Carbon\Carbon::parse(optional($appointment->timeSlot)->to)->format('H:i') : 'Sin horario' }}
+                                                </td>
+                                                <td>
+                                                    @if ($appointment->status == 1)
+                                                        <span class="badge badge-pill text-white" style="background-color:#198754;">Completado</span>
+                                                    @elseif($appointment->status == 2)
+                                                        <span class="badge badge-pill text-white" style="background-color:#dc3545;">Cancelado</span>
+                                                    @else
+                                                        <span class="badge badge-pill text-white" style="background-color:#0dcaf0;">Pendiente</span>
+                                                    @endif
+                                                </td>
+                                                <td>
+                                                    <a href="{{ url('appointment-view/' . $appointment->id) }}" class="btn btn-primary mb-1">{{ __('Ver') }}</a>
+                                                    @if ((int) $appointment->status !== 1)
+                                                        <button type="button" class="btn btn-success complete mb-1" data-id="{{ $appointment->id }}">{{ __('Completar') }}</button>
+                                                        <button type="button" class="btn btn-danger cancel mb-1" data-id="{{ $appointment->id }}">{{ __('Cancelar') }}</button>
+                                                    @endif
                                                 </td>
                                             </tr>
                                             @php
@@ -99,7 +172,16 @@
                                                 </td>
                                                 <td>{{ @$appointment->doctor->user->mobile }}</td>
                                                 <td>
-                                                    {{ optional($appointment->timeSlot)->from ? optional($appointment->timeSlot)->from . ' a ' . optional($appointment->timeSlot)->to : 'Sin horario' }}
+                                                    {{ optional($appointment->timeSlot)->from ? \Carbon\Carbon::parse(optional($appointment->timeSlot)->from)->format('H:i') . ' a ' . \Carbon\Carbon::parse(optional($appointment->timeSlot)->to)->format('H:i') : 'Sin horario' }}
+                                                </td>
+                                                <td>
+                                                    @if ($appointment->status == 1)
+                                                        <span class="badge badge-pill text-white" style="background-color:#198754;">Completado</span>
+                                                    @elseif($appointment->status == 2)
+                                                        <span class="badge badge-pill text-white" style="background-color:#dc3545;">Cancelado</span>
+                                                    @else
+                                                        <span class="badge badge-pill text-white" style="background-color:#0dcaf0;">Pendiente</span>
+                                                    @endif
                                                 </td>
                                             </tr>
                                             @php
@@ -109,6 +191,7 @@
                                     @endif
                                 </tbody>
                             </table>
+                            <input type="hidden" id="csrf_token_value" value="{{ csrf_token() }}">
                         </div>
                         <div id="new_list" style="display : none"></div>
                     </div>

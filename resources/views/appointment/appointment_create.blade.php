@@ -32,6 +32,9 @@
             <a href="{{ url('/appointment/create') }}" class="btn btn-primary text-white waves-effect waves-light mb-4">
                 <i class="mdi mdi-arrow-left  font-size-16 align-middle me-2"></i> {{ __('Volver') }}
             </a>
+            <a href="{{ url('/pending-appointment') }}" class="btn btn-outline-primary waves-effect waves-light mb-4 ms-2">
+                <i class="bx bx-list-ul font-size-16 align-middle me-2"></i> {{ __('Ver Citas') }}
+            </a>
         </div> <!-- end col -->
     </div> <!-- end row -->
     <div class="row">
@@ -259,14 +262,20 @@
                         days(day);
                     }
                     var availble_time = response.data[1];
-                    $.each(availble_time, function(key, value) {
-                        $('.availble_time').append(
-                            '<label class="btn btn-outline-secondary me-2 "><input type="radio" name="available_time" class="btn-check available-time @error('available_time') is-invalid @enderror" value="' +
-                            value.id + '" >' + value.from + ' to ' + value.to + '</label>');
-                    });
+                    if (availble_time.length === 0) {
+                        $('.availble_time').append('<span class="text-muted">No hay horarios disponibles para este odontólogo.</span>');
+                    } else {
+                        $.each(availble_time, function(key, value) {
+                            $('.availble_time').append(
+                                '<label class="btn btn-outline-secondary me-2 "><input type="radio" name="available_time" class="btn-check available-time @error('available_time') is-invalid @enderror" value="' +
+                                value.id + '" >' + value.from + ' to ' + value.to + '</label>');
+                        });
+                    }
                     activeAvailableTime();
                 },
-                error: function(response) {}
+                error: function(response) {
+                    $('.availble_time').empty().append('<span class="text-danger">No se pudieron cargar los horarios disponibles.</span>');
+                }
             });
         });
         // datepicker change

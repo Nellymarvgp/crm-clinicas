@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\Mail;
 use Cartalyst\Sentinel\Laravel\Facades\Sentinel;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Exception;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\App;
@@ -75,6 +76,10 @@ class AppointmentController extends Controller
                 $appointments = Appointment::with('patient', 'timeSlot')->where('appointment_with', $userId)->where('appointment_date', Carbon::today())->get();
             } elseif ($role == 'patient') {
                 $appointments = Appointment::with('doctor', 'timeSlot')->where('appointment_for', $userId)->where('appointment_date', Carbon::today())->get();
+            } elseif ($role == 'admin') {
+                $appointments = Appointment::with('doctor', 'doctor.user', 'patient', 'timeSlot')
+                    ->where('appointment_date', Carbon::today())
+                    ->get();
             } else {
                 $receptionists_doctor_id = ReceptionListDoctor::where('reception_id', $userId)->pluck('doctor_id');
                 $appointments = Appointment::with('doctor', 'patient', 'timeSlot')
@@ -148,18 +153,19 @@ class AppointmentController extends Controller
         $user = Sentinel::getUser();
         $role = $user->roles[0]->slug;
         $userId = $user->id;
+        $selectedDate = $request->date;
         if ($role == 'doctor') {
             $doctor = Doctor::where('user_id', $user->id)->where('is_deleted', 0)->first();
-            $res = Appointment::with('patient', 'timeSlot')->where('appointment_with', $doctor->id)->where('appointment_date', $request->date)->get();
+            $res = Appointment::with('patient', 'timeSlot')->where('appointment_with', $doctor->id)->whereDate('appointment_date', $selectedDate)->get();
         } elseif ($role == 'patient') {
-            $res = Appointment::with('doctor', 'doctor.user', 'timeSlot')->where('appointment_for', $userId)->where('appointment_date', $request->date)->get();
+            $res = Appointment::with('doctor', 'doctor.user', 'timeSlot')->where('appointment_for', $userId)->whereDate('appointment_date', $selectedDate)->get();
         } elseif ($role == 'admin') {
             $res = Appointment::with('patient', 'doctor', 'doctor.user', 'timeSlot')
-                ->where('appointment_date', $request->date)
+                ->whereDate('appointment_date', $selectedDate)
                 ->get();
         } else {
             $receptionists_doctor_id = ReceptionListDoctor::where('reception_id', $userId)->pluck('doctor_id');
-            $res = Appointment::with('patient', 'timeSlot', 'doctor', 'doctor.user')->where('appointment_date', $request->date)
+            $res = Appointment::with('patient', 'timeSlot', 'doctor', 'doctor.user')->whereDate('appointment_date', $selectedDate)
                 ->where(function ($re) use ($userId, $receptionists_doctor_id) {
                     $re->whereIN('appointment_with', $receptionists_doctor_id);
                     $re->orWhereIN('booked_by', $receptionists_doctor_id);
@@ -167,7 +173,7 @@ class AppointmentController extends Controller
                 })
                 ->get();
         }
-        if (empty($res)) {
+        if ($res->isEmpty()) {
             $response = [
                 'status' => 'error',
                 'message' => 'No Appointments Found On '
@@ -190,35 +196,36 @@ class AppointmentController extends Controller
             $today = Carbon::today()->format('Y/m/d');
             $time = date('H:i:s');
             if ($role == 'doctor') {
-                $doctor_id = Doctor::where('user_id', $user_id)->pluck('id');
-                $pending_appointment = Appointment::with('doctor', 'patient', 'timeSlot')->where(function ($re) use ($doctor_id) {
-                    $re->where('appointment_with', $doctor_id);
-                    $re->orWhere('booked_by', $doctor_id);
+                $doctor_row_id = Doctor::where('user_id', $user_id)->value('id');
+                $doctor_lookup_ids = collect([$doctor_row_id, $user_id])->filter()->unique()->values();
+                $pending_appointment = Appointment::with('doctor', 'patient', 'timeSlot')->where(function ($re) use ($doctor_lookup_ids) {
+                    $re->whereIn('appointment_with', $doctor_lookup_ids);
+                    $re->orWhereIn('booked_by', $doctor_lookup_ids);
                 })->where('status', 0)->orderBy('id', 'DESC')->get();
 
-                $Complete_appointment = Appointment::with('doctor', 'patient', 'timeSlot')->where(function ($re) use ($doctor_id) {
-                    $re->where('appointment_with', $doctor_id);
-                    $re->orWhere('booked_by', $doctor_id);
+                $Complete_appointment = Appointment::with('doctor', 'patient', 'timeSlot')->where(function ($re) use ($doctor_lookup_ids) {
+                    $re->whereIn('appointment_with', $doctor_lookup_ids);
+                    $re->orWhereIn('booked_by', $doctor_lookup_ids);
                 })->where('status', 1)->orderBy('id', 'DESC')->get();
 
-                $Upcoming_appointment = Appointment::where(function ($re) use ($doctor_id) {
-                    $re->orWhere('appointment_with', $doctor_id);
-                    $re->orWhere('booked_by', $doctor_id);
+                $Upcoming_appointment = Appointment::where(function ($re) use ($doctor_lookup_ids) {
+                    $re->whereIn('appointment_with', $doctor_lookup_ids);
+                    $re->orWhereIn('booked_by', $doctor_lookup_ids);
                 })
                     ->whereDate('appointment_date', '>', $today)
-                    ->orWhere(function ($re) use ($today, $time, $doctor_id) {
+                    ->orWhere(function ($re) use ($today, $time, $doctor_lookup_ids) {
                         $re->whereDate('appointment_date', '=', $today);
                         $re->whereTime('available_time', '>=', $time);
-                        $re->where(function ($r) use ($doctor_id) {
-                            $r->orWhere('appointment_with', $doctor_id);
-                            $r->orWhere('booked_by', $doctor_id);
+                        $re->where(function ($r) use ($doctor_lookup_ids) {
+                            $r->whereIn('appointment_with', $doctor_lookup_ids);
+                            $r->orWhereIn('booked_by', $doctor_lookup_ids);
                         });
                     })->where('status', 0)
                     ->orderBy('id', 'DESC')->get();
                 $Cancel_appointment = Appointment::with('doctor', 'patient', 'timeSlot')
-                    ->where(function ($re) use ($doctor_id) {
-                        $re->where('appointment_with', $doctor_id);
-                        $re->orWhere('booked_by', $doctor_id);
+                    ->where(function ($re) use ($doctor_lookup_ids) {
+                        $re->whereIn('appointment_with', $doctor_lookup_ids);
+                        $re->orWhereIn('booked_by', $doctor_lookup_ids);
                     })->where('status', 2)
                     ->orderBy('id', 'DESC')->get();
             } elseif ($role == 'patient') {
@@ -500,11 +507,26 @@ class AppointmentController extends Controller
     public function doctor_by_day_time(Request $request)
     {
         $user = Sentinel::getUser();
-        if ($user->hasAccess('appointment.status')) {
+        if ($user->hasAccess('appointment.create')) {
             if ($request->ajax()) {
-                $doctor_id = $request->doctor_id;
-                $doctor_available_day = DoctorAvailableDay::where('doctor_id', $doctor_id)->first();
-                $doctor_available_time = DoctorAvailableTime::where('doctor_id', $doctor_id)->where('is_deleted', 0)->get();
+                $doctor_id = (int) $request->doctor_id;
+                $doctor_user_id = Doctor::where('id', $doctor_id)->value('user_id');
+                $doctor_lookup_ids = collect([$doctor_id, $doctor_user_id])->filter()->unique()->values();
+
+                $doctor_available_day = null;
+                if ($doctor_lookup_ids->isNotEmpty()) {
+                    $doctor_available_day = DoctorAvailableDay::whereIn('doctor_id', $doctor_lookup_ids->all())
+                        ->orderByRaw('CASE WHEN doctor_id = ? THEN 0 ELSE 1 END', [$doctor_id])
+                        ->first();
+                }
+
+                $doctor_available_time = collect();
+                if ($doctor_lookup_ids->isNotEmpty()) {
+                    $doctor_available_time = DoctorAvailableTime::whereIn('doctor_id', $doctor_lookup_ids->all())
+                        ->where('is_deleted', 0)
+                        ->orderBy('from')
+                        ->get();
+                }
                 return response()->json([
                     'isSuccess' => true,
                     'Message' => "Doctor availableTime successfully",
@@ -512,7 +534,11 @@ class AppointmentController extends Controller
                 ]);
             }
         } else {
-            return view('error.403');
+            return response()->json([
+                'isSuccess' => false,
+                'Message' => 'You have no permission to access doctor availability.',
+                'data' => []
+            ], 403);
         }
     }
 
@@ -536,29 +562,44 @@ class AppointmentController extends Controller
             }
             $dayArray = collect();
             if ($role == 'doctor') {
-                $doctor_available_day = DoctorAvailableDay::where('doctor_id', $doctor_id)->first()->toArray();
-                if ($doctor_available_day['sun'] == 0) {
-                    $dayArray->push(0);
+                $doctor_lookup_ids = collect([$doctor_id, $userId])->filter()->unique()->values();
+                $doctor_available_day_model = null;
+                if ($doctor_lookup_ids->isNotEmpty()) {
+                    $doctor_available_day_model = DoctorAvailableDay::whereIn('doctor_id', $doctor_lookup_ids->all())
+                        ->orderByRaw('CASE WHEN doctor_id = ? THEN 0 ELSE 1 END', [$doctor_id])
+                        ->first();
                 }
-                if ($doctor_available_day['mon'] == 0) {
-                    $dayArray->push(1);
+                if ($doctor_available_day_model) {
+                    $doctor_available_day = $doctor_available_day_model->toArray();
+                    if ($doctor_available_day['sun'] == 0) {
+                        $dayArray->push(0);
+                    }
+                    if ($doctor_available_day['mon'] == 0) {
+                        $dayArray->push(1);
+                    }
+                    if ($doctor_available_day['tue'] == 0) {
+                        $dayArray->push(2);
+                    }
+                    if ($doctor_available_day['wen'] == 0) {
+                        $dayArray->push(3);
+                    }
+                    if ($doctor_available_day['thu'] == 0) {
+                        $dayArray->push(4);
+                    }
+                    if ($doctor_available_day['fri'] == 0) {
+                        $dayArray->push(5);
+                    }
+                    if ($doctor_available_day['sat'] == 0) {
+                        $dayArray->push(6);
+                    }
                 }
-                if ($doctor_available_day['tue'] == 0) {
-                    $dayArray->push(2);
+                $doctor_available_time = collect();
+                if ($doctor_lookup_ids->isNotEmpty()) {
+                    $doctor_available_time = DoctorAvailableTime::whereIn('doctor_id', $doctor_lookup_ids->all())
+                        ->where('is_deleted', 0)
+                        ->orderBy('from')
+                        ->get();
                 }
-                if ($doctor_available_day['wen'] == 0) {
-                    $dayArray->push(3);
-                }
-                if ($doctor_available_day['thu'] == 0) {
-                    $dayArray->push(4);
-                }
-                if ($doctor_available_day['fri'] == 0) {
-                    $dayArray->push(5);
-                }
-                if ($doctor_available_day['sat'] == 0) {
-                    $dayArray->push(6);
-                }
-                $doctor_available_time = DoctorAvailableTime::where('doctor_id', $userId)->where('is_deleted', 0)->get();
             }
             return view('appointment.appointment_create', compact('user', 'role', 'patients', 'doctors', 'doctor_available_day', 'doctor_available_time', 'dayArray'));
         } else {
@@ -739,18 +780,22 @@ class AppointmentController extends Controller
             $role = $user->roles[0]->slug;
             if ($role == 'doctor') {
                 $doctor = Doctor::where('user_id', $user->id)->where('is_deleted', 0)->first();
-                $appointment = Appointment::select(DB::raw('count(id) as `total_appointment`'), DB::raw('appointment_date'))
+                $appointment = Appointment::select(DB::raw('count(id) as `total_appointment`'), DB::raw('appointment_date'), DB::raw('status'))
                     ->whereDate('appointment_date', '>=', $request->start)
                     ->whereDate('appointment_date',   '<=', $request->end)
-                    ->groupBy(DB::raw('appointment_date'))->where('appointment_with', $doctor->id)->get();
+                    ->where('appointment_with', $doctor->id)
+                    ->groupBy(DB::raw('appointment_date'), DB::raw('status'))
+                    ->get();
             } elseif ($role == 'patient') {
-                $appointment = Appointment::select(DB::raw('count(id) as `total_appointment`'), DB::raw('appointment_date'))
+                $appointment = Appointment::select(DB::raw('count(id) as `total_appointment`'), DB::raw('appointment_date'), DB::raw('status'))
                     ->whereDate('appointment_date', '>=', $request->start)
                     ->whereDate('appointment_date',   '<=', $request->end)
-                    ->groupBy(DB::raw('appointment_date'))->where('appointment_for', $user->id)->get();
+                    ->where('appointment_for', $user->id)
+                    ->groupBy(DB::raw('appointment_date'), DB::raw('status'))
+                    ->get();
             } elseif ($role == 'receptionist') {
                 $receptionists_doctor_id = ReceptionListDoctor::where('reception_id', $userId)->pluck('doctor_id');
-                $appointment = Appointment::select(DB::raw('count(id) as `total_appointment`'), DB::raw('appointment_date'))
+                $appointment = Appointment::select(DB::raw('count(id) as `total_appointment`'), DB::raw('appointment_date'), DB::raw('status'))
                     ->whereDate('appointment_date', '>=', $request->start)
                     ->whereDate('appointment_date',   '<=', $request->end)
                     ->where(function ($re) use ($userId, $receptionists_doctor_id) {
@@ -758,10 +803,17 @@ class AppointmentController extends Controller
                         $re->orWhereIN('booked_by', $receptionists_doctor_id);
                         $re->orWhere('booked_by', $userId);
                     })
-                    ->groupBy(DB::raw('appointment_date'))->get();
+                    ->groupBy(DB::raw('appointment_date'), DB::raw('status'))
+                    ->get();
+            } else {
+                $appointment = Appointment::select(DB::raw('count(id) as `total_appointment`'), DB::raw('appointment_date'), DB::raw('status'))
+                    ->whereDate('appointment_date', '>=', $request->start)
+                    ->whereDate('appointment_date', '<=', $request->end)
+                    ->groupBy(DB::raw('appointment_date'), DB::raw('status'))
+                    ->get();
             }
 
-            if (empty($appointment)) {
+            if ($appointment->isEmpty()) {
                 $response = [
                     'status' => 'error',
                     'message' => 'No Appointments Found On '
@@ -881,27 +933,85 @@ class AppointmentController extends Controller
             $today = Carbon::today()->format('Y/m/d');
             $time = date('H:i:s');
             if ($role == 'doctor') {
-                $doctor_id = Doctor::where('user_id', $user_id)->pluck('id');
-                $Complete_appointment = Appointment::with('doctor', 'patient', 'timeSlot')->where(function ($re) use ($doctor_id) {
-                    $re->where('appointment_with', $doctor_id);
-                    $re->orWhere('booked_by', $doctor_id);
+                $doctor_row_id = Doctor::where('user_id', $user_id)->value('id');
+                $doctor_lookup_ids = collect([$doctor_row_id, $user_id])->filter()->unique()->values();
+                $Complete_appointment = Appointment::with('doctor.user', 'patient', 'timeSlot')->where(function ($re) use ($doctor_lookup_ids) {
+                    $re->whereIn('appointment_with', $doctor_lookup_ids);
+                    $re->orWhereIn('booked_by', $doctor_lookup_ids);
                 })->where('status', 1)->orderBy('id', 'DESC')->paginate($this->limit);
             } elseif ($role == 'patient') {
-                $Complete_appointment = Appointment::with('doctor', 'patient', 'timeSlot')->where(['status' => 1, 'appointment_for' => $user_id])->orderBy('id', 'DESC')->paginate($this->limit);
+                $Complete_appointment = Appointment::with('doctor.user', 'patient', 'timeSlot')->where(['status' => 1, 'appointment_for' => $user_id])->orderBy('id', 'DESC')->paginate($this->limit);
             } elseif ($role == 'receptionist') {
                 $receptionists_doctor_id = ReceptionListDoctor::where('reception_id', $user_id)->pluck('doctor_id');
-                $Complete_appointment = Appointment::with('doctor', 'patient', 'timeSlot')->where(function ($re) use ($user_id, $receptionists_doctor_id) {
-                    $re->whereIN('appointment_with', $receptionists_doctor_id);
-                    $re->orWhereIN('booked_by', $receptionists_doctor_id);
+                $receptionists_doctor_user_id = Doctor::whereIn('id', $receptionists_doctor_id)->pluck('user_id');
+                $receptionists_lookup_ids = $receptionists_doctor_id->merge($receptionists_doctor_user_id)->filter()->unique()->values();
+                $Complete_appointment = Appointment::with('doctor.user', 'patient', 'timeSlot')->where(function ($re) use ($user_id, $receptionists_lookup_ids) {
+                    $re->whereIN('appointment_with', $receptionists_lookup_ids);
+                    $re->orWhereIN('booked_by', $receptionists_lookup_ids);
                     $re->orWhere('booked_by', $user_id);
                 })->where('status', 1)->orderBy('id', 'DESC')->paginate($this->limit);
             } else {
-                $Complete_appointment = Appointment::with('doctor', 'patient')->where(['status' => 1])->orderBy('id', 'DESC')->paginate($this->limit);
+                $Complete_appointment = Appointment::with('doctor.user', 'patient', 'timeSlot')->where(['status' => 1])->orderBy('id', 'DESC')->paginate($this->limit);
             }
-            return view('appointment.complete-appointment', compact('user', 'role', 'Complete_appointment'));
+
+            $appointmentIds = $Complete_appointment->pluck('id');
+            $invoiceTotals = collect();
+            if ($appointmentIds->isNotEmpty()) {
+                try {
+                    $invoiceTotals = DB::table('invoices')
+                        ->join('invoice_details', 'invoices.id', '=', 'invoice_details.invoice_id')
+                        ->whereIn('invoices.appointment_id', $appointmentIds)
+                        ->where('invoices.is_deleted', 0)
+                        ->where('invoice_details.is_deleted', 0)
+                        ->selectRaw('invoices.appointment_id, SUM(invoice_details.amount) as total')
+                        ->groupBy('invoices.appointment_id')
+                        ->pluck('total', 'appointment_id');
+                } catch (\Throwable $e) {
+                    Log::error('No se pudieron calcular los totales de facturas para citas completadas', [
+                        'message' => $e->getMessage(),
+                        'role' => $role,
+                        'user_id' => $user_id,
+                    ]);
+                    $invoiceTotals = collect();
+                }
+            }
+
+            return view('appointment.complete-appointment', compact('user', 'role', 'Complete_appointment', 'invoiceTotals'));
         } else {
             return view('error.403');
         }
+    }
+
+    public function update_final_consultation_price(Request $request, $id)
+    {
+        $user = Sentinel::getUser();
+        if (!$user || !$user->hasAccess('appointment.status')) {
+            return response()->json([
+                'isSuccess' => false,
+                'message' => 'No tiene permisos para actualizar el precio final.'
+            ], 403);
+        }
+
+        $validated = $request->validate([
+            'final_consultation_price' => 'required|numeric|min:0',
+        ]);
+
+        $appointment = Appointment::where('id', $id)->where('status', 1)->first();
+        if (!$appointment) {
+            return response()->json([
+                'isSuccess' => false,
+                'message' => 'Cita completada no encontrada.'
+            ], 404);
+        }
+
+        $appointment->final_consultation_price = $validated['final_consultation_price'];
+        $appointment->save();
+
+        return response()->json([
+            'isSuccess' => true,
+            'message' => 'Precio final actualizado correctamente.',
+            'final_consultation_price' => (float) $appointment->final_consultation_price,
+        ], 200);
     }
 
     public function cancel_appointment(User $patient)
@@ -988,5 +1098,42 @@ class AppointmentController extends Controller
         } else {
             return view('error.403');
         }
+    }
+
+    public function appointment_view($id)
+    {
+        $user = Sentinel::getUser();
+        if (!$user || !$user->hasAccess('appointment.list')) {
+            return view('error.403');
+        }
+
+        $role = $user->roles[0]->slug;
+        $userId = $user->id;
+
+        $query = Appointment::with(['patient', 'doctor.user', 'BookedBy', 'timeSlot']);
+
+        if ($role == 'doctor') {
+            $doctorId = Doctor::where('user_id', $userId)->value('id');
+            $query->where(function ($q) use ($doctorId) {
+                $q->where('appointment_with', $doctorId)
+                    ->orWhere('booked_by', $doctorId);
+            });
+        } elseif ($role == 'patient') {
+            $query->where('appointment_for', $userId);
+        } elseif ($role == 'receptionist') {
+            $receptionistsDoctorIds = ReceptionListDoctor::where('reception_id', $userId)->pluck('doctor_id');
+            $query->where(function ($q) use ($userId, $receptionistsDoctorIds) {
+                $q->whereIn('appointment_with', $receptionistsDoctorIds)
+                    ->orWhereIn('booked_by', $receptionistsDoctorIds)
+                    ->orWhere('booked_by', $userId);
+            });
+        }
+
+        $appointment = $query->where('id', $id)->first();
+        if (!$appointment) {
+            return redirect()->back()->with('error', 'Cita no encontrada o sin permisos para verla.');
+        }
+
+        return view('appointment.appointment-view', compact('user', 'role', 'appointment'));
     }
 }

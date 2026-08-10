@@ -292,8 +292,20 @@
             <!-- Doctors Grid -->
             <div class="row" id="doctorsGrid">
                 @foreach($doctors as $doctor)
+                    @php
+                        $doctorDepartmentIds = $doctor->departments->pluck('id')->map(function ($id) {
+                            return (string) $id;
+                        })->toArray();
+                        if (empty($doctorDepartmentIds) && $doctor->department) {
+                            $doctorDepartmentIds = [(string) $doctor->department->id];
+                        }
+                        $doctorSpecialties = $doctor->departments->pluck('name')->toArray();
+                        if (empty($doctorSpecialties) && $doctor->department) {
+                            $doctorSpecialties = [$doctor->department->name];
+                        }
+                    @endphp
                     <div class="col-lg-3 col-md-6 doctor-item" 
-                         data-department="{{ $doctor->department ? $doctor->department->id : '' }}">
+                         data-departments="{{ implode(',', $doctorDepartmentIds) }}">
                         <div class="doctor-card">
                             @if($doctor->user && $doctor->user->profile_photo)
                                 <img src="{{ URL::asset('storage/images/users/'.$doctor->user->profile_photo) }}" alt="Doctor Photo">
@@ -301,7 +313,7 @@
                                 <img src="{{ URL::asset('build/images/users/avatar-1.jpg') }}" alt="Default Photo">
                             @endif
                             <h5>Dr. {{ $doctor->user ? $doctor->user->first_name.' '.$doctor->user->last_name : 'Doctor' }}</h5>
-                            <span class="specialty">{{ $doctor->department ? $doctor->department->name : 'Departamento' }}</span>
+                            <span class="specialty">{{ !empty($doctorSpecialties) ? implode(' / ', $doctorSpecialties) : 'Especialidad' }}</span>
                             <a href="{{ url('/schedule-appointment') }}?doctor_id={{ $doctor->id }}" class="btn view-schedule-btn">
                                 <i class="fas fa-calendar-alt me-2"></i>Agendar Cita
                             </a>
@@ -364,9 +376,9 @@
                 var searchText = $('#searchDoctor').val().toLowerCase();
 
                 $('.doctor-item').each(function() {
-                    var doctorDepartment = $(this).data('department');
+                    var doctorDepartments = String($(this).data('departments') || '').split(',').filter(Boolean);
                     var doctorName = $(this).find('h5').text().toLowerCase();
-                    var showByDepartment = !departmentId || doctorDepartment == departmentId;
+                    var showByDepartment = !departmentId || doctorDepartments.includes(String(departmentId));
                     var showByName = !searchText || doctorName.includes(searchText);
                     
                     $(this).toggle(showByDepartment && showByName);

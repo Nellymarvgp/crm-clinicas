@@ -58,6 +58,7 @@
                                             <th>{{ __('Fecha') }}</th>
                                             <th>{{ __('Hora') }}</th>
                                             <th>{{ __('Estado') }}</th>
+                                            <th>{{ __('Acción') }}</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -85,12 +86,24 @@
                                                 <td>{{ $item->appointment_date }}</td>
                                                 <td>{{ optional($item->timeSlot)->from ? optional($item->timeSlot)->from . ' a ' . optional($item->timeSlot)->to : 'Sin horario' }}</td>
                                                 <td>
-                                                    @if ($role == 'doctor' || $role == 'receptionist')
+                                                    @if ($item->status == 1)
+                                                        <span class="badge badge-pill text-white" style="background-color:#198754;">Completado</span>
+                                                    @elseif($item->status == 2)
+                                                        <span class="badge badge-pill text-white" style="background-color:#dc3545;">Cancelado</span>
+                                                    @else
+                                                        <span class="badge badge-pill text-white" style="background-color:#0dcaf0;">Pendiente</span>
+                                                    @endif
+                                                </td>
+                                                <td>
+                                                    <a href="{{ url('appointment-view/' . $item->id) }}" class="btn btn-primary btn-sm mb-1">Ver</a>
+                                                    @if (($role == 'doctor' || $role == 'receptionist') && (int) $item->status !== 1)
                                                         <button type="button" class="btn btn-success complete"
                                                             data-id="{{ $item->id }}">Completar</button>
                                                     @endif
-                                                    <button type="button" class="btn btn-danger cancel"
-                                                        data-id="{{ $item->id }}">Cancelar</button>
+                                                    @if ((int) $item->status !== 1)
+                                                        <button type="button" class="btn btn-danger cancel"
+                                                            data-id="{{ $item->id }}">Cancelar</button>
+                                                    @endif
                                                 </td>
                                             </tr>
                                         @endforeach
@@ -109,6 +122,8 @@
                                             <th>{{ __('Correo del Paciente') }}</th>
                                             <th>{{ __('Fecha') }}</th>
                                             <th>{{ __('Hora') }}</th>
+                                            <th>{{ __('Estado') }}</th>
+                                            <th>{{ __('Acción') }}</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -135,6 +150,22 @@
                                                 <td>{{ $item->patient->email }}</td>
                                                 <td>{{ $item->appointment_date }}</td>
                                                 <td>{{ optional($item->timeSlot)->from ? optional($item->timeSlot)->from . ' a ' . optional($item->timeSlot)->to : 'Sin horario' }}</td>
+                                                <td>
+                                                    @if ($item->status == 1)
+                                                        <span class="badge badge-pill text-white" style="background-color:#198754;">Completado</span>
+                                                    @elseif($item->status == 2)
+                                                        <span class="badge badge-pill text-white" style="background-color:#dc3545;">Cancelado</span>
+                                                    @else
+                                                        <span class="badge badge-pill text-white" style="background-color:#0dcaf0;">Pendiente</span>
+                                                    @endif
+                                                </td>
+                                                <td>
+                                                    <a href="{{ url('appointment-view/' . $item->id) }}" class="btn btn-primary btn-sm mb-1">Ver</a>
+                                                    @if (($role == 'doctor' || $role == 'receptionist' || $role == 'admin') && (int) $item->status !== 1)
+                                                        <button type="button" class="btn btn-success btn-sm complete mb-1" data-id="{{ $item->id }}">Completar</button>
+                                                        <button type="button" class="btn btn-danger btn-sm cancel mb-1" data-id="{{ $item->id }}">Cancelar</button>
+                                                    @endif
+                                                </td>
                                             </tr>
                                         @endforeach
                                     </tbody>
@@ -152,6 +183,8 @@
                                             <th>{{ __('Correo del Paciente') }}</th>
                                             <th>{{ __('Fecha') }}</th>
                                             <th>{{ __('Hora') }}</th>
+                                            <th>{{ __('Estado') }}</th>
+                                            <th>{{ __('Acción') }}</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -178,6 +211,22 @@
                                                 <td>{{ $item->patient->email }}</td>
                                                 <td>{{ $item->appointment_date }}</td>
                                                 <td>{{ optional($item->timeSlot)->from ? optional($item->timeSlot)->from . ' a ' . optional($item->timeSlot)->to : 'Sin horario' }}</td>
+                                                <td>
+                                                    @if ($item->status == 1)
+                                                        <span class="badge badge-pill text-white" style="background-color:#198754;">Completado</span>
+                                                    @elseif($item->status == 2)
+                                                        <span class="badge badge-pill text-white" style="background-color:#dc3545;">Cancelado</span>
+                                                    @else
+                                                        <span class="badge badge-pill text-white" style="background-color:#0dcaf0;">Pendiente</span>
+                                                    @endif
+                                                </td>
+                                                <td>
+                                                    <a href="{{ url('appointment-view/' . $item->id) }}" class="btn btn-primary btn-sm mb-1">Ver</a>
+                                                    @if (($role == 'doctor' || $role == 'receptionist' || $role == 'admin') && (int) $item->status !== 1)
+                                                        <button type="button" class="btn btn-success btn-sm complete mb-1" data-id="{{ $item->id }}">Completar</button>
+                                                        <button type="button" class="btn btn-danger btn-sm cancel mb-1" data-id="{{ $item->id }}">Cancelar</button>
+                                                    @endif
+                                                </td>
                                             </tr>
                                         @endforeach
                                     </tbody>
@@ -195,6 +244,8 @@
                                             <th>{{ __('Correo del Paciente') }}</th>
                                             <th>{{ __('Fecha') }}</th>
                                             <th>{{ __('Hora') }}</th>
+                                            <th>{{ __('Estado') }}</th>
+                                            <th>{{ __('Acción') }}</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -221,11 +272,28 @@
                                                 <td>{{ $item->patient->email }}</td>
                                                 <td>{{ $item->appointment_date }}</td>
                                                 <td>{{ optional($item->timeSlot)->from ? optional($item->timeSlot)->from . ' a ' . optional($item->timeSlot)->to : 'Sin horario' }}</td>
+                                                <td>
+                                                    @if ($item->status == 1)
+                                                        <span class="badge badge-pill text-white" style="background-color:#198754;">Completado</span>
+                                                    @elseif($item->status == 2)
+                                                        <span class="badge badge-pill text-white" style="background-color:#dc3545;">Cancelado</span>
+                                                    @else
+                                                        <span class="badge badge-pill text-white" style="background-color:#0dcaf0;">Pendiente</span>
+                                                    @endif
+                                                </td>
+                                                <td>
+                                                    <a href="{{ url('appointment-view/' . $item->id) }}" class="btn btn-primary btn-sm mb-1">Ver</a>
+                                                    @if (($role == 'doctor' || $role == 'receptionist' || $role == 'admin') && (int) $item->status !== 1)
+                                                        <button type="button" class="btn btn-success btn-sm complete mb-1" data-id="{{ $item->id }}">Completar</button>
+                                                        <button type="button" class="btn btn-danger btn-sm cancel mb-1" data-id="{{ $item->id }}">Cancelar</button>
+                                                    @endif
+                                                </td>
                                             </tr>
                                         @endforeach
                                     </tbody>
                                 </table>
                             </div>
+                            <input type="hidden" id="csrf_token_value" value="{{ csrf_token() }}">
                         </div>
                     </div>
                 </div>
@@ -240,69 +308,10 @@
         <!-- Init js-->
         <script src="{{ URL::asset('build/js/pages/datatables.init.js') }}"></script>
         <script src="{{ URL::asset('build/js/pages/notification.init.js') }}"></script>
+        <script src="{{ URL::asset('build/js/pages/appointment.js') }}"></script>
     @endsection
     @section('script-bottom')
         <script>
-            // complete appointment
-            $('.complete').click(function(e) {
-                var id = $(this).data('id');
-                var token = $("input[name='_token']").val();
-                var status = 1;
-                if (confirm('Are you sure you want to confirm appointment?')) {
-                    $.ajax({
-                        type: "post",
-                        url: "appointment-status/" + id,
-                        data: {
-                            'appointment_id': id,
-                            '_token': token,
-                            'status': status
-                        },
-                        beforeSend: function() {
-                            $('#preloader').show()
-                        },
-                        success: function(response) {
-                            toastr.success(reponse.Message);
-                            location.reload();
-                        },
-                        error: function(response) {
-                            toastr.error(response.responseJSON.message);
-                        },
-                        complete: function() {
-                            $('#preloader').hide();
-                        }
-                    });
-                }
-            });
-            // cancel appointment
-            $('.cancel').click(function(e) {
-                var id = $(this).data('id');
-                var token = $("input[name='_token']").val();
-                var status = 2;
-                if (confirm('Are you sure you want to cancel appointment?')) {
-                    $.ajax({
-                        type: "post",
-                        url: "appointment-status/" + id,
-                        data: {
-                            'appointment_id': id,
-                            '_token': token,
-                            'status': status
-                        },
-                        beforeSend: function() {
-                            $('#preloader').show()
-                        },
-                        success: function(response) {
-                            toastr.success(reponse.Message);
-                            location.reload();
-                        },
-                        error: function(response) {
-                            toastr.error(response.responseJSON.message);
-                        },
-                        complete: function() {
-                            $('#preloader').hide();
-                        }
-                    });
-                }
-            });
             // active tab
             if (window.location.href) {
                 var url = window.location.href;

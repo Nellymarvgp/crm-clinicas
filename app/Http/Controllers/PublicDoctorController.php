@@ -15,7 +15,7 @@ class PublicDoctorController extends Controller
      */
     public function findDoctorPage()
     {
-        $doctors = Doctor::with(['user', 'department'])
+        $doctors = Doctor::with(['user', 'department', 'departments'])
             ->whereHas('user', function($q) {
                 $q->where('is_deleted', 0);
             })
