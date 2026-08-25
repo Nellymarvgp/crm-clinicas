@@ -192,31 +192,31 @@
                                         <tbody>
                                             <tr>
                                                 <th scope="row"><?php echo e(__('Estatura')); ?></th>
-                                                <td> <?php echo e(@$medical_Info->height); ?> </td>
+                                                <td> <?php echo e($medical_Info->height ?? __('No registrado')); ?> </td>
                                             </tr>
                                             <tr>
                                                 <th scope="row"><?php echo e(__('Peso')); ?></th>
-                                                <td> <?php echo e(@$medical_Info->weight); ?> </td>
+                                                <td> <?php echo e($medical_Info->weight ?? __('No registrado')); ?> </td>
                                             </tr>
                                             <tr>
                                                 <th scope="row"><?php echo e(__('Grupo Sanguíneo')); ?></th>
-                                                <td> <?php echo e(@$medical_Info->b_group); ?> </td>
+                                                <td> <?php echo e($medical_Info->b_group ?? __('No registrado')); ?> </td>
                                             </tr>
                                             <tr>
                                                 <th scope="row"><?php echo e(__('Presión Arterial')); ?></th>
-                                                <td> <?php echo e(@$medical_Info->b_pressure); ?> </td>
+                                                <td> <?php echo e($medical_Info->b_pressure ?? __('No registrado')); ?> </td>
                                             </tr>
                                             <tr>
                                                 <th scope="row"><?php echo e(__('Pulso')); ?></th>
-                                                <td> <?php echo e(@$medical_Info->pulse); ?> </td>
+                                                <td> <?php echo e($medical_Info->pulse ?? __('No registrado')); ?> </td>
                                             </tr>
                                             <tr>
                                                 <th scope="row"><?php echo e(__('Respiración')); ?></th>
-                                                <td> <?php echo e(@$medical_Info->respiration); ?> </td>
+                                                <td> <?php echo e($medical_Info->respiration ?? __('No registrado')); ?> </td>
                                             </tr>
                                             <tr>
                                                 <th scope="row"><?php echo e(__('Alergia')); ?></th>
-                                                <td> <?php echo e(@$medical_Info->allergy); ?> </td>
+                                                <td> <?php echo e($medical_Info->allergy ?? __('No registrado')); ?> </td>
                                             </tr>
                                             <tr>
                                                 <th scope="row"><?php echo e(__('Dieta')); ?></th>
