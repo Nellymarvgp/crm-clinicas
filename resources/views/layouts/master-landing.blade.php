@@ -1,13 +1,20 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 
 <head>
     <meta charset="utf-8" />
-    <title>@yield('title') | CORE - Centro Odontológico de Rehabilitación Estética</title>
+    @php
+        $brandName = AppSetting('title');
+        $brandShortName = trim(explode(' ', $brandName)[0]);
+        $brandLogoSmall = AppSetting('logo_dark_sm');
+        $footerLeft = AppSetting('footer_left');
+        $footerRight = AppSetting('footer_right');
+    @endphp
+    <title>@yield('title') | {{ $brandName }}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="CORE es un centro odontológico orientado a rehabilitación estética, control de pacientes y especialidades dentales.">
     <meta name="keywords" content="CORE, odontología, rehabilitación estética, clínica dental, citas odontológicas, Venezuela">
-    <meta name="author" content="CORE">
+    <meta name="author" content="{{ $brandName }}">
 
     <!-- App favicon -->
     <link rel="shortcut icon" href="{{ URL::asset('build/images/') . '/' . AppSetting('favicon') }}">
@@ -41,6 +48,11 @@
         .navbar-custom .navbar-nav .nav-link:hover,
         .navbar-custom .navbar-nav .nav-link.active {
             color: var(--secondary-color);
+        }
+        .brand-logo-image {
+            max-height: 42px;
+            max-width: 150px;
+            object-fit: contain;
         }
         /* Footer styles */
         .footer {
@@ -110,8 +122,7 @@
             <div class="container">
                 <a class="navbar-brand logo" href="/">
                     <span class="d-flex align-items-center gap-2 fw-bold" style="color: #7c7c7b;">
-                        <i class="fas fa-tooth"></i>
-                        CORE
+                        <img src="{{ URL::asset('build/images/' . $brandLogoSmall) }}" alt="{{ $brandName }}" class="brand-logo-image">
                     </span>
                 </a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
@@ -125,7 +136,10 @@
                             <a class="nav-link" href="/#home">Inicio</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="/#services">Servicios</a>
+                            <a class="nav-link" href="/#services">Especialidades</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/#brand">Nosotros</a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link" href="/#commitment">Compromiso</a>
@@ -134,7 +148,7 @@
                             <a class="nav-link" href="/#team">Equipo</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="{{ route('doctors.find') }}">Doctores</a>
+                            <a class="nav-link" href="{{ route('doctors.find') }}">Odontólogos</a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link" href="/#contact">Contacto</a>
@@ -158,8 +172,8 @@
         <div class="container">
             <div class="row">
                 <div class="col-lg-4 col-md-6 mb-4 mb-lg-0">
-                    <h4>Sobre Nosotros</h4>
-                    <p>CORE es un centro odontológico especializado en rehabilitación estética, prevención y atención integral de la sonrisa.</p>
+                        <h4>{{ $brandName }}</h4>
+                    <p>{{ $footerLeft }}</p>
                     <div class="social-links mt-3">
                         <a href="#"><i class="fab fa-facebook-f"></i></a>
                         <a href="#"><i class="fab fa-twitter"></i></a>
@@ -171,8 +185,11 @@
                     <h4>Enlaces Rápidos</h4>
                     <ul>
                         <li><a href="/#home">Inicio</a></li>
-                        <li><a href="/#services">Servicios</a></li>
-                        <li><a href="/#team">Nuestro Equipo</a></li>
+                        <li><a href="/#services">Especialidades</a></li>
+                        <li><a href="/#brand">Nosotros</a></li>
+                        <li><a href="/#commitment">Compromiso</a></li>
+                        <li><a href="/#team">Equipo</a></li>
+                        <li><a href="{{ route('doctors.find') }}">Odontólogos</a></li>
                         <li><a href="/#contact">Contacto</a></li>
                     </ul>
                 </div>
@@ -181,12 +198,12 @@
                     <ul>
                         <li><i class="fas fa-map-marker-alt me-2"></i> Av. Principal #123, Ciudad</li>
                         <li><i class="fas fa-phone me-2"></i> (123) 456-7890</li>
-                        <li><i class="fas fa-envelope me-2"></i> info@centromedicobosque.com</li>
+                        <li><i class="fas fa-envelope me-2"></i> {{ $footerRight }}</li>
                     </ul>
                 </div>
             </div>
             <div class="footer-bottom text-center">
-                <p class="mb-0">&copy; {{ date('Y') }} CORE. Todos los derechos reservados.</p>
+                <p class="mb-0">&copy; {{ date('Y') }} {{ $brandName }}. {{ $footerRight }}</p>
             </div>
         </div>
     </footer>

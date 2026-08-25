@@ -22,6 +22,17 @@ use Illuminate\Support\Facades\Route;
 
 Route::get("/", [LandingController::class, "index"]);
 
+Route::get('/storage/{path}', function ($path) {
+    $storagePath = realpath(public_path('storage/' . $path));
+    $storageRoot = realpath(public_path('storage'));
+
+    if (!$storagePath || !$storageRoot || strpos($storagePath, $storageRoot . DIRECTORY_SEPARATOR) !== 0 || !is_file($storagePath)) {
+        abort(404);
+    }
+
+    return response()->file($storagePath);
+})->where('path', '.*');
+
 //Language Translation
 Route::get('index/{locale}', [App\Http\Controllers\HomeController::class, 'lang']);
 
