@@ -1,4 +1,4 @@
-<?php $__env->startSection('title'); ?> <?php echo e(__('Update Doctor Time Slot')); ?> <?php $__env->stopSection(); ?>
+<?php $__env->startSection('title'); ?> <?php echo e(__('Actualizar horario del odontólogo')); ?> <?php $__env->stopSection(); ?>
 <?php $__env->startSection('css'); ?>
     <link rel="stylesheet" type="text/css" href="<?php echo e(URL::asset('build/libs/select2/css/select2.min.css')); ?>">
 <?php $__env->stopSection(); ?>
@@ -8,15 +8,15 @@
             <div class="col-12">
                 <div class="page-title-box d-flex align-items-center justify-content-between">
                     <h4 class="mb-0 font-size-18">
-                        <?php echo e(__('Update Doctor Time Slot')); ?>
+                        <?php echo e(__('Actualizar horario del odontólogo')); ?>
 
                     </h4>
                     <div class="page-title-right">
                         <ol class="breadcrumb m-0">
-                            <li class="breadcrumb-item"><a href="<?php echo e(url('/dashboard')); ?>"><?php echo e(__('Dashboard')); ?></a></li>
-                            <li class="breadcrumb-item"><a href="<?php echo e(url('doctor')); ?>"><?php echo e(__('Doctors')); ?></a></li>
+                            <li class="breadcrumb-item"><a href="<?php echo e(url('/dashboard')); ?>"><?php echo e(__('Panel')); ?></a></li>
+                            <li class="breadcrumb-item"><a href="<?php echo e(url('doctor')); ?>"><?php echo e(__('Odontólogos')); ?></a></li>
                             <li class="breadcrumb-item active">
-                                <?php echo e(__('Update Doctor Time Slot')); ?>
+                                <?php echo e(__('Actualizar horario del odontólogo')); ?>
 
                             </li>
                         </ol>
@@ -30,14 +30,14 @@
                 <?php if($role == 'doctor'): ?>
                     <a href="<?php echo e(url('/dashboard')); ?>">
                         <button type="button" class="btn btn-primary waves-effect waves-light mb-4">
-                            <i class="bx bx-arrow-back font-size-16 align-middle me-2"></i><?php echo e(__('Back to Dashboard')); ?>
+                            <i class="bx bx-arrow-back font-size-16 align-middle me-2"></i><?php echo e(__('Volver al panel')); ?>
 
                         </button>
                     </a>
                 <?php else: ?>
                     <a href="<?php echo e(url('doctor/' . $doctor->id)); ?>">
                         <button type="button" class="btn btn-primary waves-effect waves-light mb-4">
-                            <i class="bx bx-arrow-back font-size-16 align-middle me-2"></i><?php echo e(__('Back to Profile')); ?>
+                            <i class="bx bx-arrow-back font-size-16 align-middle me-2"></i><?php echo e(__('Volver al perfil')); ?>
 
                         </button>
                     </a>
@@ -55,7 +55,7 @@
                             <input type="hidden" name="id" id="time_id" />
                             <div class="row">
                                 <div class="col-md-4 mb-3">
-                                    <label class="form-label"><?php echo e(__('Slots Time (In Minute) ')); ?><span
+                                    <label class="form-label"><?php echo e(__('Duración de cada cita (minutos) ')); ?><span
                                             class="text-danger">*</span></label>
                                     <select class="form-control select2 <?php $__errorArgs = ['slot_time'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
@@ -93,11 +93,11 @@ unset($__errorArgs, $__bag); ?>
                                 <div class="col-md-5">
                                     <div class='repeater mb-4'>
                                         <div data-repeater-list="TimeSlot" class="mb-3">
-                                            <label><?php echo e(__('Available Time ')); ?><span
+                                            <label><?php echo e(__('Horario de atención ')); ?><span
                                                     class="text-danger">*</span></label>
                                             <div data-repeater-item class="mb-3 row">
                                                 <div class="col-md-5 col-6">
-                                                    <label class="label-control">From:</label>
+                                                    <label class="label-control">Desde:</label>
                                                     <input type="time" name="from"
                                                         class="form-control timecount  <?php $__errorArgs = ['TimeSlot.*.from'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
@@ -107,7 +107,7 @@ $message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
 if (isset($__messageOriginal)) { $message = $__messageOriginal; }
 endif;
 unset($__errorArgs, $__bag); ?>"
-                                                        placeholder="<?php echo e(__('From time')); ?>" />
+                                                        placeholder="<?php echo e(__('Hora de inicio')); ?>" />
                                                     <?php $__errorArgs = ['TimeSlot.*'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
 if ($__bag->has($__errorArgs[0])) :
@@ -122,7 +122,7 @@ endif;
 unset($__errorArgs, $__bag); ?>
                                                 </div>
                                                 <div class="col-md-5 col-6">
-                                                    <label class="label-control">To:</label>
+                                                    <label class="label-control">Hasta:</label>
                                                     <input type="time" name="to"
                                                         class="form-control  <?php $__errorArgs = ['TimeSlot.*.to'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
@@ -132,7 +132,7 @@ $message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
 if (isset($__messageOriginal)) { $message = $__messageOriginal; }
 endif;
 unset($__errorArgs, $__bag); ?>"
-                                                        placeholder="<?php echo e(__('To time')); ?>" onchange="valinput0()" />
+                                                        placeholder="<?php echo e(__('Hora de finalización')); ?>" onchange="valinput0()" />
                                                     <?php $__errorArgs = ['TimeSlot.*.to'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
 if ($__bag->has($__errorArgs[0])) :
@@ -154,7 +154,7 @@ unset($__errorArgs, $__bag); ?>
                                             </div>
                                         </div>
                                         <p class="para error d-none"></p>
-                                        <input data-repeater-create type="button" class="btn btn-primary" value="Add Time"
+                                        <input data-repeater-create type="button" class="btn btn-primary" value="Agregar horario"
                                             onclick="change()" id="btn-x" />
                                     </div>
                                 </div>
@@ -162,7 +162,7 @@ unset($__errorArgs, $__bag); ?>
                             <div class="row">
                                 <div class="col-md-12">
                                     <button type="submit" class="btn btn-primary">
-                                        Update Time
+                                        Actualizar horario
                                     </button>
                                 </div>
                             </div>
@@ -225,7 +225,7 @@ unset($__errorArgs, $__bag); ?>
                 eet.setMinutes(et[1]);
                 if (sst > eet) {
                     error = 1;
-                    $('.para').html('to value is bigger then from');
+                    $('.para').html('La hora de finalización debe ser posterior a la hora de inicio');
                     $('.para').addClass('d-block');
                 } else {
                     error = 0;
@@ -266,7 +266,7 @@ unset($__errorArgs, $__bag); ?>
                     if (cct < cff) {
                         if (sst < cct && eet > cct) {
                             error = 1;
-                            $('.para').html('Value not accepted');
+                            $('.para').html('El horario se cruza con otro horario existente');
                             $('.para').addClass('d-block');
                             break;
                         } else {
@@ -274,7 +274,7 @@ unset($__errorArgs, $__bag); ?>
                             $('.para').removeClass('d-block');
                         }
                     } else {
-                        $('.para').html('to value is bigger then from');
+                        $('.para').html('La hora de finalización debe ser posterior a la hora de inicio');
                         $('.para').addClass('d-block');
                         break;
                     }

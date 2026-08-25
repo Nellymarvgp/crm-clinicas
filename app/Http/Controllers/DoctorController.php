@@ -729,9 +729,9 @@ class DoctorController extends Controller
                 }
             }
             if ($role == 'doctor') {
-                return redirect('/dashboard')->with('success', 'Profile updated successfully!');
+                return redirect('/dashboard')->with('success', 'Horario actualizado correctamente.');
             } else {
-                return redirect('doctor')->with('success', 'Doctor Profile updated successfully!');
+                return redirect('doctor')->with('success', 'Horario del odontólogo actualizado correctamente.');
             }
         } else {
             return view('error.403');
@@ -747,13 +747,13 @@ class DoctorController extends Controller
         if ($availableTime) {
             return response()->json([
                 'isSuccess' => true,
-                'Message' => "Doctor Available Time Get Successfully",
+                'Message' => "Horario del odontólogo obtenido correctamente",
                 'data' => $availableTime
             ]);
         }
         return response()->json([
             'isSuccess' => false,
-            'Message' => "Doctor availableTime not found",
+            'Message' => "No se encontró el horario del odontólogo",
         ]);
     }
     public function doctor_view($id){

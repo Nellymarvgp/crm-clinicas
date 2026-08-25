@@ -1,5 +1,5 @@
 @extends('layouts.master-layouts')
-@section('title') {{ __('Update Doctor Time Slot') }} @endsection
+@section('title') {{ __('Actualizar horario del odontólogo') }} @endsection
 @section('css')
     <link rel="stylesheet" type="text/css" href="{{ URL::asset('build/libs/select2/css/select2.min.css') }}">
 @endsection
@@ -9,14 +9,14 @@
             <div class="col-12">
                 <div class="page-title-box d-flex align-items-center justify-content-between">
                     <h4 class="mb-0 font-size-18">
-                        {{ __('Update Doctor Time Slot') }}
+                        {{ __('Actualizar horario del odontólogo') }}
                     </h4>
                     <div class="page-title-right">
                         <ol class="breadcrumb m-0">
-                            <li class="breadcrumb-item"><a href="{{ url('/dashboard') }}">{{ __('Dashboard') }}</a></li>
-                            <li class="breadcrumb-item"><a href="{{ url('doctor') }}">{{ __('Doctors') }}</a></li>
+                            <li class="breadcrumb-item"><a href="{{ url('/dashboard') }}">{{ __('Panel') }}</a></li>
+                            <li class="breadcrumb-item"><a href="{{ url('doctor') }}">{{ __('Odontólogos') }}</a></li>
                             <li class="breadcrumb-item active">
-                                {{ __('Update Doctor Time Slot') }}
+                                {{ __('Actualizar horario del odontólogo') }}
                             </li>
                         </ol>
                     </div>
@@ -29,13 +29,13 @@
                 @if ($role == 'doctor')
                     <a href="{{ url('/dashboard') }}">
                         <button type="button" class="btn btn-primary waves-effect waves-light mb-4">
-                            <i class="bx bx-arrow-back font-size-16 align-middle me-2"></i>{{ __('Back to Dashboard') }}
+                            <i class="bx bx-arrow-back font-size-16 align-middle me-2"></i>{{ __('Volver al panel') }}
                         </button>
                     </a>
                 @else
                     <a href="{{ url('doctor/' . $doctor->id) }}">
                         <button type="button" class="btn btn-primary waves-effect waves-light mb-4">
-                            <i class="bx bx-arrow-back font-size-16 align-middle me-2"></i>{{ __('Back to Profile') }}
+                            <i class="bx bx-arrow-back font-size-16 align-middle me-2"></i>{{ __('Volver al perfil') }}
                         </button>
                     </a>
                 @endif
@@ -52,7 +52,7 @@
                             <input type="hidden" name="id" id="time_id" />
                             <div class="row">
                                 <div class="col-md-4 mb-3">
-                                    <label class="form-label">{{ __('Slots Time (In Minute) ') }}<span
+                                    <label class="form-label">{{ __('Duración de cada cita (minutos) ') }}<span
                                             class="text-danger">*</span></label>
                                     <select class="form-control select2 @error('slot_time') is-invalid @enderror"
                                         name="slot_time" id="slot_time">
@@ -75,14 +75,14 @@
                                 <div class="col-md-5">
                                     <div class='repeater mb-4'>
                                         <div data-repeater-list="TimeSlot" class="mb-3">
-                                            <label>{{ __('Available Time ') }}<span
+                                            <label>{{ __('Horario de atención ') }}<span
                                                     class="text-danger">*</span></label>
                                             <div data-repeater-item class="mb-3 row">
                                                 <div class="col-md-5 col-6">
-                                                    <label class="label-control">From:</label>
+                                                    <label class="label-control">Desde:</label>
                                                     <input type="time" name="from"
                                                         class="form-control timecount  @error('TimeSlot.*.from') is-invalid @enderror"
-                                                        placeholder="{{ __('From time') }}" />
+                                                        placeholder="{{ __('Hora de inicio') }}" />
                                                     @error('TimeSlot.*')
                                                         <span class="invalid-feedback" role="alert">
                                                             <strong>{{ $message }}</strong>
@@ -90,10 +90,10 @@
                                                     @enderror
                                                 </div>
                                                 <div class="col-md-5 col-6">
-                                                    <label class="label-control">To:</label>
+                                                    <label class="label-control">Hasta:</label>
                                                     <input type="time" name="to"
                                                         class="form-control  @error('TimeSlot.*.to') is-invalid @enderror"
-                                                        placeholder="{{ __('To time') }}" onchange="valinput0()" />
+                                                        placeholder="{{ __('Hora de finalización') }}" onchange="valinput0()" />
                                                     @error('TimeSlot.*.to')
                                                         <span class="invalid-feedback" role="alert">
                                                             <strong>{{ $message }}</strong>
@@ -108,7 +108,7 @@
                                             </div>
                                         </div>
                                         <p class="para error d-none"></p>
-                                        <input data-repeater-create type="button" class="btn btn-primary" value="Add Time"
+                                        <input data-repeater-create type="button" class="btn btn-primary" value="Agregar horario"
                                             onclick="change()" id="btn-x" />
                                     </div>
                                 </div>
@@ -116,7 +116,7 @@
                             <div class="row">
                                 <div class="col-md-12">
                                     <button type="submit" class="btn btn-primary">
-                                        Update Time
+                                        Actualizar horario
                                     </button>
                                 </div>
                             </div>
@@ -179,7 +179,7 @@
                 eet.setMinutes(et[1]);
                 if (sst > eet) {
                     error = 1;
-                    $('.para').html('to value is bigger then from');
+                    $('.para').html('La hora de finalización debe ser posterior a la hora de inicio');
                     $('.para').addClass('d-block');
                 } else {
                     error = 0;
@@ -220,7 +220,7 @@
                     if (cct < cff) {
                         if (sst < cct && eet > cct) {
                             error = 1;
-                            $('.para').html('Value not accepted');
+                            $('.para').html('El horario se cruza con otro horario existente');
                             $('.para').addClass('d-block');
                             break;
                         } else {
@@ -228,7 +228,7 @@
                             $('.para').removeClass('d-block');
                         }
                     } else {
-                        $('.para').html('to value is bigger then from');
+                        $('.para').html('La hora de finalización debe ser posterior a la hora de inicio');
                         $('.para').addClass('d-block');
                         break;
                     }
