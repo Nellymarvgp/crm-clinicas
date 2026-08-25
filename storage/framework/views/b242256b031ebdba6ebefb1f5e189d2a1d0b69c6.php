@@ -237,4 +237,4 @@
     <?php echo $__env->yieldContent('script'); ?>
 </body>
 </html>
-<?php /**PATH C:\wamp64\www\appyweb\crm_clinicas\crm-clinicas\resources\views\layouts\master-landing.blade.php ENDPATH**/ ?>
+<?php /**PATH C:\wamp64\www\appyweb\crm_clinicas\crm-clinicas\resources\views/layouts/master-landing.blade.php ENDPATH**/ ?>
