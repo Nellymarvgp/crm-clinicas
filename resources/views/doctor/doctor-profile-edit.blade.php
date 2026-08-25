@@ -266,7 +266,9 @@
                                             <input type="file"
                                                 class="form-control @error('profile_photo') is-invalid @enderror"
                                                 tabindex="8" name="profile_photo" id="profile_photo" style="display:none;"
+                                                accept="image/jpeg,image/png,image/gif,image/svg+xml"
                                                 onchange="displayProfile(this)">
+                                            <small id="profile-photo-size-error" class="text-danger d-none">{{ __('La foto de perfil no debe superar los 500 KB.') }}</small>
                                             @error('profile_photo')
                                                 <span class="invalid-feedback" role="alert">
                                                     <strong>{{ $message }}</strong>
@@ -308,6 +310,12 @@
 
             function displayProfile(e) {
                 if (e.files[0]) {
+                    if (e.files[0].size > 500 * 1024) {
+                        e.value = '';
+                        document.querySelector('#profile-photo-size-error').classList.remove('d-none');
+                        return;
+                    }
+                    document.querySelector('#profile-photo-size-error').classList.add('d-none');
                     var reader = new FileReader();
                     reader.onload = function(e) {
                         document.querySelector('#profile_display').setAttribute('src', e.target.result);
