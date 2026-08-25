@@ -200,31 +200,31 @@
                                         <tbody>
                                             <tr>
                                                 <th scope="row">{{ __('Estatura') }}</th>
-                                                <td> {{ $medical_Info->height }} </td>
+                                                <td> {{ $medical_Info->height ?? __('No registrado') }} </td>
                                             </tr>
                                             <tr>
                                                 <th scope="row">{{ __('Peso') }}</th>
-                                                <td> {{ $medical_Info->weight }} </td>
+                                                <td> {{ $medical_Info->weight ?? __('No registrado') }} </td>
                                             </tr>
                                             <tr>
                                                 <th scope="row">{{ __('Grupo Sanguíneo') }}</th>
-                                                <td> {{ $medical_Info->b_group }} </td>
+                                                <td> {{ $medical_Info->b_group ?? __('No registrado') }} </td>
                                             </tr>
                                             <tr>
                                                 <th scope="row">{{ __('Presión Arterial') }}</th>
-                                                <td> {{ $medical_Info->b_pressure }} </td>
+                                                <td> {{ $medical_Info->b_pressure ?? __('No registrado') }} </td>
                                             </tr>
                                             <tr>
                                                 <th scope="row">{{ __('Pulso') }}</th>
-                                                <td> {{ $medical_Info->pulse }} </td>
+                                                <td> {{ $medical_Info->pulse ?? __('No registrado') }} </td>
                                             </tr>
                                             <tr>
                                                 <th scope="row">{{ __('Respiración') }}</th>
-                                                <td> {{ $medical_Info->respiration }} </td>
+                                                <td> {{ $medical_Info->respiration ?? __('No registrado') }} </td>
                                             </tr>
                                             <tr>
                                                 <th scope="row">{{ __('Alergia') }}</th>
-                                                <td> {{ $medical_Info->allergy }} </td>
+                                                <td> {{ $medical_Info->allergy ?? __('No registrado') }} </td>
                                             </tr>
                                             <tr>
                                                 <th scope="row">{{ __('Dieta') }}</th>
