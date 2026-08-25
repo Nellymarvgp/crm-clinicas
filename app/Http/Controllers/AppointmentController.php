@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Appointment;
+use App\DentalEvaluation;
 use App\Doctor;
 use App\DoctorAvailableDay;
 use App\DoctorAvailableSlot;
@@ -17,6 +18,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Exception;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Str;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Config;
 
@@ -51,7 +53,7 @@ class AppointmentController extends Controller
     public function index()
     {
         $user = Sentinel::getUser();
-        if ($user->hasAccess('appointment.create')) {
+        if ($user && $user->hasAccess('appointment.create')) {
             return redirect('appointment/create');
         } else {
             return view('error.403');
@@ -65,7 +67,7 @@ class AppointmentController extends Controller
     public function create()
     {
         $user = Sentinel::getUser();
-        if ($user->hasAccess('appointment.create')) {
+        if ($user && $user->hasAccess('appointment.create')) {
             $userId = $user->id;
             $role = $user->roles[0]->slug;
             $patient_role = Sentinel::findRoleBySlug('patient');
@@ -151,6 +153,9 @@ class AppointmentController extends Controller
     public function appointment_list(Request $request)
     {
         $user = Sentinel::getUser();
+        if (!$user) {
+            return response()->json(['status' => 'error', 'message' => 'Unauthorized'], 403);
+        }
         $role = $user->roles[0]->slug;
         $userId = $user->id;
         $selectedDate = $request->date;
@@ -1110,7 +1115,7 @@ class AppointmentController extends Controller
         $role = $user->roles[0]->slug;
         $userId = $user->id;
 
-        $query = Appointment::with(['patient', 'doctor.user', 'BookedBy', 'timeSlot']);
+        $query = Appointment::with(['patient', 'doctor.user', 'BookedBy', 'timeSlot', 'dentalEvaluation.images']);
 
         if ($role == 'doctor') {
             $doctorId = Doctor::where('user_id', $userId)->value('id');
@@ -1135,5 +1140,77 @@ class AppointmentController extends Controller
         }
 
         return view('appointment.appointment-view', compact('user', 'role', 'appointment'));
+    }
+
+    public function saveDentalEvaluation(Request $request, $id)
+    {
+        $user = Sentinel::getUser();
+        if (!$user || !$user->hasAccess('appointment.list')) {
+            return view('error.403');
+        }
+
+        $appointment = Appointment::find($id);
+        if (!$appointment) {
+            return redirect()->back()->with('error', 'Cita no encontrada.');
+        }
+
+        $role = $user->roles[0]->slug;
+        if ($role === 'doctor') {
+            $doctorId = Doctor::where('user_id', $user->id)->value('id');
+            if ((int) $appointment->appointment_with !== (int) $doctorId) {
+                return view('error.403');
+            }
+        }
+
+        $validated = $request->validate([
+            'diagnosis' => 'nullable|string|max:5000',
+            'treatment' => 'nullable|string|max:5000',
+            'quantity' => 'nullable|numeric|min:0',
+            'value' => 'nullable|numeric|min:0',
+            'clinical_notes' => 'nullable|string|max:10000',
+            'tooth_marks' => 'nullable|string',
+            'photos' => 'nullable|array|max:10',
+            'photos.*' => 'image|mimes:jpg,jpeg,png,webp|max:5120',
+        ]);
+
+        $toothMarks = [];
+        if (!empty($validated['tooth_marks'])) {
+            $toothMarks = json_decode($validated['tooth_marks'], true);
+            if (!is_array($toothMarks)) {
+                return redirect()->back()->withErrors(['tooth_marks' => 'El odontograma no tiene un formato válido.'])->withInput();
+            }
+        }
+
+        $evaluation = DentalEvaluation::updateOrCreate(
+            ['appointment_id' => $appointment->id],
+            [
+                'patient_id' => $appointment->appointment_for,
+                'doctor_id' => $appointment->appointment_with,
+                'diagnosis' => $validated['diagnosis'] ?? null,
+                'treatment' => $validated['treatment'] ?? null,
+                'quantity' => $validated['quantity'] ?? null,
+                'value' => $validated['value'] ?? null,
+                'clinical_notes' => $validated['clinical_notes'] ?? null,
+                'tooth_marks' => $toothMarks,
+            ]
+        );
+
+        if ($request->hasFile('photos')) {
+            $directory = public_path('storage/images/dental-evaluations');
+            if (!is_dir($directory)) {
+                mkdir($directory, 0755, true);
+            }
+
+            foreach ($request->file('photos') as $photo) {
+                $filename = Str::uuid() . '.' . $photo->getClientOriginalExtension();
+                $photo->move($directory, $filename);
+                $evaluation->images()->create([
+                    'path' => 'images/dental-evaluations/' . $filename,
+                    'original_name' => $photo->getClientOriginalName(),
+                ]);
+            }
+        }
+
+        return redirect()->back()->with('success', 'Historia Dental guardada correctamente.');
     }
 }

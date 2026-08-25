@@ -433,10 +433,10 @@
                                             @enderror
                                         </div>
                                         <div class="col-md-6 mb-3">
-                                            <label class="form-label">{{ __('¿Cuál medicamentos?') }}</label>
-                                            <input type="text" class="form-control @error('medications_list') is-invalid @enderror"
-                                                name="medications_list" value="@if ($medical_info){{ old('medications_list', $medical_info->medications_list) }}@else{{ old('medications_list') }}@endif"
-                                                placeholder="{{ __('Describa los medicamentos') }}">
+                                            <label class="form-label">{{ __('¿Qué medicamentos utiliza?') }}</label>
+                                            <textarea class="form-control @error('medications_list') is-invalid @enderror"
+                                                name="medications_list" rows="3"
+                                                placeholder="{{ __('Indique el nombre, dosis y frecuencia de cada medicamento') }}">@if ($medical_info){{ old('medications_list', $medical_info->medications_list) }}@else{{ old('medications_list') }}@endif</textarea>
                                             @error('medications_list')
                                                 <span class="invalid-feedback" role="alert"><strong>{{ $message }}</strong></span>
                                             @enderror

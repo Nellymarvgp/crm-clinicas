@@ -160,6 +160,11 @@
                                 </a>
                             </li>
                             <li class="nav-item">
+                                <a class="nav-link" data-bs-toggle="tab" href="#DentalHistory" role="tab">
+                                    <span class="d-none d-sm-block">{{ __('Historia Dental') }}</span>
+                                </a>
+                            </li>
+                            <li class="nav-item">
                                 <a class="nav-link" data-bs-toggle="tab" href="#AppointmentList" role="tab">
                                     <span class="d-block d-sm-none"><i class="far fa-user"></i></span>
                                     <span class="d-none d-sm-block">{{ __('Lista de Citas') }}</span>
@@ -214,8 +219,49 @@
                                             </tr>
                                             <tr>
                                                 <th scope="row">{{ __('Dieta') }}</th>
-                                                <td> {{ @$medical_Info->diet }} </td>
+                                                <td>
+                                                    @if (($medical_Info->diet ?? '') === 'Vegetarian') Vegetariana
+                                                    @elseif (($medical_Info->diet ?? '') === 'Non-vegetarian') No vegetariana
+                                                    @elseif (($medical_Info->diet ?? '') === 'Vegan') Vegana
+                                                    @else {{ $medical_Info->diet ?? '' }}
+                                                    @endif
+                                                </td>
                                             </tr>
+                                            <tr><th scope="row">{{ __('Diabetes') }}</th><td>{{ ($medical_Info->diabetes_status ?? '') === 'si' ? 'Si' : (($medical_Info->diabetes_status ?? '') === 'no' ? 'No' : '') }}</td></tr>
+                                            <tr><th scope="row">{{ __('Diabetes controlado') }}</th><td>{{ ($medical_Info->diabetes_controlled ?? '') === 'si' ? 'Si' : (($medical_Info->diabetes_controlled ?? '') === 'no' ? 'No' : '') }}</td></tr>
+                                            <tr><th scope="row">{{ __('Hipertensión') }}</th><td>{{ ($medical_Info->hypertension_status ?? '') === 'si' ? 'Si' : (($medical_Info->hypertension_status ?? '') === 'no' ? 'No' : '') }}</td></tr>
+                                            <tr><th scope="row">{{ __('Hipertensión controlada') }}</th><td>{{ ($medical_Info->hypertension_controlled ?? '') === 'si' ? 'Si' : (($medical_Info->hypertension_controlled ?? '') === 'no' ? 'No' : '') }}</td></tr>
+                                            <tr><th scope="row">{{ __('Actualmente embarazada') }}</th><td>{{ ($medical_Info->currently_pregnant ?? '') === 'si' ? 'Si' : (($medical_Info->currently_pregnant ?? '') === 'no' ? 'No' : '') }}</td></tr>
+                                            <tr><th scope="row">{{ __('Antecedentes de infarto') }}</th><td>{{ ($medical_Info->heart_attack_history ?? '') === 'si' ? 'Si' : (($medical_Info->heart_attack_history ?? '') === 'no' ? 'No' : '') }}</td></tr>
+                                            <tr><th scope="row">{{ __('Último infarto') }}</th><td>{{ $medical_Info->last_heart_attack ?? '' }}</td></tr>
+                                            <tr><th scope="row">{{ __('Consume medicamentos') }}</th><td>{{ ($medical_Info->takes_medications ?? '') === 'si' ? 'Si' : (($medical_Info->takes_medications ?? '') === 'no' ? 'No' : '') }}</td></tr>
+                                            <tr><th scope="row">{{ __('Medicamentos') }}</th><td>{{ $medical_Info->medications_list ?? '' }}</td></tr>
+                                            <tr><th scope="row">{{ __('Aspirina en las últimas 72 horas') }}</th><td>{{ ($medical_Info->aspirin_last_72h ?? '') === 'si' ? 'Si' : (($medical_Info->aspirin_last_72h ?? '') === 'no' ? 'No' : '') }}</td></tr>
+                                            <tr><th scope="row">{{ __('Padece alguna enfermedad') }}</th><td>{{ ($medical_Info->has_disease ?? '') === 'si' ? 'Si' : (($medical_Info->has_disease ?? '') === 'no' ? 'No' : '') }}</td></tr>
+                                            <tr><th scope="row">{{ __('Enfermedad') }}</th><td>{{ $medical_Info->disease_details ?? '' }}</td></tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            <div class="tab-pane" id="DentalHistory" role="tabpanel">
+                                <div class="table-responsive">
+                                    <table class="table table-bordered mb-0">
+                                        <thead><tr><th>{{ __('Fecha') }}</th><th>{{ __('Diagnóstico') }}</th><th>{{ __('Tratamiento') }}</th><th>{{ __('Cantidad') }}</th><th>{{ __('Valor') }}</th><th>{{ __('Detalle') }}</th></tr></thead>
+                                        <tbody>
+                                            @forelse ($appointments as $item)
+                                                @if ($item->dentalEvaluation)
+                                                    <tr>
+                                                        <td>{{ $item->appointment_date }}</td>
+                                                        <td>{{ $item->dentalEvaluation->diagnosis ?: __('Sin registrar') }}</td>
+                                                        <td>{{ $item->dentalEvaluation->treatment ?: __('Sin registrar') }}</td>
+                                                        <td>{{ $item->dentalEvaluation->quantity ?: '0' }}</td>
+                                                        <td>{{ $item->dentalEvaluation->value !== null ? number_format($item->dentalEvaluation->value, 2) : '0.00' }}</td>
+                                                        <td><a href="{{ url('appointment-view/' . $item->id) }}#dental-history" class="btn btn-primary btn-sm">{{ __('Ver') }}</a></td>
+                                                    </tr>
+                                                @endif
+                                            @empty
+                                                <tr><td colspan="6">{{ __('Sin evaluaciones registradas') }}</td></tr>
+                                            @endforelse
                                         </tbody>
                                     </table>
                                 </div>

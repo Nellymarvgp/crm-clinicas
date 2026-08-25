@@ -282,73 +282,43 @@ class PublicAppointmentController extends Controller
                 ], 500);
             }
             
-            // Comprobar qué citas ya están reservadas para este día
-            Log::info("Consultando citas ya reservadas");
-            try {
-                // Revisar si la clase Appointment existe, de lo contrario usar consulta directa
-                if (class_exists('App\Appointment')) {
-                    $bookedAppointments = \App\Appointment::whereIn('appointment_with', $doctorLookupIds)
-                        ->where('appointment_date', $date)
-                        ->get(['appointment_time']);
-                } else if (class_exists('App\Models\Appointment')) {
-                    $bookedAppointments = \App\Models\Appointment::whereIn('appointment_with', $doctorLookupIds)
-                        ->where('appointment_date', $date)
-                        ->get(['appointment_time']);
-                } else {
-                    // Usar consulta directa si no se encuentra el modelo
-                    $bookedAppointments = DB::table('appointments')
-                        ->whereIn('appointment_with', $doctorLookupIds)
-                        ->where('appointment_date', $date)
-                        ->get(['appointment_time']);
-                }
-                
-                $bookedTimes = $bookedAppointments->pluck('appointment_time')->toArray();
-                Log::info("Citas ya reservadas", ['count' => count($bookedTimes)]);
-            } catch (\Exception $e) {
-                Log::error("Error al consultar citas reservadas: " . $e->getMessage());
-                // No interrumpir el flujo, asumir que no hay citas reservadas
-                $bookedTimes = [];
-            }
-            
-            // Generar slots disponibles
-            Log::info("Generando slots disponibles");
-            $availableSlots = [];
-            
-            foreach ($availableTimes as $time) {
-                try {
-                    $startTime = strtotime($time->from);
-                    $endTime = strtotime($time->to);
-                    
-                    Log::info("Procesando horario", [
-                        'id' => $time->id,
-                        'from' => $time->from,
-                        'to' => $time->to,
-                        'startTime' => $startTime,
-                        'endTime' => $endTime
-                    ]);
-                    
-                    // Crear intervalos de 30 minutos
-                    $timeSlot = $startTime;
-                    while ($timeSlot < $endTime) {
-                        $formattedTime = date('H:i', $timeSlot);
-                        
-                        // Comprobar si ya está reservada
-                        if (!in_array($formattedTime, $bookedTimes)) {
-                            $availableSlots[] = [
-                                'id' => $time->id,
-                                'time' => $formattedTime,
-                                'display_time' => $this->formatPublicTimeLabel(date('H:i:s', $timeSlot))
-                            ];
-                        }
-                        
-                        // Incrementar 30 minutos
-                        $timeSlot = strtotime('+30 minutes', $timeSlot);
+            // Usar los slots persistidos: cada opción conserva su propio rango e ID.
+            $availableSlotsQuery = DB::table('doctor_available_slots as slots')
+                ->join('doctor_available_times as times', 'times.id', '=', 'slots.doctor_available_time_id')
+                ->whereIn('times.id', $availableTimes->pluck('id')->all())
+                ->where('slots.is_deleted', 0)
+                ->where('times.is_deleted', 0)
+                ->select('slots.id', 'slots.from', 'slots.to')
+                ->orderBy('slots.from');
+
+            $bookedAppointments = DB::table('appointments as appointments')
+                ->leftJoin('doctor_available_slots as booked_slots', 'booked_slots.id', '=', 'appointments.available_slot')
+                ->whereIn('appointments.appointment_with', $doctorLookupIds)
+                ->where('appointments.appointment_date', $date)
+                ->where('appointments.is_deleted', 0)
+                ->whereNotIn('appointments.status', [1, 2])
+                ->select('booked_slots.from', 'booked_slots.to')
+                ->get();
+
+            $availableSlots = $availableSlotsQuery->get()->filter(function ($slot) use ($bookedAppointments) {
+                $slotStart = strtotime($slot->from);
+                $slotEnd = strtotime($slot->to);
+
+                return !$bookedAppointments->contains(function ($bookedSlot) use ($slotStart, $slotEnd) {
+                    if (!$bookedSlot->from || !$bookedSlot->to) {
+                        return false;
                     }
-                } catch (\Exception $e) {
-                    Log::error("Error al procesar horario: " . $e->getMessage());
-                    // Continuar con el siguiente horario
-                }
-            }
+
+                    return $slotStart < strtotime($bookedSlot->to)
+                        && $slotEnd > strtotime($bookedSlot->from);
+                });
+            })->map(function ($slot) {
+                return [
+                    'id' => $slot->id,
+                    'time' => date('H:i', strtotime($slot->from)),
+                    'display_time' => $this->formatPublicTimeLabel($slot->from) . ' a ' . $this->formatPublicTimeLabel($slot->to),
+                ];
+            })->values()->all();
             
             Log::info("Total de slots generados: " . count($availableSlots));
             
@@ -411,6 +381,46 @@ class PublicAppointmentController extends Controller
         try {
             // Iniciar una transacción de base de datos para asegurar consistencia
             DB::beginTransaction();
+
+            $doctorLookupIds = $this->resolveAvailabilityDoctorIds($request->doctor_id);
+            $requestedDay = (string) date('w', strtotime($request->date));
+            $selectedSlot = DB::table('doctor_available_slots as slots')
+                ->join('doctor_available_times as times', 'times.id', '=', 'slots.doctor_available_time_id')
+                ->where('slots.id', $request->slot_id)
+                ->whereIn('slots.doctor_id', $doctorLookupIds)
+                ->where('times.day_of_week', $requestedDay)
+                ->where('slots.is_deleted', 0)
+                ->where('times.is_deleted', 0)
+                ->select('slots.*', 'times.id as available_time_id')
+                ->first();
+
+            if (!$selectedSlot || date('H:i', strtotime($selectedSlot->from)) !== date('H:i', strtotime($request->time))) {
+                DB::rollBack();
+
+                return response()->json([
+                    'success' => false,
+                    'message' => 'El horario seleccionado ya no está disponible. Actualiza la fecha y vuelve a intentarlo.',
+                ], 422);
+            }
+
+            $slotIsBooked = DB::table('appointments as appointments')
+                ->leftJoin('doctor_available_slots as booked_slots', 'booked_slots.id', '=', 'appointments.available_slot')
+                ->whereIn('appointments.appointment_with', $doctorLookupIds)
+                ->where('appointments.appointment_date', $request->date)
+                ->where('appointments.is_deleted', 0)
+                ->whereNotIn('appointments.status', [1, 2])
+                ->where('booked_slots.from', '<', $selectedSlot->to)
+                ->where('booked_slots.to', '>', $selectedSlot->from)
+                ->exists();
+
+            if ($slotIsBooked) {
+                DB::rollBack();
+
+                return response()->json([
+                    'success' => false,
+                    'message' => 'El horario seleccionado ya está ocupado. Actualiza la fecha y vuelve a intentarlo.',
+                ], 422);
+            }
             
             // Dividir el nombre completo en nombre y apellido
             $nameParts = explode(' ', $request->name, 2);
@@ -477,23 +487,7 @@ class PublicAppointmentController extends Controller
             // Modo de calendario estándar
             $appointment->appointment_date = $request->date;
 
-            // available_time debe ser el ID del tiempo disponible, no la hora en formato texto
-            try {
-                $slotInfo = DB::table('doctor_available_slots')
-                    ->where('id', $request->slot_id)
-                    ->first();
-
-                if ($slotInfo) {
-                    $appointment->available_time = $slotInfo->doctor_available_time_id;
-                } else {
-                    $appointment->available_time = $request->slot_id;
-                    Log::warning("No se encontró información del slot {$request->slot_id}, usando ID como fallback");
-                }
-            } catch (\Exception $e) {
-                Log::error("Error al obtener información del slot: " . $e->getMessage());
-                $appointment->available_time = $request->slot_id;
-            }
-
+            $appointment->available_time = $selectedSlot->available_time_id;
             $appointment->available_slot = $request->slot_id;
             
             $appointment->status = 0; // Pendiente

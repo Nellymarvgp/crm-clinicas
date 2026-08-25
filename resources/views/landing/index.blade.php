@@ -143,7 +143,7 @@
                         </div>
 
                         <div class="core-hero-cta">
-                            <a href="{{ url('login') }}" class="btn btn-primary">Agenda tu cita Aquí</a>
+                            <a href="{{ url('/find-doctor') }}" class="btn btn-primary">Agenda tu cita Aquí</a>
                         </div>
                     </div>
                 </div>

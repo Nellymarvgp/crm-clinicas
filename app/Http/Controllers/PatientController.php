@@ -121,8 +121,8 @@ class PatientController extends Controller
         $user = Sentinel::getUser();
         if ($user->hasAccess('patient.create')) {
             $validatedData = $request->validate([
-                'first_name' => 'required|alpha',
-                'last_name' => 'required|alpha',
+                'first_name' => ['required', 'string', 'max:100', 'regex:/^[\pL\s\'’-]+$/u'],
+                'last_name' => ['required', 'string', 'max:100', 'regex:/^[\pL\s\'’-]+$/u'],
                 'mobile' => 'required|regex:/^04[0-9]{9}$/',
                 'email' => 'required|email|unique:users|regex:/(.+)@(.+)\.(.+)/i|max:50',
                 'age' => 'required|numeric',
@@ -212,7 +212,7 @@ class PatientController extends Controller
                     $medical_Info = MedicalInfo::where('user_id', '=', $patient->id)->first();
                     $patient_role = Sentinel::findRoleBySlug('patient');
                     $patients = $patient_role->users()->with('roles')->get();
-                    $appointments = Appointment::with('doctor')->where('appointment_for', $patient->id)->orderBy('id', 'desc')->paginate($this->limit, '*', 'appointment');
+                    $appointments = Appointment::with('doctor', 'timeSlot', 'dentalEvaluation')->where('appointment_for', $patient->id)->orderBy('id', 'desc')->paginate($this->limit, '*', 'appointment');
                     $prescriptions = Prescription::with('doctor')->where('patient_id', $patient->id)->orderBy('id', 'desc')->paginate($this->limit, '*', 'prescriptions');
                     $invoices = Invoice::where('patient_id', $patient->id)->orderBy('id', 'desc')->paginate($this->limit, '*', 'invoice');
                     $tot_appointment = Appointment::where('appointment_for', $patient->id)->get();
@@ -277,8 +277,8 @@ class PatientController extends Controller
         $user = Sentinel::getUser();
         if ($user->hasAccess('patient.update')) {
             $validatedData = $request->validate([
-                'first_name' => 'required|alpha',
-                'last_name' => 'required|alpha',
+                'first_name' => ['required', 'string', 'max:100', 'regex:/^[\pL\s\'’-]+$/u'],
+                'last_name' => ['required', 'string', 'max:100', 'regex:/^[\pL\s\'’-]+$/u'],
                 'mobile' => 'required|regex:/^04[0-9]{9}$/',
                 'email' => 'required|email|regex:/(.+)@(.+)\.(.+)/i|max:50',
                 'age' => 'required|numeric',

@@ -104,6 +104,7 @@ Route::middleware('sentinel.auth')->group(function () {
     // appointment routes
     Route::get('appointmentList', 'AppointmentController@appointment_list');
     Route::post('appointment-status/{id}', 'AppointmentController@appointment_status');
+    Route::post('appointment/{id}/dental-evaluation', 'AppointmentController@saveDentalEvaluation')->name('appointment.dental-evaluation.save');
     Route::post('appointment-final-price/{id}', 'AppointmentController@update_final_consultation_price');
     Route::get('getMonthlyAppointments', 'ReportController@getMonthlyAppointments');
     Route::post('patient-by-appointment', 'InvoiceController@patient_by_appointment')->name('patient_by_appointment');

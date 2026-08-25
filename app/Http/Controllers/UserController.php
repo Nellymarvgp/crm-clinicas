@@ -626,7 +626,7 @@ class UserController extends Controller
                 $medical_Info = MedicalInfo::where('user_id', '=', $patient->id)->first();
                 $patient_role = Sentinel::findRoleBySlug('patient');
                 $patients = $patient_role->users()->with('roles')->get();
-                $appointments = Appointment::with('doctor')->where('appointment_for', $patient->id)->orderBy('id', 'desc')->paginate($this->limit, '*', 'appointment');
+                $appointments = Appointment::with('doctor', 'timeSlot', 'dentalEvaluation')->where('appointment_for', $patient->id)->orderBy('id', 'desc')->paginate($this->limit, '*', 'appointment');
                 $prescriptions = Prescription::with('doctor')->where('patient_id', $patient->id)->orderBy('id', 'desc')->paginate($this->limit, '*', 'prescription');
                 $invoices = Invoice::where('patient_id', $patient->id)->orderBy('id', 'desc')->paginate($this->limit, '*', 'invoice');
                 $tot_appointment = Appointment::where('appointment_for', $patient->id)->get();

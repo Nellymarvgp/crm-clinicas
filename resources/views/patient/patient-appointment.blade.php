@@ -47,11 +47,13 @@
                                                 <td>{{ optional($item->timeSlot)->from ? optional($item->timeSlot)->from . ' to ' . optional($item->timeSlot)->to : 'Sin horario' }}</td>
                                                 <td>
                                                     @if ($item->status == 0)
-                                                        <span class="badge bg-warning">Pending</span>
+                                                        <span class="badge bg-warning">Pendiente</span>
                                                     @elseif ($item->status == 1 )
-                                                        <span class="badge bg-success">Success</span>
+                                                        <span class="badge bg-success">Completada</span>
                                                     @elseif ($item->status == 2 )
-                                                        <span class="badge bg-danger">Cancel</span>
+                                                        <span class="badge bg-danger">Cancelada</span>
+                                                    @else
+                                                        <span class="badge bg-secondary">Estado desconocido</span>
                                                     @endif
                                                 </td>
                                                 <td>

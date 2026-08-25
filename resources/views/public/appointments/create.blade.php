@@ -349,15 +349,6 @@
                             }
                         });
                         
-                        // Handle time selection change
-                        timeSelect.addEventListener('change', function() {
-                            const selectedOption = this.options[this.selectedIndex];
-                            if (selectedOption && selectedOption.dataset.slotId) {
-                                slotIdInput.value = selectedOption.dataset.slotId;
-                            } else {
-                                slotIdInput.value = '';
-                            }
-                        });
                     } else {
                         // No slots available
                         const option = document.createElement('option');
@@ -375,6 +366,11 @@
                 }
             });
         }
+
+        timeSelect.addEventListener('change', function() {
+            const selectedOption = this.options[this.selectedIndex];
+            slotIdInput.value = selectedOption?.dataset.slotId || '';
+        });
 
         // Reset time slots
         function resetTimeSlots() {

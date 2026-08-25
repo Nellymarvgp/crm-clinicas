@@ -1,4 +1,4 @@
-@extends('layouts.public')
+@extends('layouts.master-landing')
 
 @section('title', 'Cita Agendada con Éxito')
 

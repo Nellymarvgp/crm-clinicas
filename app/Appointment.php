@@ -48,4 +48,9 @@ class Appointment extends Model
     function prescription(){
         return $this->hasOne(Prescription::class)->where('is_deleted',0);
     }
+
+    function dentalEvaluation()
+    {
+        return $this->hasOne(DentalEvaluation::class);
+    }
 }
