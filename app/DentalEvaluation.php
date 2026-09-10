@@ -13,6 +13,7 @@ class DentalEvaluation extends Model
         'patient_id',
         'doctor_id',
         'diagnosis',
+        'diagnosis_items',
         'treatment',
         'quantity',
         'value',
@@ -21,6 +22,7 @@ class DentalEvaluation extends Model
     ];
 
     protected $casts = [
+        'diagnosis_items' => 'array',
         'tooth_marks' => 'array',
         'quantity' => 'decimal:2',
         'value' => 'decimal:2',

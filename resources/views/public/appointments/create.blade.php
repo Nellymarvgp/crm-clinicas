@@ -41,8 +41,24 @@
     
     /* Ajustes para espacio por el menú fijo */
     .content-wrapper {
-        padding-top: 90px;
+        padding-top: 132px;
         padding-bottom: 40px;
+    }
+
+    .content-wrapper .card {
+        margin-top: 8px;
+    }
+
+    @media (max-width: 991px) {
+        .content-wrapper {
+            padding-top: 112px;
+        }
+    }
+
+    @media (max-width: 575px) {
+        .content-wrapper {
+            padding-top: 98px;
+        }
     }
     
     /* Estilos específicos para flatpickr */
@@ -71,26 +87,40 @@
                             @csrf
                             <h5 class="mb-4">Información Personal</h5>
                             <div class="row">
-                                <div class="col-md-12">
+                                <div class="col-md-4">
                                     <div class="form-group">
-                                        <label for="name" class="required">Nombre Completo</label>
-                                        <input type="text" class="form-control" id="name" name="name" required>
-                                        <div class="invalid-feedback" id="name-error"></div>
+                                        <label for="cedula" class="required">Cédula</label>
+                                        <input type="text" class="form-control" id="cedula" name="cedula" required maxlength="30">
+                                        <div class="invalid-feedback" id="cedula-error"></div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label for="first_name" class="required">Nombres</label>
+                                        <input type="text" class="form-control" id="first_name" name="first_name" required maxlength="100">
+                                        <div class="invalid-feedback" id="first_name-error"></div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label for="last_name" class="required">Apellidos</label>
+                                        <input type="text" class="form-control" id="last_name" name="last_name" required maxlength="100">
+                                        <div class="invalid-feedback" id="last_name-error"></div>
                                     </div>
                                 </div>
                             </div>
                             <div class="row">
                                 <div class="col-md-6">
                                     <div class="form-group">
-                                        <label for="email" class="required">Correo Electrónico</label>
-                                        <input type="email" class="form-control" id="email" name="email" required>
+                                        <label for="email">Correo Electrónico</label>
+                                        <input type="email" class="form-control" id="email" name="email">
                                         <div class="invalid-feedback" id="email-error"></div>
                                     </div>
                                 </div>
                                 <div class="col-md-6">
                                     <div class="form-group">
-                                        <label for="phone" class="required">Teléfono</label>
-                                        <input type="text" class="form-control" id="phone" name="phone" required>
+                                        <label for="phone">Teléfono</label>
+                                        <input type="text" class="form-control" id="phone" name="phone">
                                         <div class="invalid-feedback" id="phone-error"></div>
                                     </div>
                                 </div>
@@ -98,15 +128,15 @@
                             <div class="row">
                                 <div class="col-md-4">
                                     <div class="form-group">
-                                        <label for="age" class="required">Edad</label>
-                                        <input type="number" class="form-control" id="age" name="age" required min="1" max="120">
+                                        <label for="age">Edad</label>
+                                        <input type="number" class="form-control" id="age" name="age" min="1" max="120">
                                         <div class="invalid-feedback" id="age-error"></div>
                                     </div>
                                 </div>
                                 <div class="col-md-4">
                                     <div class="form-group">
-                                        <label for="gender" class="required">Sexo</label>
-                                        <select class="form-control" id="gender" name="gender" required>
+                                        <label for="gender">Sexo</label>
+                                        <select class="form-control" id="gender" name="gender">
                                             <option value="">Seleccionar</option>
                                             <option value="Male">Masculino</option>
                                             <option value="Female">Femenino</option>
@@ -117,8 +147,8 @@
                                 </div>
                                 <div class="col-md-4">
                                     <div class="form-group">
-                                        <label for="address" class="required">Dirección</label>
-                                        <input type="text" class="form-control" id="address" name="address" required>
+                                        <label for="address">Dirección</label>
+                                        <input type="text" class="form-control" id="address" name="address">
                                         <div class="invalid-feedback" id="address-error"></div>
                                     </div>
                                 </div>

@@ -23,9 +23,58 @@
     @include('layouts.head')
     <link href="{{ URL::asset('build/css/app.min.css') }}" rel="stylesheet" type="text/css" />
     <link href="{{ URL::asset('build/css/landing.css') }}" rel="stylesheet" type="text/css" />
+    <style>
+        .core-logo {
+            height: 78px;
+            width: auto;
+            max-width: 260px;
+            object-fit: contain;
+        }
+        .home-floating-contact {
+            position: fixed;
+            right: 22px;
+            bottom: 22px;
+            z-index: 1100;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .home-floating-contact a {
+            width: 50px;
+            height: 50px;
+            display: grid;
+            place-items: center;
+            border-radius: 50%;
+            color: #fff;
+            font-size: 25px;
+            box-shadow: 0 5px 16px rgba(0, 0, 0, .22);
+            transition: transform .2s ease, box-shadow .2s ease;
+        }
+        .home-floating-contact a:hover {
+            color: #fff;
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, .28);
+        }
+        .home-floating-contact .whatsapp { background: #25d366; }
+        .home-floating-contact .instagram { background: #c13584; }
+        @media (max-width: 575px) {
+            .home-floating-contact { right: 14px; bottom: 14px; }
+            .home-floating-contact a { width: 44px; height: 44px; font-size: 22px; }
+            .core-logo { height: 58px; max-width: 200px; }
+        }
+    </style>
 </head>
 
 <body>
+
+    <div class="home-floating-contact" aria-label="Contacto de CORE">
+        <a class="whatsapp" href="https://wa.me/584248326325" target="_blank" rel="noopener noreferrer" aria-label="Contactar por WhatsApp" title="WhatsApp">
+            <i class="fab fa-whatsapp"></i>
+        </a>
+        <a class="instagram" href="https://www.instagram.com/core.ven" target="_blank" rel="noopener noreferrer" aria-label="Visitar Instagram" title="Instagram">
+            <i class="fab fa-instagram"></i>
+        </a>
+    </div>
 
     <div class="landing-page">
         <!-- header nav bar start  -->

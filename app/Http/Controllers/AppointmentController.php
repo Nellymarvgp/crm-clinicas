@@ -1139,7 +1139,18 @@ class AppointmentController extends Controller
             return redirect()->back()->with('error', 'Cita no encontrada o sin permisos para verla.');
         }
 
-        return view('appointment.appointment-view', compact('user', 'role', 'appointment'));
+        $previousEvaluation = DentalEvaluation::query()
+            ->select('dental_evaluations.*')
+            ->join('appointments as previous_appointments', 'previous_appointments.id', '=', 'dental_evaluations.appointment_id')
+            ->where('dental_evaluations.patient_id', $appointment->appointment_for)
+            ->where('dental_evaluations.appointment_id', '<>', $appointment->id)
+            ->where('previous_appointments.status', 1)
+            ->whereDate('previous_appointments.appointment_date', '<=', $appointment->appointment_date)
+            ->orderByDesc('previous_appointments.appointment_date')
+            ->orderByDesc('previous_appointments.id')
+            ->first();
+
+        return view('appointment.appointment-view', compact('user', 'role', 'appointment', 'previousEvaluation'));
     }
 
     public function saveDentalEvaluation(Request $request, $id)
@@ -1155,6 +1166,9 @@ class AppointmentController extends Controller
         }
 
         $role = $user->roles[0]->slug;
+        if ((int) $appointment->status === 1) {
+            return redirect()->back()->with('error', 'La historia de una cita finalizada es de solo lectura.');
+        }
         if ($role === 'doctor') {
             $doctorId = Doctor::where('user_id', $user->id)->value('id');
             if ((int) $appointment->appointment_with !== (int) $doctorId) {
@@ -1164,6 +1178,11 @@ class AppointmentController extends Controller
 
         $validated = $request->validate([
             'diagnosis' => 'nullable|string|max:5000',
+            'diagnosis_items' => 'nullable|array',
+            'diagnosis_items.*.diagnosis' => 'nullable|string|max:1000',
+            'diagnosis_items.*.treatment' => 'nullable|string|max:1000',
+            'diagnosis_items.*.quantity' => 'nullable|numeric|min:0',
+            'diagnosis_items.*.value' => 'nullable|numeric|min:0',
             'treatment' => 'nullable|string|max:5000',
             'quantity' => 'nullable|numeric|min:0',
             'value' => 'nullable|numeric|min:0',
@@ -1179,6 +1198,32 @@ class AppointmentController extends Controller
             if (!is_array($toothMarks)) {
                 return redirect()->back()->withErrors(['tooth_marks' => 'El odontograma no tiene un formato válido.'])->withInput();
             }
+
+            $validTeeth = [18, 17, 16, 15, 14, 13, 12, 11, 21, 22, 23, 24, 25, 26, 27, 28, 48, 47, 46, 45, 44, 43, 42, 41, 31, 32, 33, 34, 35, 36, 37, 38];
+            $toothMarks = collect($toothMarks)->filter(function ($mark, $tooth) use ($validTeeth) {
+                return in_array((int) $tooth, $validTeeth, true) && in_array($mark, ['affected', 'worked'], true);
+            })->all();
+        }
+
+        $diagnosisItems = collect($validated['diagnosis_items'] ?? [])
+            ->filter(function ($item) {
+                return trim((string) ($item['diagnosis'] ?? '')) !== '';
+            })
+            ->map(function ($item) {
+                $quantity = (float) ($item['quantity'] ?? 0);
+                $value = (float) ($item['value'] ?? 0);
+                return [
+                    'diagnosis' => trim((string) ($item['diagnosis'] ?? '')),
+                    'treatment' => trim((string) ($item['treatment'] ?? '')),
+                    'quantity' => $quantity,
+                    'value' => $value,
+                    'subtotal' => round($quantity * $value, 2),
+                ];
+            })->values()->all();
+        $total = collect($diagnosisItems)->sum('subtotal');
+
+        if ($request->boolean('complete') && empty($diagnosisItems) && blank($validated['diagnosis'] ?? null)) {
+            return redirect()->back()->withErrors(['diagnosis' => 'Registra al menos un diagnóstico antes de finalizar la cita.'])->withInput();
         }
 
         $evaluation = DentalEvaluation::updateOrCreate(
@@ -1187,6 +1232,7 @@ class AppointmentController extends Controller
                 'patient_id' => $appointment->appointment_for,
                 'doctor_id' => $appointment->appointment_with,
                 'diagnosis' => $validated['diagnosis'] ?? null,
+                'diagnosis_items' => $diagnosisItems,
                 'treatment' => $validated['treatment'] ?? null,
                 'quantity' => $validated['quantity'] ?? null,
                 'value' => $validated['value'] ?? null,
@@ -1194,6 +1240,12 @@ class AppointmentController extends Controller
                 'tooth_marks' => $toothMarks,
             ]
         );
+
+        $appointment->final_consultation_price = $total > 0 ? $total : ($validated['value'] ?? null);
+        if ($request->boolean('complete')) {
+            $appointment->status = 1;
+        }
+        $appointment->save();
 
         if ($request->hasFile('photos')) {
             $directory = public_path('storage/images/dental-evaluations');
@@ -1211,6 +1263,58 @@ class AppointmentController extends Controller
             }
         }
 
-        return redirect()->back()->with('success', 'Historia Dental guardada correctamente.');
+        if ($request->boolean('complete')) {
+            $this->sendAppointmentSummary($appointment->fresh(['patient', 'doctor.user', 'timeSlot', 'dentalEvaluation']));
+        }
+
+        return redirect()->back()->with('success', $request->boolean('complete')
+            ? 'Historia guardada y cita completada correctamente.'
+            : 'Historia Dental guardada correctamente.');
+    }
+
+    public function sendDentalEvaluationEmail($id)
+    {
+        $user = Sentinel::getUser();
+        if (!$user || !$user->hasAccess('appointment.list')) {
+            return view('error.403');
+        }
+
+        $appointment = Appointment::with(['patient', 'doctor.user', 'timeSlot', 'dentalEvaluation'])
+            ->findOrFail($id);
+        if (!$appointment->dentalEvaluation) {
+            return redirect()->back()->with('error', 'La cita todavía no tiene diagnóstico registrado.');
+        }
+
+        try {
+            $this->sendAppointmentSummary($appointment);
+        } catch (\Throwable $mailError) {
+            Log::error('No se pudo enviar el resumen de la cita por correo.', [
+                'appointment_id' => $appointment->id,
+                'error' => $mailError->getMessage(),
+            ]);
+
+            return redirect()->back()->with('error', 'No se pudo enviar el correo. Verifica la contraseña SMTP de Hostinger.');
+        }
+
+        return redirect()->back()->with('success', 'El diagnóstico y el detalle de la consulta fueron enviados por correo.');
+    }
+
+    private function sendAppointmentSummary(Appointment $appointment): void
+    {
+        $recipients = collect([optional($appointment->patient)->email, optional($appointment->doctor->user)->email])
+            ->merge(User::whereHas('roles', function ($query) {
+                $query->where('slug', 'admin');
+            })->pluck('email'))
+            ->filter(function ($email) {
+                return filter_var($email, FILTER_VALIDATE_EMAIL) && !str_ends_with($email, '@no-email.local');
+            })->unique()->values()->all();
+
+        if (empty($recipients)) {
+            return;
+        }
+
+        Mail::send('emails/appointment_summary', ['appointment' => $appointment], function ($message) use ($recipients) {
+            $message->to($recipients)->subject(AppSetting('title') . ' - Diagnóstico y detalle de consulta');
+        });
     }
 }

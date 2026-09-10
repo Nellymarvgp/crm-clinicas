@@ -77,6 +77,11 @@
                                 <div class="col-md-6">
                                     <div class="row">
                                         <div class="col-md-12 mb-3">
+                                            <label class="form-label">{{ __('Cédula') }}<span class="text-danger">*</span></label>
+                                            <input type="text" class="form-control @error('cedula') is-invalid @enderror" name="cedula" value="{{ old('cedula', $patient->cedula ?? '') }}" placeholder="{{ __('Ingrese la cédula') }}">
+                                            @error('cedula')<span class="invalid-feedback"><strong>{{ $message }}</strong></span>@enderror
+                                        </div>
+                                        <div class="col-md-12 mb-3">
                                             <label class="form-label">{{ __('Nombres ') }}<span
                                                     class="text-danger">*</span></label>
                                             <input type="text"

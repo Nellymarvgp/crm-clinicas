@@ -67,6 +67,10 @@
                                         <td>{{ $patient->first_name }} {{ $patient->last_name }}</td>
                                     </tr>
                                     <tr>
+                                        <th scope="row">{{ __('Cédula:') }}</th>
+                                        <td>{{ $patient->cedula ?: __('No registrada') }}</td>
+                                    </tr>
+                                    <tr>
                                         <th scope="row">{{ __('Nro. de Contacto:') }}</th>
                                         <td> {{ @$patient->mobile }} </td>
                                     </tr>
@@ -246,7 +250,7 @@
                             <div class="tab-pane" id="DentalHistory" role="tabpanel">
                                 <div class="table-responsive">
                                     <table class="table table-bordered mb-0">
-                                        <thead><tr><th>{{ __('Fecha') }}</th><th>{{ __('Diagnóstico') }}</th><th>{{ __('Tratamiento') }}</th><th>{{ __('Cantidad') }}</th><th>{{ __('Valor') }}</th><th>{{ __('Detalle') }}</th></tr></thead>
+                                        <thead><tr><th>{{ __('Fecha') }}</th><th>{{ __('Diagnóstico') }}</th><th>{{ __('Tratamiento') }}</th><th>{{ __('Cantidad') }}</th><th>{{ __('Valor') }}</th><th>{{ __('Odontograma') }}</th><th>{{ __('Detalle') }}</th></tr></thead>
                                         <tbody>
                                             @forelse ($appointments as $item)
                                                 @if ($item->dentalEvaluation)
@@ -256,6 +260,12 @@
                                                         <td>{{ $item->dentalEvaluation->treatment ?: __('Sin registrar') }}</td>
                                                         <td>{{ $item->dentalEvaluation->quantity ?: '0' }}</td>
                                                         <td>{{ $item->dentalEvaluation->value !== null ? number_format($item->dentalEvaluation->value, 2) : '0.00' }}</td>
+                                                        <td>
+                                                            @foreach (($item->dentalEvaluation->tooth_marks ?: []) as $tooth => $mark)
+                                                                <span class="badge text-white" style="background-color:{{ $mark === 'affected' ? '#dc3545' : '#0d6efd' }}">{{ $tooth }}</span>
+                                                            @endforeach
+                                                            @if (empty($item->dentalEvaluation->tooth_marks)) {{ __('Sin marcas') }} @endif
+                                                        </td>
                                                         <td><a href="{{ url('appointment-view/' . $item->id) }}#dental-history" class="btn btn-primary btn-sm">{{ __('Ver') }}</a></td>
                                                     </tr>
                                                 @endif

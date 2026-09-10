@@ -18,6 +18,16 @@ class Appointment extends Model
         'final_consultation_price',
         'is_deleted',
     ];
+    protected $appends = ['status_label'];
+
+    public function getStatusLabelAttribute(): string
+    {
+        return match ((int) $this->status) {
+            1 => 'Completada',
+            2 => 'Cancelada',
+            default => 'Pendiente',
+        };
+    }
 
     function patient()
     {

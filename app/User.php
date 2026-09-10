@@ -16,6 +16,7 @@ class User extends EloquentUser
      * @var array
      */
     protected $fillable = [
+        'cedula',
         'email',
         'password',
         'last_name',

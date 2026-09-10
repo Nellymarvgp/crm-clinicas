@@ -14,6 +14,7 @@ use Cartalyst\Sentinel\Laravel\Facades\Sentinel;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
@@ -358,12 +359,14 @@ class PublicAppointmentController extends Controller
     {
         // Validar los datos del formulario
         $validator = Validator::make($request->all(), [
-            'name' => 'required|string|max:255',
-            'email' => 'required|email|max:255',
-            'phone' => 'required|string|max:15',
-            'age' => 'required|integer|min:1|max:120',
-            'gender' => 'required|string|in:Male,Female,Other',
-            'address' => 'required|string|max:500',
+            'cedula' => 'required|string|max:30',
+            'first_name' => 'required|string|max:100',
+            'last_name' => 'required|string|max:100',
+            'email' => 'nullable|email|max:255',
+            'phone' => 'nullable|string|max:30',
+            'age' => 'nullable|integer|min:1|max:120',
+            'gender' => 'nullable|string|in:Male,Female,Other',
+            'address' => 'nullable|string|max:500',
             'doctor_id' => 'required|exists:doctors,id',
             'date' => 'required|date|date_format:Y-m-d|after_or_equal:today',
             'time' => 'required',
@@ -422,28 +425,32 @@ class PublicAppointmentController extends Controller
                 ], 422);
             }
             
-            // Dividir el nombre completo en nombre y apellido
-            $nameParts = explode(' ', $request->name, 2);
-            $firstName = $nameParts[0];
-            $lastName = count($nameParts) > 1 ? $nameParts[1] : '';
+            $firstName = $request->first_name;
+            $lastName = $request->last_name;
             
-            // Verificar si el usuario ya existe por email
-            $existingUser = User::where('email', $request->email)->first();
+            // La cedula identifica al paciente aunque todavía no tenga correo.
+            $existingUser = User::where('cedula', $request->cedula)->first();
+            if (!$existingUser && $request->filled('email')) {
+                $existingUser = User::where('email', $request->email)->first();
+            }
             
             if ($existingUser) {
                 // Actualizar usuario existente
                 $user = $existingUser;
+                $user->cedula = $request->cedula;
                 $user->first_name = $firstName;
                 $user->last_name = $lastName;
-                $user->mobile = $request->phone;
+                $user->mobile = $request->phone ?: $user->mobile;
+                $user->email = $request->email ?: $user->email;
                 $user->save();
             } else {
                 // Crear nuevo usuario usando Sentinel (sin role_id en tabla users)
                 $userData = [
+                    'cedula' => $request->cedula,
                     'first_name' => $firstName,
                     'last_name' => $lastName,
-                    'email' => $request->email,
-                    'mobile' => $request->phone,
+                    'email' => $request->email ?: 'paciente-' . $request->cedula . '@no-email.local',
+                    'mobile' => $request->phone ?: '',
                     'password' => Str::random(10),
                 ];
                 $user = Sentinel::registerAndActivate($userData);
@@ -511,15 +518,37 @@ class PublicAppointmentController extends Controller
             
             // Confirmar transacción
             DB::commit();
-            
-            // Enviar correo de confirmación (implementación futura)
-            // Mail::to($user->email)->send(new AppointmentConfirmation($appointment));
+
+            $mailAppointment = Appointment::with('doctor.user', 'patient', 'BookedBy', 'timeSlot')->find($appointment->id);
+            $recipients = collect([$user->email, optional($mailAppointment->doctor->user)->email])
+                ->merge(User::whereHas('roles', function ($query) {
+                    $query->where('slug', 'admin');
+                })->pluck('email'))
+                ->filter(function ($email) {
+                    return filter_var($email, FILTER_VALIDATE_EMAIL) && !str_ends_with($email, '@no-email.local');
+                })->unique()->values()->all();
+            $mailSent = true;
+            if ($recipients) {
+                try {
+                    Mail::send('emails.appointment_create', ['MailAppointment' => $mailAppointment, 'email' => $user->email], function ($message) use ($recipients) {
+                        $message->to($recipients)->subject(AppSetting('title') . ' - Nueva cita generada');
+                    });
+                } catch (\Throwable $mailError) {
+                    $mailSent = false;
+                    Log::error('La cita fue creada, pero no se pudo enviar el correo de confirmación.', [
+                        'appointment_id' => $appointment->id,
+                        'error' => $mailError->getMessage(),
+                    ]);
+                }
+            }
             
             return response()->json([
                 'success' => true,
-                'message' => $googleCalendarSync
-                    ? '¡Cita agendada y sincronizada con Google Calendar!'
-                    : '¡Cita agendada correctamente! No se pudo sincronizar con Google Calendar.',
+                'message' => $mailSent
+                    ? ($googleCalendarSync
+                        ? '¡Cita agendada y confirmada por correo!'
+                        : '¡Cita agendada correctamente! No se pudo sincronizar con Google Calendar.')
+                    : '¡Cita agendada correctamente! No se pudo enviar el correo; revisa la configuración SMTP.',
                 'google_calendar_synced' => $googleCalendarSync,
                 'google_calendar_event_link' => $googleCalendarEventLink,
                 'redirect' => route('public.appointment.success')

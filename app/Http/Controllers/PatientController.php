@@ -121,13 +121,14 @@ class PatientController extends Controller
         $user = Sentinel::getUser();
         if ($user->hasAccess('patient.create')) {
             $validatedData = $request->validate([
+                'cedula' => 'required|string|max:30|unique:users,cedula',
                 'first_name' => ['required', 'string', 'max:100', 'regex:/^[\pL\s\'’-]+$/u'],
                 'last_name' => ['required', 'string', 'max:100', 'regex:/^[\pL\s\'’-]+$/u'],
-                'mobile' => 'required|regex:/^04[0-9]{9}$/',
-                'email' => 'required|email|unique:users|regex:/(.+)@(.+)\.(.+)/i|max:50',
-                'age' => 'required|numeric',
-                'address' => 'required|max:100',
-                'gender' => 'required',
+                'mobile' => 'nullable|regex:/^04[0-9]{9}$/',
+                'email' => 'nullable|email|unique:users|regex:/(.+)@(.+)\.(.+)/i|max:50',
+                'age' => 'nullable|numeric',
+                'address' => 'nullable|max:100',
+                'gender' => 'nullable',
                 'height' => 'nullable',
                 'b_group' => 'nullable',
                 'pulse' => 'nullable',
@@ -164,6 +165,8 @@ class PatientController extends Controller
                 $user = Sentinel::getUser();
                 // Set Default Password for Doctor
                 $validatedData['password'] = Config::get('app.DEFAULT_PASSWORD');
+                $validatedData['email'] = $validatedData['email'] ?? 'paciente-' . $validatedData['cedula'] . '@no-email.local';
+                $validatedData['mobile'] = $validatedData['mobile'] ?? '';
                 $validatedData['created_by'] = $user->id;
                 $validatedData['updated_by'] = $user->id;
                 //Create a new user
@@ -277,13 +280,14 @@ class PatientController extends Controller
         $user = Sentinel::getUser();
         if ($user->hasAccess('patient.update')) {
             $validatedData = $request->validate([
+                'cedula' => 'required|string|max:30|unique:users,cedula,' . $patient->id,
                 'first_name' => ['required', 'string', 'max:100', 'regex:/^[\pL\s\'’-]+$/u'],
                 'last_name' => ['required', 'string', 'max:100', 'regex:/^[\pL\s\'’-]+$/u'],
-                'mobile' => 'required|regex:/^04[0-9]{9}$/',
-                'email' => 'required|email|regex:/(.+)@(.+)\.(.+)/i|max:50',
-                'age' => 'required|numeric',
-                'address' => 'required|max:100',
-                'gender' => 'required',
+                'mobile' => 'nullable|regex:/^04[0-9]{9}$/',
+                'email' => 'nullable|email|regex:/(.+)@(.+)\.(.+)/i|max:50',
+                'age' => 'nullable|numeric',
+                'address' => 'nullable|max:100',
+                'gender' => 'nullable',
                 'height' => 'nullable|numeric',
                 'b_group' => 'nullable',
                 'pulse' => 'nullable',
@@ -322,8 +326,9 @@ class PatientController extends Controller
                 }
                 $patient->first_name = $validatedData['first_name'];
                 $patient->last_name = $validatedData['last_name'];
-                $patient->mobile = $validatedData['mobile'];
-                $patient->email = $validatedData['email'];
+                $patient->cedula = $validatedData['cedula'];
+                $patient->mobile = $validatedData['mobile'] ?? '';
+                $patient->email = $validatedData['email'] ?? $patient->email;
                 $patient->updated_by = $user->id;
                 $patient->save();
                 $patient_info= Patient::where('user_id', '=', $patient->id)->first();

@@ -54,8 +54,8 @@
         <div class="d-flex">
             <!-- LOGO -->
             <div class="navbar-brand-box">
-                <a href="{{ url('/') }}" class="logo logo-light">
-                    <img src="{{ URL::asset('build/images/logo.png') }}" alt="CORE">
+                <a href="<?php echo e(url('/')); ?>" class="logo logo-light">
+                    <img src="<?php echo e(URL::asset('build/images/logo.png')); ?>" alt="CORE">
                 </a>
             </div>
             <button type="button" class="btn btn-sm px-3 font-size-16 d-lg-none header-item waves-effect waves-light"
@@ -64,13 +64,13 @@
             </button>
         </div>
         <nav class="internal-home-nav" aria-label="Navegación principal">
-            <a href="{{ url('/#home') }}">Inicio</a>
-            <a href="{{ url('/#services') }}">Especialidades</a>
-            <a href="{{ url('/#brand') }}">Nosotros</a>
-            <a href="{{ url('/#commitment') }}">Compromiso</a>
-            <a href="{{ url('/#team') }}">Equipo</a>
-            <a href="{{ route('doctors.find') }}">Odontólogos</a>
-            <a href="{{ url('/#contact') }}">Contacto</a>
+            <a href="<?php echo e(url('/#home')); ?>">Inicio</a>
+            <a href="<?php echo e(url('/#services')); ?>">Especialidades</a>
+            <a href="<?php echo e(url('/#brand')); ?>">Nosotros</a>
+            <a href="<?php echo e(url('/#commitment')); ?>">Compromiso</a>
+            <a href="<?php echo e(url('/#team')); ?>">Equipo</a>
+            <a href="<?php echo e(route('doctors.find')); ?>">Odontólogos</a>
+            <a href="<?php echo e(url('/#contact')); ?>">Contacto</a>
         </nav>
         <div class="d-flex">
             <div class="dropdown d-inline-block d-lg-none ms-2">
@@ -83,7 +83,7 @@
                     <form class="p-3">
                         <div class="mb-3 m-0">
                             <div class="input-group">
-                                <input type="text" class="form-control" placeholder="{{ __('Search ...') }}"
+                                <input type="text" class="form-control" placeholder="<?php echo e(__('Search ...')); ?>"
                                     aria-label="Search input">
                                 <div class="input-group-append">
                                     <button class="btn btn-primary" type="submit"><i
@@ -97,99 +97,99 @@
             <div class="dropdown d-inline-block">
                 <button type="button" class="btn header-item noti-icon waves-effect" data-bs-toggle="dropdown"
                     aria-haspopup="true" aria-expanded="false">
-                    @switch(Session::get('lang'))
-                        @case('ru')
-                            <img src="{{ URL::asset('/build/images/flags/russia.jpg') }}" alt="Header Language" height="16">
-                        @break
+                    <?php switch(Session::get('lang')):
+                        case ('ru'): ?>
+                            <img src="<?php echo e(URL::asset('/build/images/flags/russia.jpg')); ?>" alt="Header Language" height="16">
+                        <?php break; ?>
 
-                        @case('it')
-                            <img src="{{ URL::asset('/build/images/flags/italy.jpg') }}" alt="Header Language" height="16">
-                        @break
+                        <?php case ('it'): ?>
+                            <img src="<?php echo e(URL::asset('/build/images/flags/italy.jpg')); ?>" alt="Header Language" height="16">
+                        <?php break; ?>
 
-                        @case('sp')
-                            <img src="{{ URL::asset('/build/images/flags/spain.jpg') }}" alt="Header Language" height="16">
-                        @break
+                        <?php case ('sp'): ?>
+                            <img src="<?php echo e(URL::asset('/build/images/flags/spain.jpg')); ?>" alt="Header Language" height="16">
+                        <?php break; ?>
 
-                        @case('ch')
-                            <img src="{{ URL::asset('/build/images/flags/china.svg') }}" alt="Header Language" height="16">
-                        @break
+                        <?php case ('ch'): ?>
+                            <img src="<?php echo e(URL::asset('/build/images/flags/china.svg')); ?>" alt="Header Language" height="16">
+                        <?php break; ?>
 
-                        @case('fr')
-                            <img src="{{ URL::asset('/build/images/flags/french.jpg') }}" alt="Header Language" height="16">
-                        @break
+                        <?php case ('fr'): ?>
+                            <img src="<?php echo e(URL::asset('/build/images/flags/french.jpg')); ?>" alt="Header Language" height="16">
+                        <?php break; ?>
 
-                        @case('gr')
-                            <img src="{{ URL::asset('/build/images/flags/germany.jpg') }}" alt="Header Language" height="16">
-                        @break
+                        <?php case ('gr'): ?>
+                            <img src="<?php echo e(URL::asset('/build/images/flags/germany.jpg')); ?>" alt="Header Language" height="16">
+                        <?php break; ?>
 
-                        @case('ae')
-                            <img src="{{ URL::asset('/build/images/flags/ae.svg') }}" alt="Header Language" height="16">
-                        @break
+                        <?php case ('ae'): ?>
+                            <img src="<?php echo e(URL::asset('/build/images/flags/ae.svg')); ?>" alt="Header Language" height="16">
+                        <?php break; ?>
 
-                        @default
-                            <img src="{{ URL::asset('/build/images/flags/us.jpg') }}" alt="Header Language" height="16">
-                    @endswitch
+                        <?php default: ?>
+                            <img src="<?php echo e(URL::asset('/build/images/flags/us.jpg')); ?>" alt="Header Language" height="16">
+                    <?php endswitch; ?>
                 </button>
                 <div class="dropdown-menu dropdown-menu-end">
 
                     <!-- item-->
-                    <a href="{{ url('index/en') }}" class="dropdown-item notify-item language py-2" data-lang="en"
+                    <a href="<?php echo e(url('index/en')); ?>" class="dropdown-item notify-item language py-2" data-lang="en"
                         title="English">
-                        <img src="{{ URL::asset('build/images/flags/us.jpg') }}" alt="user-image"
+                        <img src="<?php echo e(URL::asset('build/images/flags/us.jpg')); ?>" alt="user-image"
                             class="me-2" height="12">
                         <span class="align-middle">English</span>
                     </a>
 
                     <!-- item-->
-                    <a href="{{ url('index/sp') }}" class="dropdown-item notify-item language" data-lang="sp"
+                    <a href="<?php echo e(url('index/sp')); ?>" class="dropdown-item notify-item language" data-lang="sp"
                         title="Spanish">
-                        <img src="{{ URL::asset('build/images/flags/spain.jpg') }}" alt="user-image"
+                        <img src="<?php echo e(URL::asset('build/images/flags/spain.jpg')); ?>" alt="user-image"
                             class="me-2" height="12">
                         <span class="align-middle">Española</span>
                     </a>
 
                     <!-- item-->
-                    <a href="{{ url('index/gr') }}" class="dropdown-item notify-item language" data-lang="gr"
+                    <a href="<?php echo e(url('index/gr')); ?>" class="dropdown-item notify-item language" data-lang="gr"
                         title="German">
-                        <img src="{{ URL::asset('build/images/flags/germany.jpg') }}" alt="user-image"
+                        <img src="<?php echo e(URL::asset('build/images/flags/germany.jpg')); ?>" alt="user-image"
                             class="me-2" height="12"> <span class="align-middle">Deutsche</span>
                     </a>
 
                     <!-- item-->
-                    <a href="{{ url('index/it') }}" class="dropdown-item notify-item language" data-lang="it"
+                    <a href="<?php echo e(url('index/it')); ?>" class="dropdown-item notify-item language" data-lang="it"
                         title="Italian">
-                        <img src="{{ URL::asset('build/images/flags/italy.jpg') }}" alt="user-image"
+                        <img src="<?php echo e(URL::asset('build/images/flags/italy.jpg')); ?>" alt="user-image"
                             class="me-2" height="12">
                         <span class="align-middle">Italiana</span>
                     </a>
 
                     <!-- item-->
-                    <a href="{{ url('index/ru') }}" class="dropdown-item notify-item language" data-lang="ru"
+                    <a href="<?php echo e(url('index/ru')); ?>" class="dropdown-item notify-item language" data-lang="ru"
                         title="Russian">
-                        <img src="{{ URL::asset('build/images/flags/russia.jpg') }}" alt="user-image"
+                        <img src="<?php echo e(URL::asset('build/images/flags/russia.jpg')); ?>" alt="user-image"
                             class="me-2" height="12">
                         <span class="align-middle">русский</span>
                     </a>
 
                     <!-- item-->
-                    <a href="{{ url('index/ch') }}" class="dropdown-item notify-item language" data-lang="ch"
+                    <a href="<?php echo e(url('index/ch')); ?>" class="dropdown-item notify-item language" data-lang="ch"
                         title="Chinese">
-                        <img src="{{ URL::asset('build/images/flags/china.svg') }}" alt="user-image"
+                        <img src="<?php echo e(URL::asset('build/images/flags/china.svg')); ?>" alt="user-image"
                             class="me-2" height="12">
                         <span class="align-middle">中国人</span>
                     </a>
 
                     <!-- item-->
-                    <a href="{{ url('index/fr') }}" class="dropdown-item notify-item language" data-lang="fr"
+                    <a href="<?php echo e(url('index/fr')); ?>" class="dropdown-item notify-item language" data-lang="fr"
                         title="French">
-                        <img src="{{ URL::asset('build/images/flags/french.jpg') }}" alt="user-image"
+                        <img src="<?php echo e(URL::asset('build/images/flags/french.jpg')); ?>" alt="user-image"
                             class="me-2" height="12">
                         <span class="align-middle">français</span>
                     </a>
                     <!-- item-->
-                    <a href="{{ url('index/ae') }}" class="dropdown-item notify-item language" data-lang="ae"
+                    <a href="<?php echo e(url('index/ae')); ?>" class="dropdown-item notify-item language" data-lang="ae"
                         title="Arabic">
-                        <img src="{{ URL::asset('build/images/flags/ae.svg') }}" alt="user-image"
+                        <img src="<?php echo e(URL::asset('build/images/flags/ae.svg')); ?>" alt="user-image"
                             class="me-2" height="18">
                         <span class="align-middle">Arabic</span>
                     </a>
@@ -205,44 +205,45 @@
                     id="page-header-notifications-dropdown" data-bs-toggle="dropdown" aria-haspopup="true"
                     aria-expanded="false">
                     <i class="bx bx-bell bx-tada"></i>
-                    <span class="badge bg-danger rounded-pill">{{ $Cnotification_count->count() }}</span>
+                    <span class="badge bg-danger rounded-pill"><?php echo e($Cnotification_count->count()); ?></span>
                 </button>
                 <div class="dropdown-menu dropdown-menu-lg dropdown-menu-end p-0"
                     aria-labelledby="page-header-notifications-dropdown">
                     <div class="p-3">
                         <div class="row align-items-center">
                             <div class="col">
-                                <h6 class="m-0"> {{ __('Notifications') }}</h6>
+                                <h6 class="m-0"> <?php echo e(__('Notifications')); ?></h6>
                             </div>
                             <div class="col-auto">
-                                <a href="{{ url('/notification-list') }}" class="small"> {{ __('View All') }}</a>
+                                <a href="<?php echo e(url('/notification-list')); ?>" class="small"> <?php echo e(__('View All')); ?></a>
                             </div>
                         </div>
                     </div>
                     <div data-simplebar class="notification-list-scroll overflow-auto" style="max-height: 230px;">
-                        @forelse ($Cnotification_count as $item)
-                            <a href="/notification/{{ $item->id }}"
+                        <?php $__empty_1 = true; $__currentLoopData = $Cnotification_count; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $item): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
+                            <a href="/notification/<?php echo e($item->id); ?>"
                                 class="text-reset notification-item bg-light ">
                                 <div class="d-flex">
-                                    <img src="@if ($user->profile_photo != '') {{ URL::asset('storage/images/users/' . $user->profile_photo) }}@else{{ URL::asset('build/images/users/noImage.png') }} @endif"
+                                    <img src="<?php if($user->profile_photo != ''): ?> <?php echo e(URL::asset('storage/images/users/' . $user->profile_photo)); ?><?php else: ?><?php echo e(URL::asset('build/images/users/noImage.png')); ?> <?php endif; ?>"
                                         class="me-3 rounded-circle avatar-xs" alt="user-pic">
                                     <div class="flex-grow-1">
                                         <h6 class="mt-0 mb-1">
-                                            {{ $item->user->first_name . ' ' . $item->user->last_name }}</h6>
+                                            <?php echo e($item->user->first_name . ' ' . $item->user->last_name); ?></h6>
                                         <div class="font-size-12 text-muted">
-                                            <p class="mb-1">{{ $item->title }}</p>
+                                            <p class="mb-1"><?php echo e($item->title); ?></p>
                                             <p class="mb-0"><i class="mdi mdi-clock-outline"></i>
-                                                {{ $item->created_at->diffForHumans() }} </p>
+                                                <?php echo e($item->created_at->diffForHumans()); ?> </p>
                                         </div>
                                     </div>
                                 </div>
                             </a>
-                        @endforeach
+                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                     </div>
                     <div class="p-2 border-top d-grid">
                         <a class="btn btn-sm btn-link font-size-14 w-100 text-center"
-                            href="{{ url('/notification-list') }}">
-                            <i class="mdi mdi-arrow-right-circle me-1"></i> {{ __('View More..') }}
+                            href="<?php echo e(url('/notification-list')); ?>">
+                            <i class="mdi mdi-arrow-right-circle me-1"></i> <?php echo e(__('View More..')); ?>
+
                         </a>
                     </div>
                 </div>
@@ -251,50 +252,50 @@
                 <button type="button" class="btn header-item waves-effect" id="page-header-user-dropdown"
                     data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                     <img class="rounded-circle header-profile-user"
-                        src="@if ($user->profile_photo != '') {{ URL::asset('storage/images/users/' . $user->profile_photo) }}@else{{ URL::asset('build/images/users/noImage.png') }} @endif"
+                        src="<?php if($user->profile_photo != ''): ?> <?php echo e(URL::asset('storage/images/users/' . $user->profile_photo)); ?><?php else: ?><?php echo e(URL::asset('build/images/users/noImage.png')); ?> <?php endif; ?>"
                         alt="Avatar">
-                    <span class="d-none d-xl-inline-block ms-1">{{ $user->first_name }}</span>
+                    <span class="d-none d-xl-inline-block ms-1"><?php echo e($user->first_name); ?></span>
                     <i class="mdi mdi-chevron-down d-none d-xl-inline-block"></i>
                 </button>
                 <div class="dropdown-menu dropdown-menu-end">
                     <!-- item-->
-                    @if ($role == 'doctor')
-                        <a class="dropdown-item" href="{{ url('profile-view') }}"><i
+                    <?php if($role == 'doctor'): ?>
+                        <a class="dropdown-item" href="<?php echo e(url('profile-view')); ?>"><i
                                 class="bx bx-user font-size-16 align-middle me-1"></i>
-                            {{ __('translation.profile') }}</a>
-                    @elseif($role == 'accountant')
-                        <a class="dropdown-item" href="{{ url('profile-edit') }}"><i
+                            <?php echo e(__('translation.profile')); ?></a>
+                    <?php elseif($role == 'accountant'): ?>
+                        <a class="dropdown-item" href="<?php echo e(url('profile-edit')); ?>"><i
                                 class="bx bx-user font-size-16 align-middle me-1"></i>
-                            {{ __('translation.profile') }}</a>
-                    @elseif($role == 'patient')
-                        <a class="dropdown-item" href="{{ url('profile-view') }}"><i
+                            <?php echo e(__('translation.profile')); ?></a>
+                    <?php elseif($role == 'patient'): ?>
+                        <a class="dropdown-item" href="<?php echo e(url('profile-view')); ?>"><i
                                 class="bx bx-user font-size-16 align-middle me-1"></i>
-                            {{ __('translation.profile') }}</a>
-                    @elseif($role == 'receptionist')
-                        <a class="dropdown-item" href="{{ url('profile-view') }}"><i
+                            <?php echo e(__('translation.profile')); ?></a>
+                    <?php elseif($role == 'receptionist'): ?>
+                        <a class="dropdown-item" href="<?php echo e(url('profile-view')); ?>"><i
                                 class="bx bx-user font-size-16 align-middle me-1"></i>
-                            {{ __('translation.profile') }}</a>
-                    @elseif($role == 'admin')
-                        <a class="dropdown-item" href="{{ url('profile-edit') }}"><i
+                            <?php echo e(__('translation.profile')); ?></a>
+                    <?php elseif($role == 'admin'): ?>
+                        <a class="dropdown-item" href="<?php echo e(url('profile-edit')); ?>"><i
                                 class="bx bx-user font-size-16 align-middle me-1"></i>
-                            {{ __('translation.change-profile') }}</a>
-                        <a class="dropdown-item" href="{{ url('payment-key') }}"><i
+                            <?php echo e(__('translation.change-profile')); ?></a>
+                        <a class="dropdown-item" href="<?php echo e(url('payment-key')); ?>"><i
                                 class="bx bx-key font-size-16 align-middle me-1"></i>
-                            {{ __('translation.add-api-key') }}</a>
-                        <a class="dropdown-item" href="{{ url('app-setting') }}"><i
+                            <?php echo e(__('translation.add-api-key')); ?></a>
+                        <a class="dropdown-item" href="<?php echo e(url('app-setting')); ?>"><i
                                 class="bx bx-cog font-size-16 align-middle me-1"></i>
-                            {{ __('translation.app-setting') }}</a>
-                    @endif
-                    <a class="dropdown-item d-block" href="{{ url('change-password') }}"><i
+                            <?php echo e(__('translation.app-setting')); ?></a>
+                    <?php endif; ?>
+                    <a class="dropdown-item d-block" href="<?php echo e(url('change-password')); ?>"><i
                             class="bx bx-wrench font-size-16 align-middle me-1"></i>
-                        {{ __('translation.change-password') }}</a>
+                        <?php echo e(__('translation.change-password')); ?></a>
                     <div class="dropdown-divider"></div>
                     <a class="dropdown-item text-danger" href="javascript:void();"
                         onclick="event.preventDefault(); document.getElementById('logout-form').submit();"><i
                             class="bx bx-power-off font-size-16 align-middle me-1 text-danger"></i>
-                        {{ __('translation.logout') }} </a>
-                    <form id="logout-form" action="{{ url('logout') }}" method="POST" style="display: none;">
-                        @csrf
+                        <?php echo e(__('translation.logout')); ?> </a>
+                    <form id="logout-form" action="<?php echo e(url('logout')); ?>" method="POST" style="display: none;">
+                        <?php echo csrf_field(); ?>
                     </form>
                 </div>
             </div>
@@ -306,3 +307,4 @@
         </div>
     </div>
 </header>
+<?php /**PATH C:\wamp64\www\appyweb\crm_clinicas\crm-clinicas\resources\views/layouts/top-hor.blade.php ENDPATH**/ ?>

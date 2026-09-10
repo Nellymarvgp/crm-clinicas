@@ -10,6 +10,7 @@ use App\Http\Controllers\ReportController;
 use App\Invoice;
 use App\InvoiceDetail;
 use App\ReceptionListDoctor;
+use App\Notification;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\App;
@@ -50,6 +51,7 @@ class HomeController extends Controller
         $role = $user->roles[0]->slug;
         $today = Carbon::today()->format('Y/m/d');
         $time = date('H:i:s');
+        $this->createAppointmentReminders($user, $role);
 
         $accountant_role = Sentinel::findRoleBySlug('accountant');
         $accountants = $accountant_role->users()->pluck('id');
@@ -302,6 +304,43 @@ class HomeController extends Controller
             ];
 
             return view('index', compact('user', 'role', 'invoices', 'payment', 'payment_due', 'unpaid_invoices', 'data'));
+        }
+    }
+
+    private function createAppointmentReminders($user, string $role): void
+    {
+        $appointments = Appointment::query()->whereIn('appointment_date', [Carbon::today()->toDateString(), Carbon::tomorrow()->toDateString()]);
+        if ($role === 'patient') {
+            $appointments->where('appointment_for', $user->id);
+        } elseif ($role === 'doctor') {
+            $doctorId = Doctor::where('user_id', $user->id)->value('id');
+            $appointments->where(function ($query) use ($doctorId, $user) {
+                $query->where('appointment_with', $doctorId)->orWhere('appointment_with', $user->id);
+            });
+        } elseif ($role === 'receptionist') {
+            $doctorIds = ReceptionListDoctor::where('reception_id', $user->id)->pluck('doctor_id');
+            $appointments->where(function ($query) use ($doctorIds, $user) {
+                $query->whereIn('appointment_with', $doctorIds)->orWhere('booked_by', $user->id);
+            });
+        }
+
+        foreach ($appointments->get(['id', 'appointment_date']) as $appointment) {
+            $label = Carbon::parse($appointment->appointment_date)->isToday() ? 'hoy' : 'mañana';
+            $title = 'Cita programada para ' . $label;
+            $exists = Notification::where('to_user', $user->id)
+                ->where('data', $appointment->id)
+                ->where('title', $title)
+                ->whereNull('read_at')
+                ->exists();
+            if (!$exists) {
+                Notification::create([
+                    'to_user' => $user->id,
+                    'notification_type_id' => 1,
+                    'title' => $title,
+                    'data' => $appointment->id,
+                    'from_user' => $user->id,
+                ]);
+            }
         }
     }
 

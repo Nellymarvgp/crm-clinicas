@@ -21,7 +21,7 @@
                                             <th>{{ __('Doctor Name') }}</th>
                                             <th>{{ __('Date') }}</th>
                                             <th>{{ __('Time') }}</th>
-                                            <th>{{ __('Status') }}</th>
+                                            <th>{{ __('Estado') }}</th>
                                             <th>{{ __('Action') }}</th>
                                         </tr>
                                     </thead>
@@ -46,15 +46,8 @@
                                                 <td>{{ $item->appointment_date }}</td>
                                                 <td>{{ optional($item->timeSlot)->from ? optional($item->timeSlot)->from . ' to ' . optional($item->timeSlot)->to : 'Sin horario' }}</td>
                                                 <td>
-                                                    @if ($item->status == 0)
-                                                        <span class="badge bg-warning">Pendiente</span>
-                                                    @elseif ($item->status == 1 )
-                                                        <span class="badge bg-success">Completada</span>
-                                                    @elseif ($item->status == 2 )
-                                                        <span class="badge bg-danger">Cancelada</span>
-                                                    @else
-                                                        <span class="badge bg-secondary">Estado desconocido</span>
-                                                    @endif
+                                                    <span class="badge badge-pill text-white" style="background-color:{{ (int) $item->status === 1 ? '#198754' : ((int) $item->status === 2 ? '#dc3545' : '#0dcaf0') }};">{{ $item->status_label }}</span>
+                                                </td>
                                                 </td>
                                                 <td>
                                                     @if ($item->status == 0)
