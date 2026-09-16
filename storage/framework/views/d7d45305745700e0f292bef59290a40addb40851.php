@@ -85,6 +85,25 @@
                                 <div class="col-md-6">
                                     <div class="row">
                                         <div class="col-md-12 mb-3">
+                                            <label class="form-label"><?php echo e(__('Cédula')); ?><span class="text-danger">*</span></label>
+                                            <input type="text" class="form-control <?php $__errorArgs = ['cedula'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>" name="cedula" value="<?php echo e(old('cedula', $patient->cedula ?? '')); ?>" placeholder="<?php echo e(__('Ingrese la cédula')); ?>">
+                                            <?php $__errorArgs = ['cedula'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?><span class="invalid-feedback"><strong><?php echo e($message); ?></strong></span><?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
+                                        </div>
+                                        <div class="col-md-12 mb-3">
                                             <label class="form-label"><?php echo e(__('Nombres ')); ?><span
                                                     class="text-danger">*</span></label>
                                             <input type="text"

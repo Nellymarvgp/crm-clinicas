@@ -454,4 +454,4 @@ unset($__errorArgs, $__bag); ?>" value="' +
     </script>
 <?php $__env->stopSection(); ?>
 
-<?php echo $__env->make('layouts.master-layouts', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?><?php /**PATH C:\wamp64\www\appyweb\crm_clinicas\crm-clinicas\resources\views\appointment\appointment_create.blade.php ENDPATH**/ ?>
+<?php echo $__env->make('layouts.master-layouts', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?><?php /**PATH C:\wamp64\www\appyweb\crm_clinicas\crm-clinicas\resources\views/appointment/appointment_create.blade.php ENDPATH**/ ?>

@@ -166,6 +166,7 @@
                                 <label for="" class="d-block">{{ __('Horario Disponible') }}<span
                                         class="text-danger">*</span></label>
                                 <div class="btn-group availble_slot d-block" role="group">
+                                    <small class="text-muted d-block mb-2">Puedes seleccionar una o varias horas consecutivas.</small>
                                     @error('available_slot')
                                         <span class="invalid-feedback" role="alert">
                                             <strong>{{ $message }}</strong>
@@ -265,10 +266,16 @@
                     if (availble_time.length === 0) {
                         $('.availble_time').append('<span class="text-muted">No hay horarios disponibles para este odontólogo.</span>');
                     } else {
+                        var uniqueTimes = {};
                         $.each(availble_time, function(key, value) {
+                            var timeKey = value.from + '|' + value.to;
+                            if (uniqueTimes[timeKey]) {
+                                return;
+                            }
+                            uniqueTimes[timeKey] = true;
                             $('.availble_time').append(
                                 '<label class="btn btn-outline-secondary me-2 "><input type="radio" name="available_time" class="btn-check available-time @error('available_time') is-invalid @enderror" value="' +
-                                value.id + '" >' + value.from + ' to ' + value.to + '</label>');
+                                value.id + '" >' + formatAppointmentTime(value.from) + ' a ' + formatAppointmentTime(value.to) + '</label>');
                         });
                     }
                     activeAvailableTime();
@@ -300,30 +307,27 @@
                 },
                 success: function(response) {
                     var available_slot = response.data[0];
+                    var uniqueSlots = {};
                     $.each(available_slot, function(key, value) {
+                        var slotKey = value.from + '|' + value.to;
+                        if (uniqueSlots[slotKey]) {
+                            return;
+                        }
+                        uniqueSlots[slotKey] = true;
                         if (value.appointment.length == 0) {
                             $('.availble_slot').append(
-                                '<label class="btn btn-outline-secondary m-2"><input type="radio" name="available_slot" class="btn-check available-slot"  value="' +
-                                value.id + '">' + value.from + ' to ' + value.to +
+                                '<label class="btn btn-outline-secondary m-2"><input type="checkbox" name="available_slot[]" class="btn-check available-slot"  value="' +
+                                value.id + '">' + formatAppointmentTime(value.from) + ' a ' + formatAppointmentTime(value.to) +
                                 '</label>');
                         } else {
                             $('.availble_slot').append(
-                                '<label class="btn alert-secondary m-2"><input type="radio" name="available_slot" class="btn-check available-slot"  value="' +
-                                value.id + '" disabled>' + value.from + ' to ' + value.to +
+                                '<label class="btn alert-secondary m-2"><input type="checkbox" name="available_slot[]" class="btn-check available-slot"  value="' +
+                                value.id + '" disabled>' + formatAppointmentTime(value.from) + ' a ' + formatAppointmentTime(value.to) +
                                 '</label>');
                         }
                     });
 
-                    // available slots activation
-                    if ($(".availble_slot").length) {
-                        $(".availble_slot label").click(function() {
-                            var activeLabel = $(".availble_slot label.active");
-                            if (activeLabel.length) {
-                                activeLabel.removeClass("active");
-                            }
-                            $(this).addClass("active");
-                        });
-                    }
+                    // Slot checkboxes can remain selected at the same time.
                 },
                 error: function(error) {
                     console.log(error);
@@ -333,6 +337,20 @@
                 }
             });
         });
+
+        function formatAppointmentTime(timeValue) {
+            if (!timeValue) {
+                return '';
+            }
+
+            var parts = String(timeValue).split(':');
+            var hours = parseInt(parts[0], 10);
+            var minutes = parts[1] || '00';
+            var period = hours >= 12 ? 'pm' : 'am';
+            hours = hours % 12 || 12;
+
+            return String(hours).padStart(2, '0') + ':' + minutes + period;
+        }
 
         // available time activation
         function activeAvailableTime() {
@@ -346,6 +364,9 @@
                 });
             }
         }
+            $(document).on('change', '.available-slot', function() {
+                $(this).closest('label').toggleClass('active', this.checked);
+            });
         activeAvailableTime();
     </script>
 @endsection

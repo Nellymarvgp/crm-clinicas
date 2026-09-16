@@ -117,6 +117,8 @@ Route::middleware('sentinel.auth')->group(function () {
     Route::post('appointment-status/{id}', 'AppointmentController@appointment_status');
     Route::post('appointment/{id}/dental-evaluation', 'AppointmentController@saveDentalEvaluation')->name('appointment.dental-evaluation.save');
     Route::post('appointment/{id}/dental-evaluation/email', 'AppointmentController@sendDentalEvaluationEmail')->name('appointment.dental-evaluation.email');
+    Route::get('appointment/{id}/budget', 'AppointmentController@appointmentBudgetView')->name('appointment.budget.view');
+    Route::get('appointment/{id}/budget/whatsapp', 'AppointmentController@appointmentBudgetWhatsApp')->name('appointment.budget.whatsapp');
     Route::post('appointment-final-price/{id}', 'AppointmentController@update_final_consultation_price');
     Route::get('getMonthlyAppointments', 'ReportController@getMonthlyAppointments');
     Route::post('patient-by-appointment', 'InvoiceController@patient_by_appointment')->name('patient_by_appointment');

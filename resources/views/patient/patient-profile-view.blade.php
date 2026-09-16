@@ -248,6 +248,39 @@
                                 </div>
                             </div>
                             <div class="tab-pane" id="DentalHistory" role="tabpanel">
+                                @php
+                                    $latestDentalEvaluation = null;
+                                    foreach ($appointments as $appointmentItem) {
+                                        if ($appointmentItem->dentalEvaluation) {
+                                            $latestDentalEvaluation = $appointmentItem->dentalEvaluation;
+                                            break;
+                                        }
+                                    }
+                                    $latestToothMarks = $latestDentalEvaluation && is_array($latestDentalEvaluation->tooth_marks) ? $latestDentalEvaluation->tooth_marks : [];
+                                    $upperTeeth = [18, 17, 16, 15, 14, 13, 12, 11, 21, 22, 23, 24, 25, 26, 27, 28];
+                                    $lowerTeeth = [48, 47, 46, 45, 44, 43, 42, 41, 31, 32, 33, 34, 35, 36, 37, 38];
+                                @endphp
+                                @if ($latestDentalEvaluation)
+                                    <div class="card border-light mb-3">
+                                        <div class="card-body">
+                                            <h5 class="card-title mb-3">{{ __('Diagnóstico más reciente') }}</h5>
+                                            <div class="mb-2"><strong>{{ __('Diagnóstico:') }}</strong> {{ $latestDentalEvaluation->diagnosis ?: __('Sin registrar') }}</div>
+                                            <div class="mb-2"><strong>{{ __('Tratamiento:') }}</strong> {{ $latestDentalEvaluation->treatment ?: __('Sin registrar') }}</div>
+                                            <div class="mb-3"><strong>{{ __('Notas clínicas:') }}</strong> {{ $latestDentalEvaluation->clinical_notes ?: __('Sin registrar') }}</div>
+                                            <div class="odontogram-grid mb-2">
+                                                @foreach (array_merge($upperTeeth, $lowerTeeth) as $tooth)
+                                                    <span class="tooth-mark {{ $latestToothMarks[$tooth] ?? '' }} text-center pt-3" style="min-height: 52px;">{{ $tooth }}</span>
+                                                @endforeach
+                                            </div>
+                                            <div class="small text-muted">
+                                                <span><i class="fas fa-square text-danger me-1"></i>{{ __('Afectado') }}</span>
+                                                <span class="ms-3"><i class="fas fa-square text-primary me-1"></i>{{ __('Trabajado') }}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                @else
+                                    <div class="alert alert-light border">{{ __('No hay historial dental registrado para este paciente.') }}</div>
+                                @endif
                                 <div class="table-responsive">
                                     <table class="table table-bordered mb-0">
                                         <thead><tr><th>{{ __('Fecha') }}</th><th>{{ __('Diagnóstico') }}</th><th>{{ __('Tratamiento') }}</th><th>{{ __('Cantidad') }}</th><th>{{ __('Valor') }}</th><th>{{ __('Odontograma') }}</th><th>{{ __('Detalle') }}</th></tr></thead>
@@ -270,7 +303,7 @@
                                                     </tr>
                                                 @endif
                                             @empty
-                                                <tr><td colspan="6">{{ __('Sin evaluaciones registradas') }}</td></tr>
+                                                <tr><td colspan="7">{{ __('Sin evaluaciones registradas') }}</td></tr>
                                             @endforelse
                                         </tbody>
                                     </table>

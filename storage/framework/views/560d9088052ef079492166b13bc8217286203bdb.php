@@ -67,6 +67,10 @@
                                         <td><?php echo e($patient->first_name); ?> <?php echo e($patient->last_name); ?></td>
                                     </tr>
                                     <tr>
+                                        <th scope="row"><?php echo e(__('Cédula:')); ?></th>
+                                        <td><?php echo e($patient->cedula ?: __('No registrada')); ?></td>
+                                    </tr>
+                                    <tr>
                                         <th scope="row"><?php echo e(__('Nro. de Contacto:')); ?></th>
                                         <td> <?php echo e(@$patient->mobile); ?> </td>
                                     </tr>
@@ -246,9 +250,42 @@
                                 </div>
                             </div>
                             <div class="tab-pane" id="DentalHistory" role="tabpanel">
+                                <?php
+                                    $latestDentalEvaluation = null;
+                                    foreach ($appointments as $appointmentItem) {
+                                        if ($appointmentItem->dentalEvaluation) {
+                                            $latestDentalEvaluation = $appointmentItem->dentalEvaluation;
+                                            break;
+                                        }
+                                    }
+                                    $latestToothMarks = $latestDentalEvaluation && is_array($latestDentalEvaluation->tooth_marks) ? $latestDentalEvaluation->tooth_marks : [];
+                                    $upperTeeth = [18, 17, 16, 15, 14, 13, 12, 11, 21, 22, 23, 24, 25, 26, 27, 28];
+                                    $lowerTeeth = [48, 47, 46, 45, 44, 43, 42, 41, 31, 32, 33, 34, 35, 36, 37, 38];
+                                ?>
+                                <?php if($latestDentalEvaluation): ?>
+                                    <div class="card border-light mb-3">
+                                        <div class="card-body">
+                                            <h5 class="card-title mb-3"><?php echo e(__('Diagnóstico más reciente')); ?></h5>
+                                            <div class="mb-2"><strong><?php echo e(__('Diagnóstico:')); ?></strong> <?php echo e($latestDentalEvaluation->diagnosis ?: __('Sin registrar')); ?></div>
+                                            <div class="mb-2"><strong><?php echo e(__('Tratamiento:')); ?></strong> <?php echo e($latestDentalEvaluation->treatment ?: __('Sin registrar')); ?></div>
+                                            <div class="mb-3"><strong><?php echo e(__('Notas clínicas:')); ?></strong> <?php echo e($latestDentalEvaluation->clinical_notes ?: __('Sin registrar')); ?></div>
+                                            <div class="odontogram-grid mb-2">
+                                                <?php $__currentLoopData = array_merge($upperTeeth, $lowerTeeth); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $tooth): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                                    <span class="tooth-mark <?php echo e($latestToothMarks[$tooth] ?? ''); ?> text-center pt-3" style="min-height: 52px;"><?php echo e($tooth); ?></span>
+                                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                                            </div>
+                                            <div class="small text-muted">
+                                                <span><i class="fas fa-square text-danger me-1"></i><?php echo e(__('Afectado')); ?></span>
+                                                <span class="ms-3"><i class="fas fa-square text-primary me-1"></i><?php echo e(__('Trabajado')); ?></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                <?php else: ?>
+                                    <div class="alert alert-light border"><?php echo e(__('No hay historial dental registrado para este paciente.')); ?></div>
+                                <?php endif; ?>
                                 <div class="table-responsive">
                                     <table class="table table-bordered mb-0">
-                                        <thead><tr><th><?php echo e(__('Fecha')); ?></th><th><?php echo e(__('Diagnóstico')); ?></th><th><?php echo e(__('Tratamiento')); ?></th><th><?php echo e(__('Cantidad')); ?></th><th><?php echo e(__('Valor')); ?></th><th><?php echo e(__('Detalle')); ?></th></tr></thead>
+                                        <thead><tr><th><?php echo e(__('Fecha')); ?></th><th><?php echo e(__('Diagnóstico')); ?></th><th><?php echo e(__('Tratamiento')); ?></th><th><?php echo e(__('Cantidad')); ?></th><th><?php echo e(__('Valor')); ?></th><th><?php echo e(__('Odontograma')); ?></th><th><?php echo e(__('Detalle')); ?></th></tr></thead>
                                         <tbody>
                                             <?php $__empty_2 = true; $__currentLoopData = $appointments; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $item): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_2 = false; ?>
                                                 <?php if($item->dentalEvaluation): ?>
@@ -258,11 +295,17 @@
                                                         <td><?php echo e($item->dentalEvaluation->treatment ?: __('Sin registrar')); ?></td>
                                                         <td><?php echo e($item->dentalEvaluation->quantity ?: '0'); ?></td>
                                                         <td><?php echo e($item->dentalEvaluation->value !== null ? number_format($item->dentalEvaluation->value, 2) : '0.00'); ?></td>
+                                                        <td>
+                                                            <?php $__currentLoopData = ($item->dentalEvaluation->tooth_marks ?: []); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $tooth => $mark): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                                                <span class="badge text-white" style="background-color:<?php echo e($mark === 'affected' ? '#dc3545' : '#0d6efd'); ?>"><?php echo e($tooth); ?></span>
+                                                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                                                            <?php if(empty($item->dentalEvaluation->tooth_marks)): ?> <?php echo e(__('Sin marcas')); ?> <?php endif; ?>
+                                                        </td>
                                                         <td><a href="<?php echo e(url('appointment-view/' . $item->id)); ?>#dental-history" class="btn btn-primary btn-sm"><?php echo e(__('Ver')); ?></a></td>
                                                     </tr>
                                                 <?php endif; ?>
                                             <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_2): ?>
-                                                <tr><td colspan="6"><?php echo e(__('Sin evaluaciones registradas')); ?></td></tr>
+                                                <tr><td colspan="7"><?php echo e(__('Sin evaluaciones registradas')); ?></td></tr>
                                             <?php endif; ?>
                                         </tbody>
                                     </table>

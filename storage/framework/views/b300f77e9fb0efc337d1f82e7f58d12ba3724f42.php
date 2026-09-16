@@ -1,10 +1,61 @@
-<header id="page-topbar">
+<style>
+    #page-topbar.internal-home-header {
+        background: #fff;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, .1);
+        min-height: 88px;
+    }
+    .internal-home-header .navbar-header {
+        min-height: 88px;
+        padding: 0 24px;
+    }
+    .internal-home-header .navbar-brand-box {
+        width: auto;
+        min-width: 190px;
+        height: 88px;
+        display: flex;
+        align-items: center;
+    }
+    .internal-home-header .navbar-brand-box .logo img {
+        height: 78px;
+        width: auto;
+        max-width: 260px;
+        object-fit: contain;
+    }
+    .internal-home-nav {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        margin: 0 auto;
+    }
+    .internal-home-nav a {
+        color: #7c7c7b;
+        font-weight: 500;
+        padding: 10px 12px;
+        text-decoration: none;
+        white-space: nowrap;
+    }
+    .internal-home-nav a:hover,
+    .internal-home-nav a:focus {
+        color: #7c7c7b;
+        background: #d1cba4;
+        border-radius: 4px;
+    }
+    @media (max-width: 1199px) {
+        .internal-home-nav { display: none; }
+    }
+    @media (max-width: 575px) {
+        .internal-home-header .navbar-header { padding: 0 12px; }
+        .internal-home-header .navbar-brand-box .logo img { height: 58px; max-width: 200px; }
+    }
+</style>
+
+<header id="page-topbar" class="internal-home-header">
     <div class="navbar-header">
         <div class="d-flex">
             <!-- LOGO -->
             <div class="navbar-brand-box">
-                <a href="<?php echo e(url('/dashboard')); ?>" class="logo logo-light">
-                    <img src="<?php echo e(URL::asset('build/images/logo.png')); ?>" alt="CORE" height="34">
+                <a href="<?php echo e(url('/')); ?>" class="logo logo-light">
+                    <img src="<?php echo e(URL::asset('build/images/logo.png')); ?>" alt="CORE">
                 </a>
             </div>
             <button type="button" class="btn btn-sm px-3 font-size-16 d-lg-none header-item waves-effect waves-light"
@@ -12,6 +63,15 @@
                 <i class="fa fa-fw fa-bars"></i>
             </button>
         </div>
+        <nav class="internal-home-nav" aria-label="Navegación principal">
+            <a href="<?php echo e(url('/#home')); ?>">Inicio</a>
+            <a href="<?php echo e(url('/#services')); ?>">Especialidades</a>
+            <a href="<?php echo e(url('/#brand')); ?>">Nosotros</a>
+            <a href="<?php echo e(url('/#commitment')); ?>">Compromiso</a>
+            <a href="<?php echo e(url('/#team')); ?>">Equipo</a>
+            <a href="<?php echo e(route('doctors.find')); ?>">Odontólogos</a>
+            <a href="<?php echo e(url('/#contact')); ?>">Contacto</a>
+        </nav>
         <div class="d-flex">
             <div class="dropdown d-inline-block d-lg-none ms-2">
                 <button type="button" class="btn header-item noti-icon waves-effect" id="page-header-search-dropdown"

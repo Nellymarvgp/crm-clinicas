@@ -84,7 +84,7 @@
                                                 <td> {{ $item->patient->mobile }} </td>
                                                 <td> {{ $item->patient->email }} </td>
                                                 <td>{{ $item->appointment_date }}</td>
-                                                <td>{{ optional($item->timeSlot)->from ? optional($item->timeSlot)->from . ' a ' . optional($item->timeSlot)->to : 'Sin horario' }}</td>
+                                                <td>{{ $item->time_range_label }}</td>
                                                 <td>
                                                     @if ($item->status == 1)
                                                         <span class="badge badge-pill text-white" style="background-color:#198754;">Completado</span>
@@ -149,7 +149,7 @@
                                                 <td> {{ $item->patient->mobile }} </td>
                                                 <td>{{ $item->patient->email }}</td>
                                                 <td>{{ $item->appointment_date }}</td>
-                                                <td>{{ optional($item->timeSlot)->from ? optional($item->timeSlot)->from . ' a ' . optional($item->timeSlot)->to : 'Sin horario' }}</td>
+                                                <td>{{ $item->time_range_label }}</td>
                                                 <td>
                                                     @if ($item->status == 1)
                                                         <span class="badge badge-pill text-white" style="background-color:#198754;">Completado</span>
@@ -210,7 +210,7 @@
                                                 <td> {{ $item->patient->mobile }} </td>
                                                 <td>{{ $item->patient->email }}</td>
                                                 <td>{{ $item->appointment_date }}</td>
-                                                <td>{{ optional($item->timeSlot)->from ? optional($item->timeSlot)->from . ' a ' . optional($item->timeSlot)->to : 'Sin horario' }}</td>
+                                                <td>{{ $item->time_range_label }}</td>
                                                 <td>
                                                     @if ($item->status == 1)
                                                         <span class="badge badge-pill text-white" style="background-color:#198754;">Completado</span>
@@ -271,7 +271,7 @@
                                                 <td> {{ $item->patient->mobile }} </td>
                                                 <td>{{ $item->patient->email }}</td>
                                                 <td>{{ $item->appointment_date }}</td>
-                                                <td>{{ optional($item->timeSlot)->from ? optional($item->timeSlot)->from . ' a ' . optional($item->timeSlot)->to : 'Sin horario' }}</td>
+                                                <td>{{ $item->time_range_label }}</td>
                                                 <td>
                                                     @if ($item->status == 1)
                                                         <span class="badge badge-pill text-white" style="background-color:#198754;">Completado</span>

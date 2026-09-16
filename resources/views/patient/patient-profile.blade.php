@@ -110,7 +110,7 @@
             </div>
             <div class="col-xl-8">
                 <div class="row">
-                    <div class="col-md-4">
+                    <div class="col-md-6">
                         <div class="card mini-stats-wid">
                             <div class="card-body">
                                 <div class="d-flex">
@@ -127,30 +127,13 @@
                             </div>
                         </div>
                     </div>
-                    <div class="col-md-4">
+                    <div class="col-md-6">
                         <div class="card mini-stats-wid">
                             <div class="card-body">
                                 <div class="d-flex">
                                     <div class="flex-grow-1">
-                                        <p class="text-muted fw-medium">{{ __('Facturas Pendientes') }}</p>
-                                        <h4 class="mb-0">{{ number_format($data['pending_bill']) }}</h4>
-                                    </div>
-                                    <div class="avatar-sm align-self-center mini-stat-icon rounded-circle bg-primary">
-                                        <span class="avatar-title">
-                                            <i class="bx bx-hourglass font-size-24"></i>
-                                        </span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="card mini-stats-wid">
-                            <div class="card-body">
-                                <div class="d-flex">
-                                    <div class="flex-grow-1">
-                                        <p class="text-muted fw-medium">{{ __('Total Facturado') }}</p>
-                                        <h4 class="mb-0">${{ number_format($data['revenue'], 2) }}</h4>
+                                        <p class="text-muted fw-medium">{{ __('Valor Diagnóstico') }}</p>
+                                        <h4 class="mb-0">${{ number_format((float) $data['revenue'], 2) }}</h4>
                                     </div>
                                     <div class="avatar-sm align-self-center mini-stat-icon rounded-circle bg-primary">
                                         <span class="avatar-title">
@@ -183,18 +166,7 @@
                                     <span class="d-none d-sm-block">{{ __('Lista de Citas') }}</span>
                                 </a>
                             </li>
-                            <li class="nav-item">
-                                <a class="nav-link" data-bs-toggle="tab" href="#PrescriptionList" role="tab">
-                                    <span class="d-block d-sm-none"><i class="far fa-envelope"></i></span>
-                                    <span class="d-none d-sm-block">{{ __('Lista de Recetas') }}</span>
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" data-bs-toggle="tab" href="#Invoices" role="tab">
-                                    <span class="d-block d-sm-none"><i class="fas fa-cog"></i></span>
-                                    <span class="d-none d-sm-block">{{ __('Facturas') }}</span>
-                                </a>
-                            </li>
+
                         </ul>
                         <!-- Tab panes -->
                         <div class="tab-content p-3 text-muted">
@@ -202,34 +174,6 @@
                                 <div class="table-responsive">
                                     <table class="table table-striped mb-0">
                                         <tbody>
-                                            <tr>
-                                                <th scope="row">{{ __('Estatura') }}</th>
-                                                <td> {{ $medical_Info->height ?? __('No registrado') }} </td>
-                                            </tr>
-                                            <tr>
-                                                <th scope="row">{{ __('Peso') }}</th>
-                                                <td> {{ $medical_Info->weight ?? __('No registrado') }} </td>
-                                            </tr>
-                                            <tr>
-                                                <th scope="row">{{ __('Grupo Sanguíneo') }}</th>
-                                                <td> {{ $medical_Info->b_group ?? __('No registrado') }} </td>
-                                            </tr>
-                                            <tr>
-                                                <th scope="row">{{ __('Presión Arterial') }}</th>
-                                                <td> {{ $medical_Info->b_pressure ?? __('No registrado') }} </td>
-                                            </tr>
-                                            <tr>
-                                                <th scope="row">{{ __('Pulso') }}</th>
-                                                <td> {{ $medical_Info->pulse ?? __('No registrado') }} </td>
-                                            </tr>
-                                            <tr>
-                                                <th scope="row">{{ __('Respiración') }}</th>
-                                                <td> {{ $medical_Info->respiration ?? __('No registrado') }} </td>
-                                            </tr>
-                                            <tr>
-                                                <th scope="row">{{ __('Alergia') }}</th>
-                                                <td> {{ $medical_Info->allergy ?? __('No registrado') }} </td>
-                                            </tr>
                                             <tr>
                                                 <th scope="row">{{ __('Dieta') }}</th>
                                                 <td>
@@ -293,6 +237,39 @@
                                 </div>
                             </div>
                             <div class="tab-pane" id="DentalHistory" role="tabpanel">
+                                @php
+                                    $latestDentalEvaluation = null;
+                                    foreach ($appointments as $appointmentItem) {
+                                        if ($appointmentItem->dentalEvaluation) {
+                                            $latestDentalEvaluation = $appointmentItem->dentalEvaluation;
+                                            break;
+                                        }
+                                    }
+                                    $latestToothMarks = $latestDentalEvaluation && is_array($latestDentalEvaluation->tooth_marks) ? $latestDentalEvaluation->tooth_marks : [];
+                                    $upperTeeth = [18, 17, 16, 15, 14, 13, 12, 11, 21, 22, 23, 24, 25, 26, 27, 28];
+                                    $lowerTeeth = [48, 47, 46, 45, 44, 43, 42, 41, 31, 32, 33, 34, 35, 36, 37, 38];
+                                @endphp
+                                @if ($latestDentalEvaluation)
+                                    <div class="card border-light mb-3">
+                                        <div class="card-body">
+                                            <h5 class="card-title mb-3">{{ __('Diagnóstico más reciente') }}</h5>
+                                            <div class="mb-2"><strong>{{ __('Diagnóstico:') }}</strong> {{ $latestDentalEvaluation->diagnosis ?: __('Sin registrar') }}</div>
+                                            <div class="mb-2"><strong>{{ __('Tratamiento:') }}</strong> {{ $latestDentalEvaluation->treatment ?: __('Sin registrar') }}</div>
+                                            <div class="mb-3"><strong>{{ __('Notas clínicas:') }}</strong> {{ $latestDentalEvaluation->clinical_notes ?: __('Sin registrar') }}</div>
+                                            <div class="odontogram-grid mb-2">
+                                                @foreach (array_merge($upperTeeth, $lowerTeeth) as $tooth)
+                                                    <span class="tooth-mark {{ $latestToothMarks[$tooth] ?? '' }} text-center pt-3" style="min-height: 52px;">{{ $tooth }}</span>
+                                                @endforeach
+                                            </div>
+                                            <div class="small text-muted">
+                                                <span><i class="fas fa-square text-danger me-1"></i>{{ __('Afectado') }}</span>
+                                                <span class="ms-3"><i class="fas fa-square text-primary me-1"></i>{{ __('Trabajado') }}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                @else
+                                    <div class="alert alert-light border">{{ __('No hay historial dental registrado para este paciente.') }}</div>
+                                @endif
                                 <div class="table-responsive">
                                     <table class="table table-bordered mb-0">
                                         <thead><tr><th>{{ __('Fecha') }}</th><th>{{ __('Diagnóstico') }}</th><th>{{ __('Tratamiento') }}</th><th>{{ __('Cantidad') }}</th><th>{{ __('Valor') }}</th><th>{{ __('Odontograma') }}</th><th>{{ __('Detalle') }}</th></tr></thead>
@@ -315,7 +292,7 @@
                                                     </tr>
                                                 @endif
                                             @empty
-                                                <tr><td colspan="6">{{ __('Sin evaluaciones registradas') }}</td></tr>
+                                                <tr><td colspan="7">{{ __('Sin evaluaciones registradas') }}</td></tr>
                                             @endforelse
                                         </tbody>
                                     </table>
@@ -363,12 +340,18 @@
                                 </table>
                                 <div class="col-md-12 text-center mt-3">
                                     <div class="d-flex justify-content-start">
-                                        Mostrando {{ $appointments->firstItem() }} a {{ $appointments->lastItem() }} de
-                                        {{ $appointments->total() }} registros
+                                        @if (method_exists($appointments, 'firstItem'))
+                                            Mostrando {{ $appointments->firstItem() }} a {{ $appointments->lastItem() }} de
+                                            {{ $appointments->total() }} registros
+                                        @else
+                                            Mostrando {{ count($appointments) }} registros
+                                        @endif
                                     </div>
-                                    <div class="d-flex justify-content-end">
-                                        {{ $appointments->links() }}
-                                    </div>
+                                    @if (method_exists($appointments, 'links'))
+                                        <div class="d-flex justify-content-end">
+                                            {{ $appointments->links() }}
+                                        </div>
+                                    @endif
                                 </div>
                             </div>
                             <div class="tab-pane" id="PrescriptionList" role="tabpanel">
@@ -415,12 +398,18 @@
                                 </table>
                                 <div class="col-md-12 text-center mt-3">
                                     <div class="d-flex justify-content-start">
-                                        Mostrando {{ $prescriptions->firstItem() }} a {{ $prescriptions->lastItem() }}
-                                        de {{ $prescriptions->total() }} registros
+                                        @if (method_exists($prescriptions, 'firstItem'))
+                                            Mostrando {{ $prescriptions->firstItem() }} a {{ $prescriptions->lastItem() }}
+                                            de {{ $prescriptions->total() }} registros
+                                        @else
+                                            Mostrando {{ count($prescriptions) }} registros
+                                        @endif
                                     </div>
-                                    <div class="d-flex justify-content-end">
-                                        {{ $prescriptions->links() }}
-                                    </div>
+                                    @if (method_exists($prescriptions, 'links'))
+                                        <div class="d-flex justify-content-end">
+                                            {{ $prescriptions->links() }}
+                                        </div>
+                                    @endif
                                 </div>
                             </div>
                             <div class="tab-pane" id="Invoices" role="tabpanel">
@@ -466,12 +455,18 @@
                                 </table>
                                 <div class="col-md-12 text-center mt-3">
                                     <div class="d-flex justify-content-start">
-                                        Mostrando {{ $invoices->firstItem() }} a {{ $invoices->lastItem() }} de
-                                        {{ $invoices->total() }} registros
+                                        @if (method_exists($invoices, 'firstItem'))
+                                            Mostrando {{ $invoices->firstItem() }} a {{ $invoices->lastItem() }} de
+                                            {{ $invoices->total() }} registros
+                                        @else
+                                            Mostrando {{ count($invoices) }} registros
+                                        @endif
                                     </div>
-                                    <div class="d-flex justify-content-end">
-                                        {{ $invoices->links() }}
-                                    </div>
+                                    @if (method_exists($invoices, 'links'))
+                                        <div class="d-flex justify-content-end">
+                                            {{ $invoices->links() }}
+                                        </div>
+                                    @endif
                                 </div>
                             </div>
                         </div>

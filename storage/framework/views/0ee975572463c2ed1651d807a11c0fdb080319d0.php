@@ -63,13 +63,8 @@
                                 <tr>
                                     <th><?php echo e(__('Hora')); ?></th>
                                     <td>
-                                        <?php if(optional($appointment->timeSlot)->from): ?>
-                                            <?php echo e(\Carbon\Carbon::parse(optional($appointment->timeSlot)->from)->format('H:i')); ?> a <?php echo e(\Carbon\Carbon::parse(optional($appointment->timeSlot)->to)->format('H:i')); ?>
+                                        <?php echo e($appointment->time_range_label); ?>
 
-                                        <?php else: ?>
-                                            <?php echo e(__('Sin horario')); ?>
-
-                                        <?php endif; ?>
                                     </td>
                                 </tr>
                                 <tr>
@@ -229,10 +224,20 @@
                         <?php endif; ?>
                     <?php endif; ?>
                     <?php if($dentalEvaluation): ?>
-                        <form method="POST" action="<?php echo e(route('appointment.dental-evaluation.email', $appointment->id)); ?>" class="mt-3">
-                            <?php echo csrf_field(); ?>
-                            <button type="submit" class="btn btn-outline-secondary"><i class="mdi mdi-email-send me-1"></i><?php echo e(__('Enviar diagnóstico por correo')); ?></button>
-                        </form>
+                        <div class="mt-3 d-flex flex-wrap gap-2">
+                            <form method="POST" action="<?php echo e(route('appointment.dental-evaluation.email', $appointment->id)); ?>">
+                                <?php echo csrf_field(); ?>
+                                <button type="submit" class="btn btn-outline-secondary"><i class="mdi mdi-email-send me-1"></i><?php echo e(__('Enviar diagnóstico por correo')); ?></button>
+                            </form>
+                            <a href="<?php echo e(route('appointment.budget.view', $appointment->id)); ?>" class="btn btn-outline-primary" target="_blank" rel="noopener">
+                                <i class="mdi mdi-file-document-outline me-1"></i><?php echo e(__('Descargar presupuesto final')); ?>
+
+                            </a>
+                            <a href="<?php echo e(route('appointment.budget.whatsapp', $appointment->id)); ?>" class="btn btn-success" target="_blank" rel="noopener">
+                                <i class="mdi mdi-whatsapp me-1"></i><?php echo e(__('Enviar por WhatsApp')); ?>
+
+                            </a>
+                        </div>
                     <?php endif; ?>
                 </div>
             </div>

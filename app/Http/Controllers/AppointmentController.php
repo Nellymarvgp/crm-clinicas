@@ -623,10 +623,11 @@ class AppointmentController extends Controller
                 'appointment_with' => 'required',
                 'appointment_date' => 'required',
                 'available_time' => 'required',
-                'available_slot' => 'required',
+                'available_slot' => 'required|array|min:1',
+                'available_slot.*' => 'required|exists:doctor_available_slots,id',
             ]);
             try {
-                if ($request->available_time == null && $request->available_slot == null) {
+                if ($request->available_time == null && empty($request->available_slot)) {
                     return redirect()->back()->with('error', 'The appointment time and appointment slot  field is required.');
                 } else {
                     $verify_mail = $user->email;
@@ -638,7 +639,9 @@ class AppointmentController extends Controller
                     $appointment->appointment_with = $request->appointment_with;
                     $appointment->appointment_date = $newDate;
                     $appointment->available_time = $request->available_time;
-                    $appointment->available_slot  = $request->available_slot;
+                    $selectedSlots = array_values(array_unique(array_map('intval', $request->available_slot)));
+                    $appointment->available_slot = $selectedSlots[0];
+                    $appointment->available_slots = json_encode($selectedSlots);
                     $appointment->booked_by    = $user->id;
                     $appointment->save();
                     // appointment create notification send and mail send
@@ -760,12 +763,39 @@ class AppointmentController extends Controller
                 $timeId = $request->timeId;
                 $doctorId  = $request->doctorId;
                 $date  = $request->dates;
-                $dates = Carbon::createFromFormat('m/d/Y', $date)->format('Y-m-d');
+                $dates = Carbon::parse($date)->format('Y-m-d');
 
                 $appointment_slot = DoctorAvailableSlot::with(['appointment' => function ($re) use ($dates) {
-                    $re->where('appointment_date', $dates);
+                    $re->whereDate('appointment_date', $dates)
+                        ->where('is_deleted', 0)
+                        ->where('status', 0);
                 }])
-                    ->where('doctor_available_time_id', $timeId)->get();
+                    ->where('doctor_available_time_id', $timeId)
+                    ->where('is_deleted', 0)
+                    ->orderBy('from')
+                    ->get();
+
+                $bookedSlotIds = Appointment::whereDate('appointment_date', $dates)
+                    ->where('is_deleted', 0)
+                    ->where('status', 0)
+                    ->get(['available_slot', 'available_slots'])
+                    ->flatMap(function ($appointment) {
+                        $storedSlots = json_decode($appointment->available_slots ?: '[]', true);
+                        return array_merge(
+                            [$appointment->available_slot],
+                            is_array($storedSlots) ? $storedSlots : []
+                        );
+                    })
+                    ->map(function ($slotId) {
+                        return (int) $slotId;
+                    })
+                    ->unique();
+
+                $appointment_slot->each(function ($slot) use ($bookedSlotIds) {
+                    if ($bookedSlotIds->contains((int) $slot->id)) {
+                        $slot->setRelation('appointment', collect([(object) []]));
+                    }
+                });
                 return response()->json([
                     'isSuccess' => true,
                     'Message' => "Appointment slot find successfully",
@@ -1297,6 +1327,98 @@ class AppointmentController extends Controller
         }
 
         return redirect()->back()->with('success', 'El diagnóstico y el detalle de la consulta fueron enviados por correo.');
+    }
+
+    public function appointmentBudgetView($id)
+    {
+        $user = Sentinel::getUser();
+        if (!$user || !$user->hasAccess('appointment.list')) {
+            return view('error.403');
+        }
+
+        $appointment = Appointment::with(['patient', 'doctor.user', 'timeSlot', 'dentalEvaluation'])
+            ->findOrFail($id);
+
+        $items = $appointment->dentalEvaluation && is_array($appointment->dentalEvaluation->diagnosis_items)
+            ? $appointment->dentalEvaluation->diagnosis_items
+            : [];
+
+        $total = (float) ($appointment->final_consultation_price ?? collect($items)->sum('subtotal'));
+
+        return view('appointment.appointment-budget', compact('appointment', 'items', 'total'));
+    }
+
+    public function appointmentBudgetWhatsApp($id)
+    {
+        $user = Sentinel::getUser();
+        if (!$user || !$user->hasAccess('appointment.list')) {
+            return view('error.403');
+        }
+
+        $appointment = Appointment::with(['patient', 'doctor.user', 'dentalEvaluation'])
+            ->findOrFail($id);
+
+        $mobile = $this->sanitizeWhatsappNumber(optional($appointment->patient)->mobile);
+        if (!$mobile) {
+            return redirect()->back()->with('error', 'El paciente no tiene un número de WhatsApp registrado.');
+        }
+
+        $message = $this->buildBudgetMessage($appointment);
+        $encodedMessage = urlencode($message);
+
+        return redirect()->away('https://wa.me/' . $mobile . '?text=' . $encodedMessage);
+    }
+
+    private function sanitizeWhatsappNumber(?string $number): ?string
+    {
+        if (blank($number)) {
+            return null;
+        }
+
+        $clean = preg_replace('/[^0-9]/', '', $number);
+        if (strlen($clean) >= 9) {
+            return ltrim($clean, '0');
+        }
+
+        return null;
+    }
+
+    private function buildBudgetMessage(Appointment $appointment): string
+    {
+        $patientName = trim(optional($appointment->patient)->first_name . ' ' . optional($appointment->patient)->last_name);
+        $doctorName = trim(optional(optional($appointment->doctor)->user)->first_name . ' ' . optional(optional($appointment->doctor)->user)->last_name);
+        $items = $appointment->dentalEvaluation && is_array($appointment->dentalEvaluation->diagnosis_items)
+            ? $appointment->dentalEvaluation->diagnosis_items
+            : [];
+        $total = (float) ($appointment->final_consultation_price ?? collect($items)->sum('subtotal'));
+
+        $lines = [
+            'Presupuesto final de consulta',
+            'Paciente: ' . ($patientName ?: 'No especificado'),
+            'Odontólogo: ' . ($doctorName ?: 'No especificado'),
+            'Fecha: ' . ($appointment->appointment_date ?: 'Sin fecha'),
+            '',
+            'Detalle:',
+        ];
+
+        if (empty($items)) {
+            $lines[] = 'Sin diagnósticos registrados.';
+        } else {
+            foreach ($items as $item) {
+                $diagnosis = $item['diagnosis'] ?? 'Servicio';
+                $treatment = $item['treatment'] ?? '';
+                $quantity = (float) ($item['quantity'] ?? 1);
+                $value = (float) ($item['value'] ?? 0);
+                $subtotal = (float) ($item['subtotal'] ?? ($quantity * $value));
+                $summary = $diagnosis . (($treatment !== '') ? ' - ' . $treatment : '');
+                $lines[] = '- ' . $summary . ': ' . number_format($quantity, 2, '.', '') . ' x ' . number_format($value, 2, '.', '') . ' = $' . number_format($subtotal, 2, '.', ',');
+            }
+        }
+
+        $lines[] = '';
+        $lines[] = 'Total: $' . number_format($total, 2, '.', ',');
+
+        return implode("\n", $lines);
     }
 
     private function sendAppointmentSummary(Appointment $appointment): void

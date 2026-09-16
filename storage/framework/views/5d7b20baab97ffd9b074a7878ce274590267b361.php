@@ -78,6 +78,10 @@
                                         <td><?php echo e($patient->first_name); ?> <?php echo e($patient->last_name); ?></td>
                                     </tr>
                                     <tr>
+                                        <th scope="row"><?php echo e(__('Cédula:')); ?></th>
+                                        <td><?php echo e($patient->cedula ?: __('No registrada')); ?></td>
+                                    </tr>
+                                    <tr>
                                         <th scope="row"><?php echo e(__('Nro. de Contacto:')); ?></th>
                                         <td> <?php echo e($patient->mobile); ?> </td>
                                     </tr>
@@ -109,7 +113,7 @@
             </div>
             <div class="col-xl-8">
                 <div class="row">
-                    <div class="col-md-4">
+                    <div class="col-md-6">
                         <div class="card mini-stats-wid">
                             <div class="card-body">
                                 <div class="d-flex">
@@ -126,30 +130,13 @@
                             </div>
                         </div>
                     </div>
-                    <div class="col-md-4">
+                    <div class="col-md-6">
                         <div class="card mini-stats-wid">
                             <div class="card-body">
                                 <div class="d-flex">
                                     <div class="flex-grow-1">
-                                        <p class="text-muted fw-medium"><?php echo e(__('Facturas Pendientes')); ?></p>
-                                        <h4 class="mb-0"><?php echo e(number_format($data['pending_bill'])); ?></h4>
-                                    </div>
-                                    <div class="avatar-sm align-self-center mini-stat-icon rounded-circle bg-primary">
-                                        <span class="avatar-title">
-                                            <i class="bx bx-hourglass font-size-24"></i>
-                                        </span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="card mini-stats-wid">
-                            <div class="card-body">
-                                <div class="d-flex">
-                                    <div class="flex-grow-1">
-                                        <p class="text-muted fw-medium"><?php echo e(__('Total Facturado')); ?></p>
-                                        <h4 class="mb-0">$<?php echo e(number_format($data['revenue'], 2)); ?></h4>
+                                        <p class="text-muted fw-medium"><?php echo e(__('Valor Diagnóstico')); ?></p>
+                                        <h4 class="mb-0">$<?php echo e(number_format((float) $data['revenue'], 2)); ?></h4>
                                     </div>
                                     <div class="avatar-sm align-self-center mini-stat-icon rounded-circle bg-primary">
                                         <span class="avatar-title">
@@ -182,18 +169,7 @@
                                     <span class="d-none d-sm-block"><?php echo e(__('Lista de Citas')); ?></span>
                                 </a>
                             </li>
-                            <li class="nav-item">
-                                <a class="nav-link" data-bs-toggle="tab" href="#PrescriptionList" role="tab">
-                                    <span class="d-block d-sm-none"><i class="far fa-envelope"></i></span>
-                                    <span class="d-none d-sm-block"><?php echo e(__('Lista de Recetas')); ?></span>
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" data-bs-toggle="tab" href="#Invoices" role="tab">
-                                    <span class="d-block d-sm-none"><i class="fas fa-cog"></i></span>
-                                    <span class="d-none d-sm-block"><?php echo e(__('Facturas')); ?></span>
-                                </a>
-                            </li>
+
                         </ul>
                         <!-- Tab panes -->
                         <div class="tab-content p-3 text-muted">
@@ -201,34 +177,6 @@
                                 <div class="table-responsive">
                                     <table class="table table-striped mb-0">
                                         <tbody>
-                                            <tr>
-                                                <th scope="row"><?php echo e(__('Estatura')); ?></th>
-                                                <td> <?php echo e($medical_Info->height ?? __('No registrado')); ?> </td>
-                                            </tr>
-                                            <tr>
-                                                <th scope="row"><?php echo e(__('Peso')); ?></th>
-                                                <td> <?php echo e($medical_Info->weight ?? __('No registrado')); ?> </td>
-                                            </tr>
-                                            <tr>
-                                                <th scope="row"><?php echo e(__('Grupo Sanguíneo')); ?></th>
-                                                <td> <?php echo e($medical_Info->b_group ?? __('No registrado')); ?> </td>
-                                            </tr>
-                                            <tr>
-                                                <th scope="row"><?php echo e(__('Presión Arterial')); ?></th>
-                                                <td> <?php echo e($medical_Info->b_pressure ?? __('No registrado')); ?> </td>
-                                            </tr>
-                                            <tr>
-                                                <th scope="row"><?php echo e(__('Pulso')); ?></th>
-                                                <td> <?php echo e($medical_Info->pulse ?? __('No registrado')); ?> </td>
-                                            </tr>
-                                            <tr>
-                                                <th scope="row"><?php echo e(__('Respiración')); ?></th>
-                                                <td> <?php echo e($medical_Info->respiration ?? __('No registrado')); ?> </td>
-                                            </tr>
-                                            <tr>
-                                                <th scope="row"><?php echo e(__('Alergia')); ?></th>
-                                                <td> <?php echo e($medical_Info->allergy ?? __('No registrado')); ?> </td>
-                                            </tr>
                                             <tr>
                                                 <th scope="row"><?php echo e(__('Dieta')); ?></th>
                                                 <td>
@@ -293,9 +241,42 @@
                                 </div>
                             </div>
                             <div class="tab-pane" id="DentalHistory" role="tabpanel">
+                                <?php
+                                    $latestDentalEvaluation = null;
+                                    foreach ($appointments as $appointmentItem) {
+                                        if ($appointmentItem->dentalEvaluation) {
+                                            $latestDentalEvaluation = $appointmentItem->dentalEvaluation;
+                                            break;
+                                        }
+                                    }
+                                    $latestToothMarks = $latestDentalEvaluation && is_array($latestDentalEvaluation->tooth_marks) ? $latestDentalEvaluation->tooth_marks : [];
+                                    $upperTeeth = [18, 17, 16, 15, 14, 13, 12, 11, 21, 22, 23, 24, 25, 26, 27, 28];
+                                    $lowerTeeth = [48, 47, 46, 45, 44, 43, 42, 41, 31, 32, 33, 34, 35, 36, 37, 38];
+                                ?>
+                                <?php if($latestDentalEvaluation): ?>
+                                    <div class="card border-light mb-3">
+                                        <div class="card-body">
+                                            <h5 class="card-title mb-3"><?php echo e(__('Diagnóstico más reciente')); ?></h5>
+                                            <div class="mb-2"><strong><?php echo e(__('Diagnóstico:')); ?></strong> <?php echo e($latestDentalEvaluation->diagnosis ?: __('Sin registrar')); ?></div>
+                                            <div class="mb-2"><strong><?php echo e(__('Tratamiento:')); ?></strong> <?php echo e($latestDentalEvaluation->treatment ?: __('Sin registrar')); ?></div>
+                                            <div class="mb-3"><strong><?php echo e(__('Notas clínicas:')); ?></strong> <?php echo e($latestDentalEvaluation->clinical_notes ?: __('Sin registrar')); ?></div>
+                                            <div class="odontogram-grid mb-2">
+                                                <?php $__currentLoopData = array_merge($upperTeeth, $lowerTeeth); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $tooth): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                                    <span class="tooth-mark <?php echo e($latestToothMarks[$tooth] ?? ''); ?> text-center pt-3" style="min-height: 52px;"><?php echo e($tooth); ?></span>
+                                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                                            </div>
+                                            <div class="small text-muted">
+                                                <span><i class="fas fa-square text-danger me-1"></i><?php echo e(__('Afectado')); ?></span>
+                                                <span class="ms-3"><i class="fas fa-square text-primary me-1"></i><?php echo e(__('Trabajado')); ?></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                <?php else: ?>
+                                    <div class="alert alert-light border"><?php echo e(__('No hay historial dental registrado para este paciente.')); ?></div>
+                                <?php endif; ?>
                                 <div class="table-responsive">
                                     <table class="table table-bordered mb-0">
-                                        <thead><tr><th><?php echo e(__('Fecha')); ?></th><th><?php echo e(__('Diagnóstico')); ?></th><th><?php echo e(__('Tratamiento')); ?></th><th><?php echo e(__('Cantidad')); ?></th><th><?php echo e(__('Valor')); ?></th><th><?php echo e(__('Detalle')); ?></th></tr></thead>
+                                        <thead><tr><th><?php echo e(__('Fecha')); ?></th><th><?php echo e(__('Diagnóstico')); ?></th><th><?php echo e(__('Tratamiento')); ?></th><th><?php echo e(__('Cantidad')); ?></th><th><?php echo e(__('Valor')); ?></th><th><?php echo e(__('Odontograma')); ?></th><th><?php echo e(__('Detalle')); ?></th></tr></thead>
                                         <tbody>
                                             <?php $__empty_2 = true; $__currentLoopData = $appointments; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $item): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_2 = false; ?>
                                                 <?php if($item->dentalEvaluation): ?>
@@ -305,11 +286,17 @@
                                                         <td><?php echo e($item->dentalEvaluation->treatment ?: __('Sin registrar')); ?></td>
                                                         <td><?php echo e($item->dentalEvaluation->quantity ?: '0'); ?></td>
                                                         <td><?php echo e($item->dentalEvaluation->value !== null ? number_format($item->dentalEvaluation->value, 2) : '0.00'); ?></td>
+                                                        <td>
+                                                            <?php $__currentLoopData = ($item->dentalEvaluation->tooth_marks ?: []); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $tooth => $mark): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                                                <span class="badge text-white" style="background-color:<?php echo e($mark === 'affected' ? '#dc3545' : '#0d6efd'); ?>"><?php echo e($tooth); ?></span>
+                                                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                                                            <?php if(empty($item->dentalEvaluation->tooth_marks)): ?> <?php echo e(__('Sin marcas')); ?> <?php endif; ?>
+                                                        </td>
                                                         <td><a href="<?php echo e(url('appointment-view/' . $item->id)); ?>#dental-history" class="btn btn-primary btn-sm"><?php echo e(__('Ver')); ?></a></td>
                                                     </tr>
                                                 <?php endif; ?>
                                             <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_2): ?>
-                                                <tr><td colspan="6"><?php echo e(__('Sin evaluaciones registradas')); ?></td></tr>
+                                                <tr><td colspan="7"><?php echo e(__('Sin evaluaciones registradas')); ?></td></tr>
                                             <?php endif; ?>
                                         </tbody>
                                     </table>
@@ -357,13 +344,19 @@
                                 </table>
                                 <div class="col-md-12 text-center mt-3">
                                     <div class="d-flex justify-content-start">
-                                        Mostrando <?php echo e($appointments->firstItem()); ?> a <?php echo e($appointments->lastItem()); ?> de
-                                        <?php echo e($appointments->total()); ?> registros
+                                        <?php if(method_exists($appointments, 'firstItem')): ?>
+                                            Mostrando <?php echo e($appointments->firstItem()); ?> a <?php echo e($appointments->lastItem()); ?> de
+                                            <?php echo e($appointments->total()); ?> registros
+                                        <?php else: ?>
+                                            Mostrando <?php echo e(count($appointments)); ?> registros
+                                        <?php endif; ?>
                                     </div>
-                                    <div class="d-flex justify-content-end">
-                                        <?php echo e($appointments->links()); ?>
+                                    <?php if(method_exists($appointments, 'links')): ?>
+                                        <div class="d-flex justify-content-end">
+                                            <?php echo e($appointments->links()); ?>
 
-                                    </div>
+                                        </div>
+                                    <?php endif; ?>
                                 </div>
                             </div>
                             <div class="tab-pane" id="PrescriptionList" role="tabpanel">
@@ -412,14 +405,20 @@
                                 </table>
                                 <div class="col-md-12 text-center mt-3">
                                     <div class="d-flex justify-content-start">
-                                        Mostrando <?php echo e($prescriptions->firstItem()); ?> a <?php echo e($prescriptions->lastItem()); ?>
+                                        <?php if(method_exists($prescriptions, 'firstItem')): ?>
+                                            Mostrando <?php echo e($prescriptions->firstItem()); ?> a <?php echo e($prescriptions->lastItem()); ?>
 
-                                        de <?php echo e($prescriptions->total()); ?> registros
+                                            de <?php echo e($prescriptions->total()); ?> registros
+                                        <?php else: ?>
+                                            Mostrando <?php echo e(count($prescriptions)); ?> registros
+                                        <?php endif; ?>
                                     </div>
-                                    <div class="d-flex justify-content-end">
-                                        <?php echo e($prescriptions->links()); ?>
+                                    <?php if(method_exists($prescriptions, 'links')): ?>
+                                        <div class="d-flex justify-content-end">
+                                            <?php echo e($prescriptions->links()); ?>
 
-                                    </div>
+                                        </div>
+                                    <?php endif; ?>
                                 </div>
                             </div>
                             <div class="tab-pane" id="Invoices" role="tabpanel">
@@ -466,13 +465,19 @@
                                 </table>
                                 <div class="col-md-12 text-center mt-3">
                                     <div class="d-flex justify-content-start">
-                                        Mostrando <?php echo e($invoices->firstItem()); ?> a <?php echo e($invoices->lastItem()); ?> de
-                                        <?php echo e($invoices->total()); ?> registros
+                                        <?php if(method_exists($invoices, 'firstItem')): ?>
+                                            Mostrando <?php echo e($invoices->firstItem()); ?> a <?php echo e($invoices->lastItem()); ?> de
+                                            <?php echo e($invoices->total()); ?> registros
+                                        <?php else: ?>
+                                            Mostrando <?php echo e(count($invoices)); ?> registros
+                                        <?php endif; ?>
                                     </div>
-                                    <div class="d-flex justify-content-end">
-                                        <?php echo e($invoices->links()); ?>
+                                    <?php if(method_exists($invoices, 'links')): ?>
+                                        <div class="d-flex justify-content-end">
+                                            <?php echo e($invoices->links()); ?>
 
-                                    </div>
+                                        </div>
+                                    <?php endif; ?>
                                 </div>
                             </div>
                         </div>

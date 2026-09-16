@@ -20,7 +20,7 @@
                                             <th><?php echo e(__('Doctor Name')); ?></th>
                                             <th><?php echo e(__('Date')); ?></th>
                                             <th><?php echo e(__('Time')); ?></th>
-                                            <th><?php echo e(__('Status')); ?></th>
+                                            <th><?php echo e(__('Estado')); ?></th>
                                             <th><?php echo e(__('Action')); ?></th>
                                         </tr>
                                     </thead>
@@ -46,15 +46,8 @@
                                                 <td><?php echo e($item->appointment_date); ?></td>
                                                 <td><?php echo e(optional($item->timeSlot)->from ? optional($item->timeSlot)->from . ' to ' . optional($item->timeSlot)->to : 'Sin horario'); ?></td>
                                                 <td>
-                                                    <?php if($item->status == 0): ?>
-                                                        <span class="badge bg-warning">Pendiente</span>
-                                                    <?php elseif($item->status == 1 ): ?>
-                                                        <span class="badge bg-success">Completada</span>
-                                                    <?php elseif($item->status == 2 ): ?>
-                                                        <span class="badge bg-danger">Cancelada</span>
-                                                    <?php else: ?>
-                                                        <span class="badge bg-secondary">Estado desconocido</span>
-                                                    <?php endif; ?>
+                                                    <span class="badge badge-pill text-white" style="background-color:<?php echo e((int) $item->status === 1 ? '#198754' : ((int) $item->status === 2 ? '#dc3545' : '#0dcaf0')); ?>;"><?php echo e($item->status_label); ?></span>
+                                                </td>
                                                 </td>
                                                 <td>
                                                     <?php if($item->status == 0): ?>

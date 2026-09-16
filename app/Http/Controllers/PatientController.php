@@ -63,6 +63,9 @@ class PatientController extends Controller
                         $name = $row->first_name.' '.$row->last_name;
                         return $name;
                     })
+                    ->addColumn('cedula', function($row){
+                        return $row->cedula ?? 'Sin cédula';
+                    })
                     ->addColumn('option', function($row){
                         $option = '
                             <a href="patient/'.$row->id.'">
@@ -219,13 +222,23 @@ class PatientController extends Controller
                     $prescriptions = Prescription::with('doctor')->where('patient_id', $patient->id)->orderBy('id', 'desc')->paginate($this->limit, '*', 'prescriptions');
                     $invoices = Invoice::where('patient_id', $patient->id)->orderBy('id', 'desc')->paginate($this->limit, '*', 'invoice');
                     $tot_appointment = Appointment::where('appointment_for', $patient->id)->get();
-                    $invoice = Invoice::where('patient_id', $patient->id)->where('is_deleted', 0)->pluck('id');
-                    $revenue = InvoiceDetail::whereIn('invoice_id',$invoice)->sum('amount');
-                    $pending_bill = Invoice::where(['patient_id' => $patient->id, 'payment_status' => 'Unpaid'])->count();
+                    $diagnosticRevenue = 0;
+                    foreach ($tot_appointment as $appointment) {
+                        if (!empty($appointment->dentalEvaluation)) {
+                            $items = $appointment->dentalEvaluation->diagnosis_items ?? [];
+                            if (is_array($items) && !empty($items)) {
+                                $diagnosticRevenue += collect($items)->sum(function ($item) {
+                                    return (float) ($item['subtotal'] ?? ((float) ($item['quantity'] ?? 0) * (float) ($item['value'] ?? 0)));
+                                });
+                            } elseif (!empty($appointment->dentalEvaluation->value)) {
+                                $diagnosticRevenue += (float) $appointment->dentalEvaluation->value;
+                            }
+                        }
+                    }
                     $data = [
                         'total_appointment' => $tot_appointment->count(),
-                        'revenue' => $revenue,
-                        'pending_bill' => $pending_bill
+                        'revenue' => $diagnosticRevenue,
+                        'pending_bill' => 0
                     ];
                     return view('patient.patient-profile', compact('user', 'role', 'patient', 'patient_info', 'medical_Info', 'data', 'appointments', 'prescriptions', 'invoices'));
                 } else {

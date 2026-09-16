@@ -33,6 +33,12 @@
         <div class="col-12">
             <div class="card">
                 <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-md-4 ms-auto">
+                            <label for="patientCedulaFilter" class="form-label mb-1"><?php echo e(__('Buscar')); ?></label>
+                            <input type="text" id="patientCedulaFilter" class="form-control" placeholder="Buscar">
+                        </div>
+                    </div>
                     <a href=" <?php echo e(route('patient.create')); ?> ">
                         <button type="button" class="btn btn-primary waves-effect waves-light mb-4">
                             <i class="bx bx-plus font-size-16 align-middle me-2"></i> <?php echo e(__('Nuevo Paciente')); ?>
@@ -44,7 +50,8 @@
                         <thead>
                             <tr>
                                 <th><?php echo e(__('Nro.')); ?></th>
-                                <th><?php echo e(__('Name')); ?></th>
+                                <th><?php echo e(__('Nombre')); ?></th>
+                                <th><?php echo e(__('Cédula')); ?></th>
                                 <th><?php echo e(__('Número de Contacto')); ?></th>
                                 <th><?php echo e(__('Email')); ?></th>
                                 <th><?php echo e(__('Opciones')); ?></th>
@@ -74,12 +81,12 @@
     <!-- Init js-->
     <script src="<?php echo e(URL::asset('build/js/pages/notification.init.js')); ?>"></script>
     <script>
-        // Load Datatable 
+        // Load Datatable
         $(document).ready(function() {
-            $('#patientList').DataTable({
+            var patientTable = $('#patientList').DataTable({
                 processing: true,
                 serverSide: true,
-                dom: 'Bfrtip',
+                dom: 'Brtip',
                 buttons: [
                     'copy', 'excel', 'pdf'
                 ],
@@ -94,15 +101,24 @@
                         data: 'name',
                         name: 'name',
                         sortable: false,
-                        visible: true
+                        visible: true,
+                        searchable: true
+                    },
+                    {
+                        data: 'cedula',
+                        name: 'cedula',
+                        searchable: true,
+                        orderable: false
                     },
                     {
                         data: 'mobile',
-                        name: 'mobile'
+                        name: 'mobile',
+                        searchable: true
                     },
                     {
                         data: 'email',
-                        name: 'email'
+                        name: 'email',
+                        searchable: true
                     },
                     {
                         data: 'option',
@@ -112,9 +128,21 @@
                     },
                 ],
                 pagingType: 'full_numbers',
+                initComplete: function() {
+                    var api = this.api();
+                    $('#patientCedulaFilter').on('keyup change', function() {
+                        api.column(2).search(this.value).draw();
+                    });
+                },
                 "drawCallback": function() {
                     $('.dataTables_paginate > .pagination').addClass('justify-content-end');
                     $('.dataTables_filter').addClass('d-flex justify-content-end');
+                }
+            });
+
+            $('#patientCedulaFilter').on('keydown', function(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
                 }
             });
         });

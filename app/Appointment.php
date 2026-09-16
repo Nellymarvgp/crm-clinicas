@@ -15,6 +15,7 @@ class Appointment extends Model
         'appointment_time',
         'booked_by',
         'status',
+        'available_slots',
         'final_consultation_price',
         'is_deleted',
     ];
@@ -52,6 +53,28 @@ class Appointment extends Model
     {
         return $this->hasOne(DoctorAvailableSlot::class, 'id', 'available_slot');
     }
+
+    public function getTimeRangeLabelAttribute(): string
+    {
+        $slotIds = json_decode($this->available_slots ?: '[]', true);
+        $slotIds = is_array($slotIds) ? array_values(array_filter(array_map('intval', $slotIds))) : [];
+
+        if (empty($slotIds) && $this->available_slot) {
+            $slotIds = [(int) $this->available_slot];
+        }
+
+        $slots = DoctorAvailableSlot::whereIn('id', $slotIds)->get(['from', 'to']);
+        $start = $slots->min('from');
+        $end = $slots->max('to');
+
+        if (!$start || !$end) {
+            return 'Sin horario';
+        }
+
+        return \Carbon\Carbon::parse($start)->format('h:ia') . ' a ' .
+            \Carbon\Carbon::parse($end)->format('h:ia');
+    }
+
     function invoice(){
         return $this->hasOne(Invoice::class)->where('payment_status','Paid');
     }

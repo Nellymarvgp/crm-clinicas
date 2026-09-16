@@ -62,11 +62,7 @@
                                 <tr>
                                     <th>{{ __('Hora') }}</th>
                                     <td>
-                                        @if (optional($appointment->timeSlot)->from)
-                                            {{ \Carbon\Carbon::parse(optional($appointment->timeSlot)->from)->format('H:i') }} a {{ \Carbon\Carbon::parse(optional($appointment->timeSlot)->to)->format('H:i') }}
-                                        @else
-                                            {{ __('Sin horario') }}
-                                        @endif
+                                        {{ $appointment->time_range_label }}
                                     </td>
                                 </tr>
                                 <tr>
@@ -224,10 +220,18 @@
                         @endif
                     @endif
                     @if ($dentalEvaluation)
-                        <form method="POST" action="{{ route('appointment.dental-evaluation.email', $appointment->id) }}" class="mt-3">
-                            @csrf
-                            <button type="submit" class="btn btn-outline-secondary"><i class="mdi mdi-email-send me-1"></i>{{ __('Enviar diagnóstico por correo') }}</button>
-                        </form>
+                        <div class="mt-3 d-flex flex-wrap gap-2">
+                            <form method="POST" action="{{ route('appointment.dental-evaluation.email', $appointment->id) }}">
+                                @csrf
+                                <button type="submit" class="btn btn-outline-secondary"><i class="mdi mdi-email-send me-1"></i>{{ __('Enviar diagnóstico por correo') }}</button>
+                            </form>
+                            <a href="{{ route('appointment.budget.view', $appointment->id) }}" class="btn btn-outline-primary" target="_blank" rel="noopener">
+                                <i class="mdi mdi-file-document-outline me-1"></i>{{ __('Descargar presupuesto final') }}
+                            </a>
+                            <a href="{{ route('appointment.budget.whatsapp', $appointment->id) }}" class="btn btn-success" target="_blank" rel="noopener">
+                                <i class="mdi mdi-whatsapp me-1"></i>{{ __('Enviar por WhatsApp') }}
+                            </a>
+                        </div>
                     @endif
                 </div>
             </div>

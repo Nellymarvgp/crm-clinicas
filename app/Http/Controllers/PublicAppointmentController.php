@@ -77,9 +77,10 @@ class PublicAppointmentController extends Controller
     private function formatPublicTimeLabel($timeValue): string
     {
         try {
-            $formatted = date('h:i A', strtotime($timeValue));
+            $time = date('h:i', strtotime($timeValue));
+            $period = strtolower(date('A', strtotime($timeValue)));
 
-            return str_replace(['AM', 'PM'], ['a. m.', 'p. m.'], $formatted);
+            return $time . $period;
         } catch (\Throwable $e) {
             return (string) $timeValue;
         }
@@ -184,6 +185,8 @@ class PublicAppointmentController extends Controller
             
             $doctorId = $request->input('doctor_id');
             $date = $request->input('date');
+            $durationMinutes = (int) $request->input('duration_minutes', 60);
+            $durationMinutes = in_array($durationMinutes, [30, 60, 90, 120, 150, 180], true) ? $durationMinutes : 60;
             $doctorLookupIds = $this->resolveAvailabilityDoctorIds($doctorId);
             
             Log::info("Parámetros extraídos", ['doctor_id' => $doctorId, 'date' => $date]);
@@ -289,7 +292,7 @@ class PublicAppointmentController extends Controller
                 ->whereIn('times.id', $availableTimes->pluck('id')->all())
                 ->where('slots.is_deleted', 0)
                 ->where('times.is_deleted', 0)
-                ->select('slots.id', 'slots.from', 'slots.to')
+                ->select('slots.id', 'slots.from', 'slots.to', 'times.from as time_from', 'times.to as time_to')
                 ->orderBy('slots.from');
 
             $bookedAppointments = DB::table('appointments as appointments')
@@ -301,25 +304,43 @@ class PublicAppointmentController extends Controller
                 ->select('booked_slots.from', 'booked_slots.to')
                 ->get();
 
-            $availableSlots = $availableSlotsQuery->get()->filter(function ($slot) use ($bookedAppointments) {
+            $availableSlots = $availableSlotsQuery->get()->filter(function ($slot) use ($bookedAppointments, $durationMinutes) {
                 $slotStart = strtotime($slot->from);
-                $slotEnd = strtotime($slot->to);
+                $slotEnd = $slotStart + ($durationMinutes * 60);
+
+                if ($slot->time_to && $slotEnd > strtotime($slot->time_to)) {
+                    return false;
+                }
 
                 return !$bookedAppointments->contains(function ($bookedSlot) use ($slotStart, $slotEnd) {
                     if (!$bookedSlot->from || !$bookedSlot->to) {
                         return false;
                     }
 
-                    return $slotStart < strtotime($bookedSlot->to)
-                        && $slotEnd > strtotime($bookedSlot->from);
+                    $bookedStart = strtotime($bookedSlot->from);
+                    $bookedEnd = strtotime($bookedSlot->to);
+
+                    return $slotStart < $bookedEnd && $slotEnd > $bookedStart;
                 });
             })->map(function ($slot) {
                 return [
                     'id' => $slot->id,
-                    'time' => date('H:i', strtotime($slot->from)),
+                    'from' => $slot->from,
+                    'to' => $slot->to,
+                    'time' => date('h:iA', strtotime($slot->from)),
                     'display_time' => $this->formatPublicTimeLabel($slot->from) . ' a ' . $this->formatPublicTimeLabel($slot->to),
                 ];
             })->values()->all();
+
+            $uniqueSlots = [];
+            foreach ($availableSlots as $slot) {
+                $slotKey = $slot['from'] . '|' . $slot['to'];
+                if (!isset($uniqueSlots[$slotKey])) {
+                    $uniqueSlots[$slotKey] = $slot;
+                }
+            }
+
+            $availableSlots = array_values($uniqueSlots);
             
             Log::info("Total de slots generados: " . count($availableSlots));
             
@@ -370,6 +391,7 @@ class PublicAppointmentController extends Controller
             'doctor_id' => 'required|exists:doctors,id',
             'date' => 'required|date|date_format:Y-m-d|after_or_equal:today',
             'time' => 'required',
+            'duration_minutes' => 'required|integer|min:30|max:180',
             'slot_id' => 'required|exists:doctor_available_slots,id',
         ]);
         
@@ -387,6 +409,8 @@ class PublicAppointmentController extends Controller
 
             $doctorLookupIds = $this->resolveAvailabilityDoctorIds($request->doctor_id);
             $requestedDay = (string) date('w', strtotime($request->date));
+            $durationMinutes = (int) $request->input('duration_minutes', 60);
+            $durationMinutes = in_array($durationMinutes, [30, 60, 90, 120, 150, 180], true) ? $durationMinutes : 60;
             $selectedSlot = DB::table('doctor_available_slots as slots')
                 ->join('doctor_available_times as times', 'times.id', '=', 'slots.doctor_available_time_id')
                 ->where('slots.id', $request->slot_id)
@@ -394,7 +418,7 @@ class PublicAppointmentController extends Controller
                 ->where('times.day_of_week', $requestedDay)
                 ->where('slots.is_deleted', 0)
                 ->where('times.is_deleted', 0)
-                ->select('slots.*', 'times.id as available_time_id')
+                ->select('slots.*', 'times.id as available_time_id', 'times.from as time_from', 'times.to as time_to')
                 ->first();
 
             if (!$selectedSlot || date('H:i', strtotime($selectedSlot->from)) !== date('H:i', strtotime($request->time))) {
@@ -406,15 +430,36 @@ class PublicAppointmentController extends Controller
                 ], 422);
             }
 
+            $slotStart = strtotime($selectedSlot->from);
+            $slotEnd = $slotStart + ($durationMinutes * 60);
+
+            if ($selectedSlot->time_to && $slotEnd > strtotime($selectedSlot->time_to)) {
+                DB::rollBack();
+
+                return response()->json([
+                    'success' => false,
+                    'message' => 'La duración seleccionada excede el horario disponible del doctor para ese día.',
+                ], 422);
+            }
+
             $slotIsBooked = DB::table('appointments as appointments')
                 ->leftJoin('doctor_available_slots as booked_slots', 'booked_slots.id', '=', 'appointments.available_slot')
                 ->whereIn('appointments.appointment_with', $doctorLookupIds)
                 ->where('appointments.appointment_date', $request->date)
                 ->where('appointments.is_deleted', 0)
                 ->whereNotIn('appointments.status', [1, 2])
-                ->where('booked_slots.from', '<', $selectedSlot->to)
-                ->where('booked_slots.to', '>', $selectedSlot->from)
-                ->exists();
+                ->select('booked_slots.from', 'booked_slots.to')
+                ->get()
+                ->contains(function ($bookedSlot) use ($slotStart, $slotEnd) {
+                    if (!$bookedSlot->from || !$bookedSlot->to) {
+                        return false;
+                    }
+
+                    $bookedStart = strtotime($bookedSlot->from);
+                    $bookedEnd = strtotime($bookedSlot->to);
+
+                    return $slotStart < $bookedEnd && $slotEnd > $bookedStart;
+                });
 
             if ($slotIsBooked) {
                 DB::rollBack();

@@ -6,7 +6,6 @@
     <?php
         $brandName = AppSetting('title');
         $brandShortName = trim(explode(' ', $brandName)[0]);
-        $brandLogoSmall = AppSetting('logo_dark_sm');
         $footerLeft = AppSetting('footer_left');
         $footerRight = AppSetting('footer_right');
     ?>
@@ -50,9 +49,34 @@
             color: var(--secondary-color);
         }
         .brand-logo-image {
-            max-height: 42px;
-            max-width: 150px;
+            height: 78px;
+            width: auto;
+            max-width: 260px;
             object-fit: contain;
+        }
+        .floating-contact {
+            position: fixed;
+            right: 20px;
+            bottom: 20px;
+            z-index: 1050;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .floating-contact a {
+            width: 48px;
+            height: 48px;
+            display: grid;
+            place-items: center;
+            border-radius: 50%;
+            color: #fff;
+            font-size: 24px;
+            box-shadow: 0 5px 16px rgba(0,0,0,.2);
+        }
+        .floating-contact .whatsapp { background: #25d366; }
+        .floating-contact .instagram { background: #c13584; }
+        @media (max-width: 575px) {
+            .brand-logo-image { height: 58px; max-width: 200px; }
         }
         /* Footer styles */
         .footer {
@@ -122,7 +146,7 @@
             <div class="container">
                 <a class="navbar-brand logo" href="/">
                     <span class="d-flex align-items-center gap-2 fw-bold" style="color: #7c7c7b;">
-                        <img src="<?php echo e(URL::asset('build/images/' . $brandLogoSmall)); ?>" alt="<?php echo e($brandName); ?>" class="brand-logo-image">
+                        <img src="<?php echo e(URL::asset('build/images/logo.png')); ?>" alt="Logo CORE" class="brand-logo-image">
                     </span>
                 </a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
@@ -207,6 +231,15 @@
             </div>
         </div>
     </footer>
+
+    <div class="floating-contact" aria-label="Contacto">
+        <a class="whatsapp" href="https://wa.me/584248326325" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp">
+            <i class="fab fa-whatsapp"></i>
+        </a>
+        <a class="instagram" href="https://www.instagram.com/core.ven" target="_blank" rel="noopener noreferrer" aria-label="Instagram">
+            <i class="fab fa-instagram"></i>
+        </a>
+    </div>
 
     <!-- JAVASCRIPT -->
     <script src="<?php echo e(URL::asset('build/libs/jquery/jquery.min.js')); ?>"></script>

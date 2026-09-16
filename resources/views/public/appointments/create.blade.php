@@ -179,16 +179,29 @@
                             
                             <!-- Sistema de calendario estándar -->
                             <div id="standard-calendar-container" class="row">
-                                <div class="col-md-6">
+                                <div class="col-md-4">
                                     <div class="form-group">
                                         <label for="date" class="required">Fecha de la Cita</label>
                                         <input type="text" class="form-control" id="date" name="date" readonly required>
                                         <div class="invalid-feedback" id="date-error"></div>
                                     </div>
                                 </div>
-                                <div class="col-md-6">
+                                <div class="col-md-4">
                                     <div class="form-group">
-                                        <label for="time" class="required">Hora de la Cita</label>
+                                        <label for="duration_minutes" class="required">Duración de la Cita</label>
+                                        <select class="form-control" id="duration_minutes" name="duration_minutes" required>
+                                            <option value="60">1 hora</option>
+                                            <option value="90">1 hora 30 minutos</option>
+                                            <option value="120">2 horas</option>
+                                            <option value="150">2 horas 30 minutos</option>
+                                            <option value="180" selected>3 horas</option>
+                                        </select>
+                                        <div class="invalid-feedback" id="duration_minutes-error"></div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label for="time" class="required">Hora de inicio</label>
                                         <select class="form-control" id="time" name="time" required disabled>
                                             <option value="">Primero selecciona un doctor y una fecha</option>
                                         </select>
@@ -224,6 +237,7 @@
         // Variables
         const doctorSelect = document.getElementById('doctor_id');
         const dateInput = document.getElementById('date');
+        const durationSelect = document.getElementById('duration_minutes');
         const timeSelect = document.getElementById('time');
         const slotIdInput = document.getElementById('slot_id');
         const appointmentForm = document.getElementById('appointment-form');
@@ -288,6 +302,12 @@
                 } else {
                     resetDatePicker();
                     resetTimeSlots();
+                }
+            });
+
+            durationSelect.addEventListener('change', function() {
+                if (doctorId && dateInput.value) {
+                    loadTimeSlots(dateInput.value);
                 }
             });
 

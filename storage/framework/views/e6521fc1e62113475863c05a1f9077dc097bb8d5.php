@@ -86,7 +86,7 @@
                                                     <td><?php echo e(optional($item->patient)->mobile ?? '-'); ?></td>
                                                     <td><?php echo e(optional($item->patient)->email ?? '-'); ?></td>
                                                     <td><?php echo e($item->appointment_date); ?></td>
-                                                    <td><?php echo e(optional($item->timeSlot)->from ? optional($item->timeSlot)->from . ' a ' . optional($item->timeSlot)->to : 'Sin horario'); ?></td>
+                                                    <td><?php echo e($item->time_range_label); ?></td>
                                                     <td>
                                                         <?php if($item->status == 1): ?>
                                                             <span class="badge badge-pill text-white" style="background-color:#198754;">Completado</span>
