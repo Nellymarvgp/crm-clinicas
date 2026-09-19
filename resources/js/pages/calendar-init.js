@@ -36,9 +36,17 @@
             editable: true,
             droppable: true,
             selectable: true,
+            locale: 'es',
             initialView: 'dayGridMonth',
             themeSystem: 'bootstrap',
             weekNumbers: true,
+            buttonText: {
+                today: 'Hoy',
+                month: 'Mes',
+                week: 'Semana',
+                day: 'Día',
+                list: 'Lista'
+            },
             headerToolbar: {
                 left: 'prev,next today',
                 right: 'dayGridMonth,timeGridWeek,timeGridDay,listMonth',
@@ -150,9 +158,9 @@
                         var appEvents = [];
                         $(response.appointments).each(function (key, value) {
                             if (value.total_appointment == 1) {
-                                var badge = value.total_appointment + ' Appointment'
+                                var badge = value.total_appointment + ' Cita'
                             } else if (value.total_appointment > 1) {
-                                var badge = value.total_appointment + ' Appointments'
+                                var badge = value.total_appointment + ' Citas'
                             }
                             appEvents.push({
                                 title: badge,

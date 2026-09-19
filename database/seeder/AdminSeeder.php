@@ -20,7 +20,7 @@ class AdminSeeder extends Seeder
             'last_name'  => 'Admin',
             'mobile'     => '5142323114',
             'profile_photo'=>'avatar-5.jpg',
-            'email'      => 'admin@themesbrand.website',
+            'email'      => 'centrocore.ve@gmail.com',
             'password' => 'admin@123456',
             'last_login' => now(),
         ];
