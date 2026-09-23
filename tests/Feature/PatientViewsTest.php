@@ -35,6 +35,22 @@ class PatientViewsTest extends TestCase
         $this->assertTrue($method->invoke($controller, $slotStart, $slotEnd, $bookedRange));
     }
 
+    public function test_selected_day_time_is_used_for_overlap_validation(): void
+    {
+        $controller = new \App\Http\Controllers\PublicAppointmentController();
+        $buildMethod = new \ReflectionMethod($controller, 'buildDateTimeFromTimeString');
+        $buildMethod->setAccessible(true);
+
+        $slotStart = $buildMethod->invoke($controller, '2026-10-15', '09:30');
+        $slotEnd = $slotStart + (60 * 60);
+        $bookedRange = ['from' => '2026-10-15 09:00:00', 'to' => '2026-10-15 10:00:00'];
+
+        $method = new \ReflectionMethod($controller, 'slotRangeOverlapsBookedRange');
+        $method->setAccessible(true);
+
+        $this->assertTrue($method->invoke($controller, $slotStart, $slotEnd, $bookedRange));
+    }
+
     public function test_patient_list_view_contains_search_by_name_and_cedula(): void
     {
         $user = (object) ['id' => 1, 'first_name' => 'Ana', 'last_name' => 'García'];

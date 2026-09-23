@@ -136,6 +136,20 @@ class PublicAppointmentController extends Controller
             ->all();
     }
 
+    private function buildDateTimeFromTimeString(string $date, string $timeValue): int
+    {
+        $timeValue = trim((string) $timeValue);
+
+        if ($timeValue === '') {
+            return 0;
+        }
+
+        $dateTimeString = $date . ' ' . $timeValue;
+        $timestamp = strtotime($dateTimeString);
+
+        return $timestamp === false ? 0 : (int) $timestamp;
+    }
+
     private function slotRangeOverlapsBookedRange(int $slotStartTs, int $slotEndTs, array $bookedRange): bool
     {
         if (empty($bookedRange['from']) || empty($bookedRange['to'])) {
@@ -363,11 +377,11 @@ class PublicAppointmentController extends Controller
 
             $bookedAppointments = $this->getBookedAppointmentRanges($doctorLookupIds, $date);
 
-            $availableSlots = $availableSlotsQuery->get()->filter(function ($slot) use ($bookedAppointments, $durationMinutes) {
-                $slotStart = strtotime($slot->from);
+            $availableSlots = $availableSlotsQuery->get()->filter(function ($slot) use ($bookedAppointments, $durationMinutes, $date) {
+                $slotStart = $this->buildDateTimeFromTimeString($date, $slot->from);
                 $slotEnd = $slotStart + ($durationMinutes * 60);
 
-                if ($slot->time_to && $slotEnd > strtotime($slot->time_to)) {
+                if ($slot->time_to && $slotEnd > $this->buildDateTimeFromTimeString($date, $slot->time_to)) {
                     return false;
                 }
 
@@ -486,10 +500,10 @@ class PublicAppointmentController extends Controller
                 ], 422);
             }
 
-            $slotStart = strtotime($selectedSlot->from);
+            $slotStart = $this->buildDateTimeFromTimeString($request->date, $selectedSlot->from);
             $slotEnd = $slotStart + ($durationMinutes * 60);
 
-            if ($selectedSlot->time_to && $slotEnd > strtotime($selectedSlot->time_to)) {
+            if ($selectedSlot->time_to && $slotEnd > $this->buildDateTimeFromTimeString($request->date, $selectedSlot->time_to)) {
                 DB::rollBack();
 
                 return response()->json([
