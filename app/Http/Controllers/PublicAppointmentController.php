@@ -136,6 +136,22 @@ class PublicAppointmentController extends Controller
             ->all();
     }
 
+    private function slotRangeOverlapsBookedRange(int $slotStartTs, int $slotEndTs, array $bookedRange): bool
+    {
+        if (empty($bookedRange['from']) || empty($bookedRange['to'])) {
+            return false;
+        }
+
+        $bookedStart = strtotime($bookedRange['from']);
+        $bookedEnd = strtotime($bookedRange['to']);
+
+        if ($bookedStart === false || $bookedEnd === false) {
+            return false;
+        }
+
+        return $slotStartTs < $bookedEnd && $slotEndTs > $bookedStart;
+    }
+
     /**
      * Display the public appointment form.
      *
@@ -356,14 +372,7 @@ class PublicAppointmentController extends Controller
                 }
 
                 foreach ($bookedAppointments as $bookedSlot) {
-                    if (empty($bookedSlot['from']) || empty($bookedSlot['to'])) {
-                        continue;
-                    }
-
-                    $bookedStart = strtotime($bookedSlot['from']);
-                    $bookedEnd = strtotime($bookedSlot['to']);
-
-                    if ($slotStart < $bookedEnd && $slotEnd > $bookedStart) {
+                    if ($this->slotRangeOverlapsBookedRange($slotStart, $slotEnd, $bookedSlot)) {
                         return false;
                     }
                 }
@@ -491,14 +500,7 @@ class PublicAppointmentController extends Controller
 
             $bookedAppointments = $this->getBookedAppointmentRanges($doctorLookupIds, $request->date);
             $slotIsBooked = collect($bookedAppointments)->contains(function ($bookedSlot) use ($slotStart, $slotEnd) {
-                if (empty($bookedSlot['from']) || empty($bookedSlot['to'])) {
-                    return false;
-                }
-
-                $bookedStart = strtotime($bookedSlot['from']);
-                $bookedEnd = strtotime($bookedSlot['to']);
-
-                return $slotStart < $bookedEnd && $slotEnd > $bookedStart;
+                return $this->slotRangeOverlapsBookedRange($slotStart, $slotEnd, $bookedSlot);
             });
 
             if ($slotIsBooked) {

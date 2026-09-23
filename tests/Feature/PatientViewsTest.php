@@ -22,6 +22,19 @@ class PatientViewsTest extends TestCase
         ]);
     }
 
+    public function test_overlap_check_blocks_already_booked_slot(): void
+    {
+        $controller = new \App\Http\Controllers\PublicAppointmentController();
+        $method = new \ReflectionMethod($controller, 'slotRangeOverlapsBookedRange');
+        $method->setAccessible(true);
+
+        $slotStart = strtotime('2026-09-22 09:30:00');
+        $slotEnd = strtotime('2026-09-22 10:30:00');
+        $bookedRange = ['from' => '2026-09-22 09:00:00', 'to' => '2026-09-22 10:00:00'];
+
+        $this->assertTrue($method->invoke($controller, $slotStart, $slotEnd, $bookedRange));
+    }
+
     public function test_patient_list_view_contains_search_by_name_and_cedula(): void
     {
         $user = (object) ['id' => 1, 'first_name' => 'Ana', 'last_name' => 'García'];
