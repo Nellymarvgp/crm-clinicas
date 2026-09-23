@@ -45,6 +45,42 @@ class AppointmentController extends Controller
             return $next($request);
         });
     }
+
+    private function getBookedSlotIdsForDoctorAndDate($doctorId, string $date, ?int $excludeAppointmentId = null)
+    {
+        $bookedSlotIds = Appointment::whereDate('appointment_date', $date)
+            ->where('appointment_with', $doctorId)
+            ->where('is_deleted', 0)
+            ->whereNotIn('status', [2])
+            ->when($excludeAppointmentId, function ($query, $excludeAppointmentId) {
+                return $query->where('id', '!=', $excludeAppointmentId);
+            })
+            ->get(['available_slot', 'available_slots'])
+            ->flatMap(function ($appointment) {
+                $storedSlots = json_decode($appointment->available_slots ?: '[]', true);
+                return array_merge(
+                    [$appointment->available_slot],
+                    is_array($storedSlots) ? $storedSlots : []
+                );
+            })
+            ->map(function ($slotId) {
+                return (int) $slotId;
+            })
+            ->filter(fn ($slotId) => $slotId > 0)
+            ->unique()
+            ->values();
+
+        return $bookedSlotIds;
+    }
+
+    private function ensureDoctorSlotIsAvailable($doctorId, string $date, int $slotId, ?int $excludeAppointmentId = null): void
+    {
+        $bookedSlotIds = $this->getBookedSlotIdsForDoctorAndDate($doctorId, $date, $excludeAppointmentId);
+
+        if ($bookedSlotIds->contains($slotId)) {
+            throw new Exception('El horario seleccionado ya está ocupado para este doctor en la fecha indicada.');
+        }
+    }
     /**
      * Display a listing of the resource.
      *
@@ -385,7 +421,7 @@ class AppointmentController extends Controller
                         $mailSend = $mailSend->flatten();
                         $mailArray = $mailSend->toarray();
                         Mail::send('emails.appointment_cancel', ['MailAppointment' => $MailAppointment, 'email' => $verify_mail,'CancelBy'=>$CancelBy], function ($message) use ($mailArray, $app_name) {
-                            $message->to($mailArray)->subject($app_name . ' ' . 'Appointment cancel');
+                            $message->to($mailArray)->subject($app_name . ' - Cita cancelada');
                         });
 
                     } elseif ($role == 'patient') {
@@ -418,7 +454,7 @@ class AppointmentController extends Controller
                         $mailSend = $mailSend->flatten();
                         $mailArray = $mailSend->toarray();
                         Mail::send('emails.appointment_cancel', ['MailAppointment' => $MailAppointment, 'email' => $verify_mail,'CancelBy'=>$CancelBy], function ($message) use ($mailArray, $app_name) {
-                            $message->to($mailArray)->subject($app_name . ' ' . 'Appointment cancel');
+                            $message->to($mailArray)->subject($app_name . ' - Cita cancelada');
                         });
                     } elseif ($role == 'admin') {
                         $patient_id = $appointment->appointment_for;
@@ -452,7 +488,7 @@ class AppointmentController extends Controller
                         $mailSend = $mailSend->flatten();
                         $mailArray = $mailSend->toarray();
                         Mail::send('emails.appointment_cancel', ['MailAppointment' => $MailAppointment, 'email' => $verify_mail,'CancelBy'=>$CancelBy], function ($message) use ($mailArray, $app_name) {
-                            $message->to($mailArray)->subject($app_name . ' ' . 'Appointment cancel');
+                            $message->to($mailArray)->subject($app_name . ' - Cita cancelada');
                         });
 
                     } elseif ($role == 'receptionist') {
@@ -484,7 +520,7 @@ class AppointmentController extends Controller
                         $mailSend = $mailSend->flatten();
                         $mailArray = $mailSend->toarray();
                         Mail::send('emails.appointment_cancel', ['MailAppointment' => $MailAppointment, 'email' => $verify_mail,'CancelBy'=>$CancelBy], function ($message) use ($mailArray, $app_name) {
-                            $message->to($mailArray)->subject($app_name . ' ' . 'Appointment cancel');
+                            $message->to($mailArray)->subject($app_name . ' - Cita cancelada');
                         });
                     }
                     return response()->json([
@@ -634,13 +670,21 @@ class AppointmentController extends Controller
                     $app_name =  AppSetting('title');
                     $date = $request->appointment_date;
                     $newDate = Carbon::createFromFormat('m/d/Y', $date)->format('Y-m-d');
+                    $selectedSlots = array_values(array_unique(array_map('intval', $request->available_slot)));
+                    $selectedSlotId = (int) ($selectedSlots[0] ?? 0);
+
+                    if ($selectedSlotId <= 0) {
+                        return redirect()->back()->with('error', 'El horario seleccionado no es válido.');
+                    }
+
+                    $this->ensureDoctorSlotIsAvailable((int) $request->appointment_with, $newDate, $selectedSlotId);
+
                     $appointment = new Appointment();
                     $appointment->appointment_for = $request->appointment_for;
                     $appointment->appointment_with = $request->appointment_with;
                     $appointment->appointment_date = $newDate;
                     $appointment->available_time = $request->available_time;
-                    $selectedSlots = array_values(array_unique(array_map('intval', $request->available_slot)));
-                    $appointment->available_slot = $selectedSlots[0];
+                    $appointment->available_slot = $selectedSlotId;
                     $appointment->available_slots = json_encode($selectedSlots);
                     $appointment->booked_by    = $user->id;
                     $appointment->save();
@@ -677,7 +721,7 @@ class AppointmentController extends Controller
                         $mailSend = $mailSend->flatten();
                         $mailArray = $mailSend->toarray();
                         Mail::send('emails.appointment_create', ['MailAppointment' => $MailAppointment, 'email' => $verify_mail], function ($message) use ($mailArray, $app_name) {
-                            $message->to($mailArray)->subject($app_name . ' ' . 'New appointment generated');
+                            $message->to($mailArray)->subject($app_name . ' - Nueva cita generada');
                         });
                     } elseif ($role == 'receptionist') {
                         $admin_role = Sentinel::findRoleBySlug('admin');
@@ -709,7 +753,7 @@ class AppointmentController extends Controller
                         $mailSend = $mailSend->flatten();
                         $mailArray = $mailSend->toarray();
                         Mail::send('emails.appointment_create', ['MailAppointment' => $MailAppointment, 'email' => $verify_mail], function ($message) use ($mailArray, $app_name) {
-                            $message->to($mailArray)->subject($app_name . ' ' . 'New appointment generated');
+                            $message->to($mailArray)->subject($app_name . ' - Nueva cita generada');
                         });
 
                     } elseif ($role == 'doctor') {
@@ -742,7 +786,7 @@ class AppointmentController extends Controller
                         $this->mailSend = $this->mailSend->flatten();
                         $mailArray = $this->mailSend->toarray();
                         Mail::send('emails.appointment_create', ['MailAppointment' => $MailAppointment, 'email' => $verify_mail], function ($message) use ($mailArray, $app_name) {
-                            $message->to($mailArray)->subject($app_name . ' ' . 'New appointment generated');
+                            $message->to($mailArray)->subject($app_name . ' - Nueva cita generada');
                         });
                     }
                 }
@@ -768,7 +812,7 @@ class AppointmentController extends Controller
                 $appointment_slot = DoctorAvailableSlot::with(['appointment' => function ($re) use ($dates) {
                     $re->whereDate('appointment_date', $dates)
                         ->where('is_deleted', 0)
-                        ->where('status', 0);
+                        ->whereNotIn('status', [2]);
                 }])
                     ->where('doctor_available_time_id', $timeId)
                     ->where('is_deleted', 0)
@@ -777,7 +821,7 @@ class AppointmentController extends Controller
 
                 $bookedSlotIds = Appointment::whereDate('appointment_date', $dates)
                     ->where('is_deleted', 0)
-                    ->where('status', 0)
+                    ->whereNotIn('status', [2])
                     ->get(['available_slot', 'available_slots'])
                     ->flatMap(function ($appointment) {
                         $storedSlots = json_decode($appointment->available_slots ?: '[]', true);

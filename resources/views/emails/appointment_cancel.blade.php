@@ -1,10 +1,9 @@
 <!doctype html>
 <html>
-​
 <head>
     <meta name="viewport" content="width=device-width" />
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-    <title>Payment complete successfully  | {{ AppSetting('title'); }}</title>
+    <title>Cita cancelada | {{ AppSetting('title') }}</title>
 </head>
 <body style="background-color:#f0f3fc; padding: 20px 0px;">
     <div style="margin: 50px 0px;">
@@ -12,51 +11,49 @@
             <thead>
                 <tr style="background-color: #242e4d; border: none; height: 70px; font-size: 32px;">
                     <th scope="col">
-                        <img src="{{ URL::asset('build/images/logo-light1.png') }}" alt="{{ AppSetting('title'); }}"
-                            title="{{ AppSetting('title'); }}" style="height: 24px;" />
+                        <img src="{{ URL::asset('build/images/logo-light1.png') }}" alt="{{ AppSetting('title') }}"
+                            title="{{ AppSetting('title') }}" style="height: 24px;" />
                     </th>
                 </tr>
             </thead>
             <tbody>
                 <tr>
                     <td style="padding: 30px 24px 0; color: #161c2d; font-size: 18px;">
-
                         <table style="width: 100%;">
                             <tbody>
                                 <tr>
                                     <td style="padding: 30px 0px 10px; color: #829adb; font-size: 18px; font-weight: 600;">
-                                        Appointment Cancel
+                                        Cita cancelada
                                     </td>
                                 </tr>
                                 <tr>
-                                    <td><b>Doctor Details: </b></td>
-                                    <td style="padding-top:10px;"><b>Patient Details: </b></td>
-
+                                    <td><b>Detalles del doctor: </b></td>
+                                    <td style="padding-top:10px;"><b>Detalles del paciente: </b></td>
                                 </tr>
                                 <tr>
-                                    <td><b>Name: </b>{{ $MailAppointment->doctor->user->first_name .' '. $MailAppointment->doctor->user->last_name}}</td>
-                                    <td><b>Name: </b>{{ $MailAppointment->patient->first_name .' '. $MailAppointment->patient->last_name}}</td>
+                                    <td><b>Nombre: </b>{{ $MailAppointment->doctor->user->first_name .' '. $MailAppointment->doctor->user->last_name}}</td>
+                                    <td><b>Nombre: </b>{{ $MailAppointment->patient->first_name .' '. $MailAppointment->patient->last_name}}</td>
                                 </tr>
                                 <tr>
-                                    <td><b>Contact: </b>{{ $MailAppointment->doctor->user->mobile }}</td>
-                                    <td><b>Contact: </b>{{ $MailAppointment->patient->mobile }}</td>
+                                    <td><b>Contacto: </b>{{ $MailAppointment->doctor->user->mobile }}</td>
+                                    <td><b>Contacto: </b>{{ $MailAppointment->patient->mobile }}</td>
                                 </tr>
                                 <tr>
-                                    <td><b>Email: </b>{{ $MailAppointment->doctor->user->email }}</td>
-                                    <td><b>Email: </b>{{ $MailAppointment->patient->email }}</td>
+                                    <td><b>Correo: </b>{{ $MailAppointment->doctor->user->email }}</td>
+                                    <td><b>Correo: </b>{{ $MailAppointment->patient->email }}</td>
                                 </tr>
                                 <tr>
-                                    <td style="padding-top:10px;"><b>Cancel By: </b></td>
+                                    <td style="padding-top:10px;"><b>Cancelada por: </b></td>
                                 </tr>
                                 <tr>
-                                    <td><b>Name: </b>{{ $CancelBy->first_name .' '. $CancelBy->last_name}}</td>
+                                    <td><b>Nombre: </b>{{ $CancelBy->first_name .' '. $CancelBy->last_name}}</td>
                                     <td></td>
                                 </tr>
                                 <tr>
-                                    <td><b>Contact: </b>{{ $CancelBy->mobile }}</td>
+                                    <td><b>Contacto: </b>{{ $CancelBy->mobile }}</td>
                                 </tr>
                                 <tr>
-                                    <td><b>Email: </b>{{ $CancelBy->email }}</td>
+                                    <td><b>Correo: </b>{{ $CancelBy->email }}</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -64,14 +61,14 @@
                         <table border="1" width="100%">
                             <thead>
                                 <tr>
-                                    <th>Appointment Date</th>
-                                    <th>Appointment Time</th>
+                                    <th>Fecha de la cita</th>
+                                    <th>Hora de la cita</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <tr>
                                     <td>{{ $MailAppointment->appointment_date }}</td>
-                                    <td>{{ $MailAppointment->timeSlot->from .' to '. $MailAppointment->timeSlot->to  }}</td>
+                                    <td>{{ $MailAppointment->timeSlot->from .' a '. $MailAppointment->timeSlot->to  }}</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -79,13 +76,12 @@
                 </tr>
                 <tr>
                     <td style="padding: 15px 24px 15px; color: #8492a6; font-size: 16px; font-weight: 600;">
-                        Thank you
+                        Gracias
                     </td>
                 </tr>
-
                 <tr>
                     <td style="padding: 15px 24px 15px; color: #8492a6;">
-                        {{ AppSetting('title'); }} <br> Support Team
+                        {{ AppSetting('title') }} <br> Equipo de soporte
                     </td>
                 </tr>
                 <tr>
@@ -97,5 +93,4 @@
         </table>
     </div>
 </body>
-​
 </html>

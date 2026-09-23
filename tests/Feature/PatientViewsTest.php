@@ -2,7 +2,12 @@
 
 namespace Tests\Feature;
 
+use App\User;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\View;
 use Tests\TestCase;
 
@@ -49,6 +54,140 @@ class PatientViewsTest extends TestCase
         $method->setAccessible(true);
 
         $this->assertTrue($method->invoke($controller, $slotStart, $slotEnd, $bookedRange));
+    }
+
+    public function test_completed_appointments_still_block_available_slots(): void
+    {
+        Schema::dropIfExists('appointments');
+        Schema::dropIfExists('doctor_available_slots');
+        Schema::create('doctor_available_slots', function (Blueprint $table) {
+            $table->increments('id');
+            $table->integer('doctor_id');
+            $table->string('from');
+            $table->string('to');
+            $table->boolean('is_deleted')->default(false);
+        });
+
+        Schema::create('appointments', function (Blueprint $table) {
+            $table->increments('id');
+            $table->integer('appointment_with');
+            $table->date('appointment_date');
+            $table->integer('status')->default(0);
+            $table->boolean('is_deleted')->default(false);
+            $table->integer('available_slot')->nullable();
+            $table->text('available_slots')->nullable();
+        });
+
+        DB::table('doctor_available_slots')->insert([
+            ['id' => 101, 'doctor_id' => 7, 'from' => '09:00', 'to' => '09:30', 'is_deleted' => false],
+        ]);
+
+        DB::table('appointments')->insert([
+            [
+                'appointment_with' => 7,
+                'appointment_date' => '2026-10-15',
+                'status' => 1,
+                'is_deleted' => 0,
+                'available_slot' => 101,
+                'available_slots' => null,
+            ],
+        ]);
+
+        $controller = new \App\Http\Controllers\PublicAppointmentController();
+        $method = new \ReflectionMethod($controller, 'getBookedAppointmentRanges');
+        $method->setAccessible(true);
+
+        $result = $method->invoke($controller, [7], '2026-10-15');
+
+        $this->assertNotEmpty($result);
+        $this->assertSame('2026-10-15 09:00', $result[0]['from']);
+        $this->assertSame('2026-10-15 09:30', $result[0]['to']);
+    }
+
+    public function test_internal_appointment_store_rejects_duplicate_slot_for_same_doctor_and_date(): void
+    {
+        Schema::dropIfExists('appointments');
+        Schema::create('appointments', function (Blueprint $table) {
+            $table->increments('id');
+            $table->integer('appointment_with');
+            $table->date('appointment_date');
+            $table->integer('status')->default(0);
+            $table->boolean('is_deleted')->default(false);
+            $table->integer('available_slot')->nullable();
+            $table->text('available_slots')->nullable();
+        });
+
+        DB::table('appointments')->insert([
+            [
+                'appointment_with' => 12,
+                'appointment_date' => '2026-10-15',
+                'status' => 0,
+                'is_deleted' => 0,
+                'available_slot' => 44,
+                'available_slots' => '[44]',
+            ],
+        ]);
+
+        $controller = new \App\Http\Controllers\AppointmentController();
+        $method = new \ReflectionMethod($controller, 'getBookedSlotIdsForDoctorAndDate');
+        $method->setAccessible(true);
+
+        $booked = $method->invoke($controller, 12, '2026-10-15');
+
+        $this->assertTrue($booked->contains(44));
+
+        $ensureMethod = new \ReflectionMethod($controller, 'ensureDoctorSlotIsAvailable');
+        $ensureMethod->setAccessible(true);
+
+        $this->expectException(\Exception::class);
+        $ensureMethod->invoke($controller, 12, '2026-10-15', 44);
+    }
+
+    public function test_booking_keeps_existing_email_when_another_user_already_has_it(): void
+    {
+        Schema::dropIfExists('users');
+        Schema::create('users', function (Blueprint $table) {
+            $table->increments('id');
+            $table->string('cedula')->nullable();
+            $table->string('first_name')->nullable();
+            $table->string('last_name')->nullable();
+            $table->string('email')->unique()->nullable();
+            $table->string('mobile')->nullable();
+            $table->timestamp('created_at')->nullable();
+            $table->timestamp('updated_at')->nullable();
+        });
+
+        $userWithEmail = User::create([
+            'cedula' => '11111111',
+            'first_name' => 'Ana',
+            'last_name' => 'Pérez',
+            'email' => 'otro@correo.com',
+            'mobile' => '04140000000',
+        ]);
+
+        $existingUser = User::create([
+            'cedula' => '22222222',
+            'first_name' => 'Luis',
+            'last_name' => 'Gómez',
+            'email' => 'luis@correo.com',
+            'mobile' => '04141111111',
+        ]);
+
+        $controller = new \App\Http\Controllers\PublicAppointmentController();
+        $method = new \ReflectionMethod($controller, 'resolveBookingUserEmail');
+        $method->setAccessible(true);
+
+        $request = new Request([
+            'email' => 'otro@correo.com',
+            'cedula' => '22222222',
+        ]);
+
+        $resolvedEmail = $method->invoke($controller, $request, $existingUser);
+
+        $this->assertSame('luis@correo.com', $resolvedEmail);
+        $this->assertSame('luis@correo.com', $existingUser->fresh()->email);
+        $this->assertNotSame('otro@correo.com', $existingUser->fresh()->email);
+        $this->assertSame('otro@correo.com', $userWithEmail->fresh()->email);
     }
 
     public function test_patient_list_view_contains_search_by_name_and_cedula(): void

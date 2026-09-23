@@ -99,7 +99,7 @@ class PublicAppointmentController extends Controller
             ->whereIn('appointments.appointment_with', $doctorLookupIds)
             ->where('appointments.appointment_date', $date)
             ->where('appointments.is_deleted', 0)
-            ->whereNotIn('appointments.status', [1, 2])
+            ->whereNotIn('appointments.status', [2])
             ->select('appointments.available_slot', 'appointments.available_slots')
             ->get();
 
@@ -131,9 +131,33 @@ class PublicAppointmentController extends Controller
 
         return $bookedSlots
             ->filter(fn ($slot) => !empty($slot->from) && !empty($slot->to))
-            ->map(fn ($slot) => ['from' => $slot->from, 'to' => $slot->to])
+            ->map(fn ($slot) => [
+                'from' => $date . ' ' . $slot->from,
+                'to' => $date . ' ' . $slot->to,
+            ])
             ->values()
             ->all();
+    }
+
+    private function resolveBookingUserEmail(Request $request, ?User $existingUser = null): ?string
+    {
+        if (!$request->filled('email')) {
+            return $existingUser?->email;
+        }
+
+        $email = trim((string) $request->email);
+        if ($email === '') {
+            return $existingUser?->email;
+        }
+
+        $normalizedEmail = mb_strtolower($email);
+        $emailOwner = User::whereRaw('LOWER(email) = ?', [$normalizedEmail])->first();
+
+        if ($emailOwner && (!$existingUser || (int) $emailOwner->id !== (int) $existingUser->id)) {
+            return $existingUser?->email;
+        }
+
+        return $email;
     }
 
     private function buildDateTimeFromTimeString(string $date, string $timeValue): int
@@ -528,13 +552,15 @@ class PublicAppointmentController extends Controller
             
             $firstName = $request->first_name;
             $lastName = $request->last_name;
-            
+
             // La cedula identifica al paciente aunque todavía no tenga correo.
             $existingUser = User::where('cedula', $request->cedula)->first();
             if (!$existingUser && $request->filled('email')) {
-                $existingUser = User::where('email', $request->email)->first();
+                $existingUser = User::whereRaw('LOWER(email) = ?', [mb_strtolower(trim((string) $request->email))])->first();
             }
-            
+
+            $safeEmail = $this->resolveBookingUserEmail($request, $existingUser);
+
             if ($existingUser) {
                 // Actualizar usuario existente
                 $user = $existingUser;
@@ -542,7 +568,7 @@ class PublicAppointmentController extends Controller
                 $user->first_name = $firstName;
                 $user->last_name = $lastName;
                 $user->mobile = $request->phone ?: $user->mobile;
-                $user->email = $request->email ?: $user->email;
+                $user->email = $safeEmail ?: $user->email;
                 $user->save();
             } else {
                 // Crear nuevo usuario usando Sentinel (sin role_id en tabla users)
@@ -550,7 +576,7 @@ class PublicAppointmentController extends Controller
                     'cedula' => $request->cedula,
                     'first_name' => $firstName,
                     'last_name' => $lastName,
-                    'email' => $request->email ?: 'paciente-' . $request->cedula . '@no-email.local',
+                    'email' => $safeEmail ?: 'paciente-' . $request->cedula . '@no-email.local',
                     'mobile' => $request->phone ?: '',
                     'password' => Str::random(10),
                 ];

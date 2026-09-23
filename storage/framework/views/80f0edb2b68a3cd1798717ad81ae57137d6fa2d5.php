@@ -216,6 +216,7 @@
         <script src="<?php echo e(URL::asset('build/libs/jquery-ui/jquery-ui.min.js')); ?>"></script>
         <script src="<?php echo e(URL::asset('build/libs/moment/moment.js')); ?>"></script>
         <script src="<?php echo e(URL::asset('build/libs/fullcalendar/index.global.min.js')); ?>"></script>
+        <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.9/locales/es.global.min.js"></script>
         <!-- Get App url in Javascript file -->
         <script type="text/javascript">
             var aplist_url = "<?php echo e(url('appointmentList')); ?>";
