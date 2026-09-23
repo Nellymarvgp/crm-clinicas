@@ -1,7 +1,6 @@
 <?php
 
 namespace App\Http\Controllers;
-
 use App\Appointment;
 use App\DentalEvaluation;
 use App\Doctor;
