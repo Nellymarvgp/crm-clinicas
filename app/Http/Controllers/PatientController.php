@@ -53,10 +53,23 @@ class PatientController extends Controller
         if ($user->hasAccess('patient.list')) {
             $role = $user->roles[0]->slug;
             $patient_role = Sentinel::findRoleBySlug('patient');
-            $patients = $patient_role->users()->with('roles')->where('is_deleted', 0)->orderByDesc('id')->get();
+            $patientsQuery = $patient_role->users()->with('roles')->where('is_deleted', 0)->orderByDesc('id');
             
             // Load Datatables
             if ($request->ajax()) {
+                $searchTerm = trim((string) ($request->input('search.value') ?? ''));
+                if ($searchTerm !== '') {
+                    $searchTerm = strtolower($searchTerm);
+                    $patientsQuery->where(function ($query) use ($searchTerm) {
+                        $query->whereRaw('LOWER(first_name) LIKE ?', ['%' . $searchTerm . '%'])
+                            ->orWhereRaw('LOWER(last_name) LIKE ?', ['%' . $searchTerm . '%'])
+                            ->orWhereRaw('LOWER(cedula) LIKE ?', ['%' . $searchTerm . '%'])
+                            ->orWhereRaw('LOWER(CONCAT(first_name, " ", last_name)) LIKE ?', ['%' . $searchTerm . '%']);
+                    });
+                }
+
+                $patients = $patientsQuery->get();
+
                 return Datatables::of($patients)
                     ->addIndexColumn()
                     ->addColumn('name', function($row){
@@ -87,6 +100,7 @@ class PatientController extends Controller
                     })->rawColumns(['option'])->make(true);
             }
             // End
+            $patients = $patientsQuery->get();
             return view('patient.patients', compact('user', 'role', 'patients'));
         } else {
             return view('error.403');

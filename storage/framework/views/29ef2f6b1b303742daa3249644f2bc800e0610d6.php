@@ -1,8 +1,6 @@
-@extends('layouts.master-landing')
+<?php $__env->startSection('title', 'Agendar Cita'); ?>
 
-@section('title', 'Agendar Cita')
-
-@section('css')
+<?php $__env->startSection('css'); ?>
 <!-- Flatpickr -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/themes/material_green.css">
@@ -67,9 +65,9 @@
         border-color: var(--secondary-color);
     }
 </style>
-@endsection
+<?php $__env->stopSection(); ?>
 
-@section('content')
+<?php $__env->startSection('content'); ?>
 <div class="content-wrapper">
     <div class="container">
         <div class="row">
@@ -82,9 +80,9 @@
                         <div id="error-container" class="alert alert-danger" style="display: none;"></div>
                         <div id="success-container" class="alert alert-success" style="display: none;"></div>
                         
-                        <form id="appointment-form" method="POST" action="{{ route('public.appointment.store') }}">
-                            <meta name="csrf-token" content="{{ csrf_token() }}">
-                            @csrf
+                        <form id="appointment-form" method="POST" action="<?php echo e(route('public.appointment.store')); ?>">
+                            <meta name="csrf-token" content="<?php echo e(csrf_token()); ?>">
+                            <?php echo csrf_field(); ?>
                             <h5 class="mb-4">Información Personal</h5>
                             <div class="row">
                                 <div class="col-md-4">
@@ -162,13 +160,14 @@
                                         <label for="doctor_id" class="required">Doctor</label>
                                         <select id="doctor_id" name="doctor_id" class="form-control">
                                             <option value="">Seleccionar doctor</option>
-                                            @foreach($doctors as $doctor)
-                                                <option value="{{ $doctor->id }}" 
-                                                    @if(isset($selectedDoctorId) && $selectedDoctorId == $doctor->id) selected @endif>
-                                                    Dr. {{ $doctor->user ? $doctor->user->first_name.' '.$doctor->user->last_name : 'Doctor' }}
-                                                    ({{ $doctor->department ? $doctor->department->name : 'Sin departamento' }})
+                                            <?php $__currentLoopData = $doctors; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $doctor): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                                <option value="<?php echo e($doctor->id); ?>" 
+                                                    <?php if(isset($selectedDoctorId) && $selectedDoctorId == $doctor->id): ?> selected <?php endif; ?>>
+                                                    Dr. <?php echo e($doctor->user ? $doctor->user->first_name.' '.$doctor->user->last_name : 'Doctor'); ?>
+
+                                                    (<?php echo e($doctor->department ? $doctor->department->name : 'Sin departamento'); ?>)
                                                 </option>
-                                            @endforeach
+                                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                                         </select>
                                         <div id="doctor_id-error" class="invalid-feedback"></div>
                                     </div>
@@ -223,9 +222,9 @@
         </div>
     </div>
 </div>
-@endsection
+<?php $__env->stopSection(); ?>
 
-@section('script')
+<?php $__env->startSection('script'); ?>
 <!-- jQuery (necesario para bootstrap) -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
@@ -317,7 +316,7 @@
                 if (!doctorId) return;
                 
                 $.ajax({
-                    url: '{{ route('public.doctor.available.days') }}',
+                    url: '<?php echo e(route('public.doctor.available.days')); ?>',
                     method: 'POST',
                     data: {
                         doctor_id: doctorId,
@@ -368,7 +367,7 @@
             if (!doctorId || !date) return;
             
             $.ajax({
-                url: '{{ route('public.doctor.available.slots') }}',
+                url: '<?php echo e(route('public.doctor.available.slots')); ?>',
                 method: 'POST',
                 data: {
                     doctor_id: doctorId,
@@ -496,7 +495,7 @@
                 formData.append('_token', csrfToken);
                 
                 $.ajax({
-                    url: '{{ route('public.appointment.store') }}',
+                    url: '<?php echo e(route('public.appointment.store')); ?>',
                     method: 'POST',
                     data: formData,
                     processData: false,
@@ -613,4 +612,6 @@
         }
     });
 </script>
-@endsection
+<?php $__env->stopSection(); ?>
+
+<?php echo $__env->make('layouts.master-landing', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?><?php /**PATH C:\wamp64\www\appyweb\crm_clinicas\crm-clinicas\resources\views/public/appointments/create.blade.php ENDPATH**/ ?>

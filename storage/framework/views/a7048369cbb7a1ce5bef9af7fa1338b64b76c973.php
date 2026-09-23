@@ -1,8 +1,8 @@
-@extends('layouts.master-layouts')
-@section('title')
-    {{ __('Lista de Pacientes') }}
-@endsection
-@section('css')
+<?php $__env->startSection('title'); ?>
+    <?php echo e(__('Lista de Pacientes')); ?>
+
+<?php $__env->stopSection(); ?>
+<?php $__env->startSection('css'); ?>
     <!-- Datatables -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet" />
     <link href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css" rel="stylesheet" />
@@ -14,20 +14,20 @@
             gap: 04px;
         }
     </style>
-@endsection
-@section('content')
+<?php $__env->stopSection(); ?>
+<?php $__env->startSection('content'); ?>
     <!-- start page title -->
-    @component('components.breadcrumb')
-        @slot('title')
+    <?php $__env->startComponent('components.breadcrumb'); ?>
+        <?php $__env->slot('title'); ?>
             Lista de Pacientes
-        @endslot
-        @slot('li_1')
+        <?php $__env->endSlot(); ?>
+        <?php $__env->slot('li_1'); ?>
             Panel
-        @endslot
-        @slot('li_2')
+        <?php $__env->endSlot(); ?>
+        <?php $__env->slot('li_2'); ?>
             Pacientes
-        @endslot
-    @endcomponent
+        <?php $__env->endSlot(); ?>
+    <?php echo $__env->renderComponent(); ?>
     <!-- end page title -->
     <div class="row">
         <div class="col-12">
@@ -35,25 +35,26 @@
                 <div class="card-body">
                     <div class="row mb-3">
                         <div class="col-md-4 ms-auto">
-                            <label for="patientSearchFilter" class="form-label mb-1">{{ __('Buscar por nombre, apellido o cédula') }}</label>
+                            <label for="patientSearchFilter" class="form-label mb-1"><?php echo e(__('Buscar por nombre, apellido o cédula')); ?></label>
                             <input type="text" id="patientSearchFilter" class="form-control" placeholder="Buscar">
                         </div>
                     </div>
-                    <a href=" {{ route('patient.create') }} ">
+                    <a href=" <?php echo e(route('patient.create')); ?> ">
                         <button type="button" class="btn btn-primary waves-effect waves-light mb-4">
-                            <i class="bx bx-plus font-size-16 align-middle me-2"></i> {{ __('Nuevo Paciente') }}
+                            <i class="bx bx-plus font-size-16 align-middle me-2"></i> <?php echo e(__('Nuevo Paciente')); ?>
+
                         </button>
                     </a>
                     <table id="patientList" class="table table-bordered dt-responsive nowrap display"
                         style="border-collapse: collapse; border-spacing: 0; width: 100%;">
                         <thead>
                             <tr>
-                                <th>{{ __('Nro.') }}</th>
-                                <th>{{ __('Nombre') }}</th>
-                                <th>{{ __('Cédula') }}</th>
-                                <th>{{ __('Número de Contacto') }}</th>
-                                <th>{{ __('Email') }}</th>
-                                <th>{{ __('Opciones') }}</th>
+                                <th><?php echo e(__('Nro.')); ?></th>
+                                <th><?php echo e(__('Nombre')); ?></th>
+                                <th><?php echo e(__('Cédula')); ?></th>
+                                <th><?php echo e(__('Número de Contacto')); ?></th>
+                                <th><?php echo e(__('Email')); ?></th>
+                                <th><?php echo e(__('Opciones')); ?></th>
                             </tr>
                         </thead>
                     </table>
@@ -61,12 +62,12 @@
             </div>
         </div> <!-- end col -->
     </div> <!-- end row -->
-@endsection
-@section('script')
+<?php $__env->stopSection(); ?>
+<?php $__env->startSection('script'); ?>
     <!-- Plugins js -->
-    <script src="{{ URL::asset('build/libs/jszip/jszip.min.js') }}"></script>
-    <script src="{{ URL::asset('build/libs/pdfmake/build/pdfmake.min.js') }}"></script>
-    <script src="{{ URL::asset('build/libs/pdfmake/build/vfs_fonts.js') }}"></script>
+    <script src="<?php echo e(URL::asset('build/libs/jszip/jszip.min.js')); ?>"></script>
+    <script src="<?php echo e(URL::asset('build/libs/pdfmake/build/pdfmake.min.js')); ?>"></script>
+    <script src="<?php echo e(URL::asset('build/libs/pdfmake/build/vfs_fonts.js')); ?>"></script>
      <!-- Datatables -->
      <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
      <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
@@ -78,7 +79,7 @@
      </script>
 
     <!-- Init js-->
-    <script src="{{ URL::asset('build/js/pages/notification.init.js') }}"></script>
+    <script src="<?php echo e(URL::asset('build/js/pages/notification.init.js')); ?>"></script>
     <script>
         // Load Datatable
         $(document).ready(function() {
@@ -89,7 +90,7 @@
                 buttons: [
                     'copy', 'excel', 'pdf'
                 ],
-                ajax: "{{ route('patient.index') }}",
+                ajax: "<?php echo e(route('patient.index')); ?>",
                 columns: [{
                         data: 'DT_RowIndex',
                         name: 'DT_RowIndex',
@@ -154,7 +155,7 @@
                     type: "DELETE",
                     url: 'patient/' + id,
                     data: {
-                        _token: '{{ csrf_token() }}',
+                        _token: '<?php echo e(csrf_token()); ?>',
                         id: id,
                     },
                     beforeSend: function() {
@@ -178,4 +179,6 @@
             }
         });
     </script>
-@endsection
+<?php $__env->stopSection(); ?>
+
+<?php echo $__env->make('layouts.master-layouts', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?><?php /**PATH C:\wamp64\www\appyweb\crm_clinicas\crm-clinicas\resources\views/patient/patients.blade.php ENDPATH**/ ?>

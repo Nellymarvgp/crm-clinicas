@@ -12,22 +12,49 @@ class PatientViewsTest extends TestCase
     {
         parent::setUp();
 
-        \Illuminate\Support\Facades\DB::statement('CREATE TABLE IF NOT EXISTS app_setting (id INTEGER PRIMARY KEY AUTOINCREMENT, title TEXT);');
-        \Illuminate\Support\Facades\DB::table('app_setting')->insert(['title' => 'CORE']);
+        \Illuminate\Support\Facades\DB::statement('CREATE TABLE IF NOT EXISTS app_setting (id INTEGER PRIMARY KEY AUTOINCREMENT, title TEXT, favicon TEXT, footer_left TEXT, footer_right TEXT);');
+        \Illuminate\Support\Facades\DB::table('app_setting')->truncate();
+        \Illuminate\Support\Facades\DB::table('app_setting')->insert([
+            'title' => 'CORE',
+            'favicon' => 'favicon.ico',
+            'footer_left' => 'CORE Centro Odontológico',
+            'footer_right' => 'info@corecentrove.com | centrocore.ve@gmail.com',
+        ]);
     }
 
-    public function test_patient_list_view_contains_cedula_column_and_filter(): void
+    public function test_patient_list_view_contains_search_by_name_and_cedula(): void
     {
         $user = (object) ['id' => 1, 'first_name' => 'Ana', 'last_name' => 'García'];
 
         $html = View::make('patient.patients', [
-            'user' => $user,
+            'user' => (object) [
+                'id' => 1,
+                'first_name' => 'Ana',
+                'last_name' => 'García',
+                'profile_photo' => null,
+                'roles' => [(object) ['slug' => 'admin']],
+            ],
             'role' => 'admin',
             'patients' => collect(),
+            'Cnotification_count' => collect(),
         ])->render();
 
         $this->assertStringContainsString('Cédula', $html);
-        $this->assertStringContainsString('Buscar por cédula', $html);
+        $this->assertStringContainsString('Buscar por nombre, apellido o cédula', $html);
+    }
+
+    public function test_public_appointment_form_includes_half_hour_duration_option(): void
+    {
+        $html = View::make('public.appointments.create', [
+            'doctors' => collect(),
+            'selectedDoctor' => null,
+            'selectedDoctorId' => null,
+            'user' => (object) ['first_name' => 'Visitante', 'profile_photo' => null],
+            'Cnotification_count' => collect(),
+        ])->render();
+
+        $this->assertStringContainsString('value="30"', $html);
+        $this->assertStringContainsString('Media hora', $html);
     }
 
     public function test_patient_profile_view_contains_dental_history_and_odontogram_sections(): void
@@ -73,7 +100,13 @@ class PatientViewsTest extends TestCase
         ];
 
         $html = View::make('patient.patient-profile', [
-            'user' => (object) ['id' => 1, 'roles' => [(object) ['slug' => 'admin']]],
+            'user' => (object) [
+                'id' => 1,
+                'first_name' => 'Ana',
+                'last_name' => 'García',
+                'profile_photo' => null,
+                'roles' => [(object) ['slug' => 'admin']],
+            ],
             'role' => 'admin',
             'patient' => $patient,
             'patient_info' => $patientInfo,
@@ -82,6 +115,7 @@ class PatientViewsTest extends TestCase
             'appointments' => collect(),
             'prescriptions' => new LengthAwarePaginator([], 0, 10),
             'invoices' => new LengthAwarePaginator([], 0, 10),
+            'Cnotification_count' => collect(),
         ])->render();
 
         $this->assertStringContainsString('Historia Dental', $html);

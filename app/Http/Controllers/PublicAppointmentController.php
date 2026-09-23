@@ -87,6 +87,56 @@ class PublicAppointmentController extends Controller
     }
 
     /**
+     * Get the busy ranges for a doctor and date, including legacy multi-slot appointments.
+     *
+     * @param array<int> $doctorLookupIds
+     * @param string $date
+     * @return array<int, array{from:string,to:string}>
+     */
+    private function getBookedAppointmentRanges(array $doctorLookupIds, string $date): array
+    {
+        $appointments = DB::table('appointments as appointments')
+            ->whereIn('appointments.appointment_with', $doctorLookupIds)
+            ->where('appointments.appointment_date', $date)
+            ->where('appointments.is_deleted', 0)
+            ->whereNotIn('appointments.status', [1, 2])
+            ->select('appointments.available_slot', 'appointments.available_slots')
+            ->get();
+
+        $slotIds = [];
+
+        foreach ($appointments as $appointment) {
+            if (!empty($appointment->available_slot)) {
+                $slotIds[] = (int) $appointment->available_slot;
+            }
+
+            $storedSlotIds = json_decode($appointment->available_slots ?: '[]', true);
+            if (is_array($storedSlotIds)) {
+                foreach ($storedSlotIds as $storedSlotId) {
+                    $slotIds[] = (int) $storedSlotId;
+                }
+            }
+        }
+
+        $slotIds = array_values(array_unique(array_filter($slotIds, fn ($slotId) => $slotId > 0)));
+
+        if (empty($slotIds)) {
+            return [];
+        }
+
+        $bookedSlots = DB::table('doctor_available_slots')
+            ->whereIn('id', $slotIds)
+            ->select('from', 'to')
+            ->get();
+
+        return $bookedSlots
+            ->filter(fn ($slot) => !empty($slot->from) && !empty($slot->to))
+            ->map(fn ($slot) => ['from' => $slot->from, 'to' => $slot->to])
+            ->values()
+            ->all();
+    }
+
+    /**
      * Display the public appointment form.
      *
      * @return \Illuminate\View\View
@@ -295,14 +345,7 @@ class PublicAppointmentController extends Controller
                 ->select('slots.id', 'slots.from', 'slots.to', 'times.from as time_from', 'times.to as time_to')
                 ->orderBy('slots.from');
 
-            $bookedAppointments = DB::table('appointments as appointments')
-                ->leftJoin('doctor_available_slots as booked_slots', 'booked_slots.id', '=', 'appointments.available_slot')
-                ->whereIn('appointments.appointment_with', $doctorLookupIds)
-                ->where('appointments.appointment_date', $date)
-                ->where('appointments.is_deleted', 0)
-                ->whereNotIn('appointments.status', [1, 2])
-                ->select('booked_slots.from', 'booked_slots.to')
-                ->get();
+            $bookedAppointments = $this->getBookedAppointmentRanges($doctorLookupIds, $date);
 
             $availableSlots = $availableSlotsQuery->get()->filter(function ($slot) use ($bookedAppointments, $durationMinutes) {
                 $slotStart = strtotime($slot->from);
@@ -312,16 +355,20 @@ class PublicAppointmentController extends Controller
                     return false;
                 }
 
-                return !$bookedAppointments->contains(function ($bookedSlot) use ($slotStart, $slotEnd) {
-                    if (!$bookedSlot->from || !$bookedSlot->to) {
-                        return false;
+                foreach ($bookedAppointments as $bookedSlot) {
+                    if (empty($bookedSlot['from']) || empty($bookedSlot['to'])) {
+                        continue;
                     }
 
-                    $bookedStart = strtotime($bookedSlot->from);
-                    $bookedEnd = strtotime($bookedSlot->to);
+                    $bookedStart = strtotime($bookedSlot['from']);
+                    $bookedEnd = strtotime($bookedSlot['to']);
 
-                    return $slotStart < $bookedEnd && $slotEnd > $bookedStart;
-                });
+                    if ($slotStart < $bookedEnd && $slotEnd > $bookedStart) {
+                        return false;
+                    }
+                }
+
+                return true;
             })->map(function ($slot) {
                 return [
                     'id' => $slot->id,
@@ -442,24 +489,17 @@ class PublicAppointmentController extends Controller
                 ], 422);
             }
 
-            $slotIsBooked = DB::table('appointments as appointments')
-                ->leftJoin('doctor_available_slots as booked_slots', 'booked_slots.id', '=', 'appointments.available_slot')
-                ->whereIn('appointments.appointment_with', $doctorLookupIds)
-                ->where('appointments.appointment_date', $request->date)
-                ->where('appointments.is_deleted', 0)
-                ->whereNotIn('appointments.status', [1, 2])
-                ->select('booked_slots.from', 'booked_slots.to')
-                ->get()
-                ->contains(function ($bookedSlot) use ($slotStart, $slotEnd) {
-                    if (!$bookedSlot->from || !$bookedSlot->to) {
-                        return false;
-                    }
+            $bookedAppointments = $this->getBookedAppointmentRanges($doctorLookupIds, $request->date);
+            $slotIsBooked = collect($bookedAppointments)->contains(function ($bookedSlot) use ($slotStart, $slotEnd) {
+                if (empty($bookedSlot['from']) || empty($bookedSlot['to'])) {
+                    return false;
+                }
 
-                    $bookedStart = strtotime($bookedSlot->from);
-                    $bookedEnd = strtotime($bookedSlot->to);
+                $bookedStart = strtotime($bookedSlot['from']);
+                $bookedEnd = strtotime($bookedSlot['to']);
 
-                    return $slotStart < $bookedEnd && $slotEnd > $bookedStart;
-                });
+                return $slotStart < $bookedEnd && $slotEnd > $bookedStart;
+            });
 
             if ($slotIsBooked) {
                 DB::rollBack();
